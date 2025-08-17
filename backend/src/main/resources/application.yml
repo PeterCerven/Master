@@ -5,18 +5,10 @@ spring:
     active: docker
   datasource:
     driver-class-name: org.postgresql.Driver
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-info:
-  application:
-    name: backend
-    description: Backend service
-    author: Peter Červeň
-    version: 1.0.0
+    username: user
+    password: password
+  sql:
+    init:
+      mode: always
 server:
   port: 8080
-frontend:
-  url: ${FRONTEND_URL}
-

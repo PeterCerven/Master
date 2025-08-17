@@ -1,9 +1,5 @@
 spring:
   datasource:
-    driver-class-name: org.postgresql.Driver
-    username: user
-    password: password
     url: jdbc:postgresql://postgresql_db:5432/master
-  sql:
-    init:
-      mode: always
+frontend:
+  url: http://frontend:4200

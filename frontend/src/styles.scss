@@ -1,0 +1,15 @@
+@use "@angular/material" as mat;
+@use './tailwind.css';
+@plugin "daisyui";
+@include mat.core();
+@import "@angular/material/prebuilt-themes/azure-blue.css";
+
+body {
+  height: 100%;
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+html {
+  height: 100%;
+}

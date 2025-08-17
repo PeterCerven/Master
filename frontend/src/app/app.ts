@@ -1,11 +1,29 @@
-import { Component, signal } from '@angular/core';
+import {Component, computed, signal} from '@angular/core';
+import {MatSidenav, MatSidenavContainer, MatSidenavContent} from '@angular/material/sidenav';
+import {RouterOutlet} from '@angular/router';
+import {MatToolbar} from '@angular/material/toolbar';
+import {MatIconButton} from '@angular/material/button';
+import {MatIcon} from '@angular/material/icon';
+import {CustomSidenav} from './components/custom-sidenav/custom-sidenav';
 
 @Component({
   selector: 'app-root',
-  imports: [],
+  imports: [
+    MatSidenav,
+    MatSidenavContent,
+    RouterOutlet,
+    MatToolbar,
+    MatIconButton,
+    MatSidenavContainer,
+    MatIcon,
+    CustomSidenav
+  ],
   templateUrl: './app.html',
-  styleUrl: './app.css'
+  styleUrl: './app.scss'
 })
 export class App {
   protected readonly title = signal('frontend');
+
+  collapsed = signal(false);
+  sideNavWidth = computed(() => this.collapsed() ? '60px' : '250px');
 }

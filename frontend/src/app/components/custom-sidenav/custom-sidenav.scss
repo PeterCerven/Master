@@ -1,0 +1,37 @@
+.sidenav-header {
+  padding-top: 24px;
+  text-align: center;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  > img {
+    border-radius: 100%;
+    object-fit: cover;
+    margin-bottom: 10px;
+  }
+
+  .header-text {
+    height: 3rem;
+    > h2 {
+      margin: 0;
+      font-size: 1rem;
+      line-height: 1.5rem;
+    }
+
+    > p {
+      margin: 0;
+      font-size: 0.8rem;
+    }
+  }
+
+}
+
+.hide-header-text {
+  display: none;
+}
+
+:host * {
+  transition: all 500ms ease-in-out;
+}

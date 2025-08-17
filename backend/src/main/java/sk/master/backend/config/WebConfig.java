@@ -8,20 +8,14 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
-    @Value("${frontend.public.url}")
-    private String publicFrontendUrl;
+    @Value("${frontend.url}")
+    private String frontendUrl;
 
-    @Value("${frontend.private.url}")
-    private String privateFrontendUrl;
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/public/**")
-                .allowedOrigins(publicFrontendUrl)
-                .allowedMethods("GET", "POST", "PUT", "DELETE");
-
-        registry.addMapping("/api/private/**")
-                .allowedOrigins(privateFrontendUrl)
+                .allowedOrigins(frontendUrl)
                 .allowedMethods("GET", "POST", "PUT", "DELETE");
     }
 }

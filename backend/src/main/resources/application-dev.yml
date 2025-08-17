@@ -1,8 +1,9 @@
 spring:
   datasource:
-    url: ${DB_URL}
+    driver-class-name: org.postgresql.Driver
     username: ${DEFAULT_USERNAME}
     password: ${DEFAULT_PASSWORD}
+    url: ${DB_URL}
   sql:
     init:
       mode: always

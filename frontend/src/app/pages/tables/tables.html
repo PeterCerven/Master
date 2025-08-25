@@ -1,1 +1,57 @@
-<p>Tables works</p>
+<div class="button-container">
+  <button matFab extended (click)="showData()">
+    <mat-icon>storage</mat-icon>
+    Show Data
+  </button>
+
+  <button matFab extended (click)="fileInput.click()">
+    <mat-icon>file_upload</mat-icon>
+    Import Data
+  </button>
+  <input hidden (change)="importData($event)" #fileInput type="file" accept=".csv, .xls, .xlsx">
+</div>
+
+<div class="mat-elevation-z8 table">
+  <mat-form-field class="filter-input">
+    <mat-label>Filter</mat-label>
+    <input matInput (keyup)="applyFilter($event)">
+  </mat-form-field>
+
+  <button matFab extended (click)="saveData()">
+    <mat-icon>save_alt</mat-icon>
+    Save Data
+  </button>
+
+  <mat-table [dataSource]="dataSource" matSort>
+    <ng-container matColumnDef="latitude">
+      <mat-header-cell
+        *matHeaderCellDef mat-sort-header sortActionDescription="Sort by name"> Latitude
+      </mat-header-cell>
+      <mat-cell *matCellDef="let row"> {{ row.programName }}</mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="longitude">
+      <mat-header-cell
+        *matHeaderCellDef mat-sort-header sortActionDescription="Sort by name"> Longitude
+      </mat-header-cell>
+      <mat-cell *matCellDef="let row"> {{ row.university }}</mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="timestamp">
+      <mat-header-cell
+        *matHeaderCellDef mat-sort-header sortActionDescription="Sort by name"> Timestamp
+      </mat-header-cell>
+      <mat-cell *matCellDef="let row"> {{ row.faculty }}</mat-cell>
+    </ng-container>
+
+
+    <!-- Header and Row Declarations -->
+    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+    <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+  </mat-table>
+
+  <mat-paginator [pageSizeOptions]="[10, 50, 100]"
+                 showFirstLastButtons
+                 aria-label="Select page">
+  </mat-paginator>
+</div>

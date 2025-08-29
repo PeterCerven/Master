@@ -1,5 +1,8 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/master
+    username: user
+    password: password
 frontend:
   url: http://localhost:4200
+server:
+  port: 8080

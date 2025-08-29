@@ -4,15 +4,11 @@ spring:
   profiles:
     active: dev
   datasource:
-    driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://postgresql_db:5432/master
-    username: user
-    password: password
+    driver-class-name: org.postgresql.Driver
     hikari:
       connection-timeout: 20000
       maximum-pool-size: 10
   sql:
     init:
       mode: always
-server:
-  port: 8080

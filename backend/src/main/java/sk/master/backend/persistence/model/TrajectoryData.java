@@ -17,10 +17,10 @@ public class TrajectoryData {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(precision = 9, scale = 6, nullable = false)
+    @Column(precision = 9, nullable = false)
     private Double latitude;
 
-    @Column(precision = 9, scale = 6, nullable = false)
+    @Column(precision = 9, nullable = false)
     private Double longitude;
 
     private Instant timestamp;

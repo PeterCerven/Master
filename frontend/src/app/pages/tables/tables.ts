@@ -87,4 +87,8 @@ export class Tables implements AfterViewInit {
   showData() {
     this.dataService.showData();
   }
+
+  onRowClicked(row: TrajectoryDataModel) {
+    console.log('Row clicked: ', row);
+  }
 }

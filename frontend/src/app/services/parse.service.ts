@@ -24,7 +24,6 @@ export class ParseService {
   private parseGpxFile(file: File): Promise<TrajectoryDataModel[]> {
     const formData = new FormData();
     formData.append('file', file);
-    console.log(`${environment.apiUrl}/parse-gpx`)
 
     return firstValueFrom(this.http.post<TrajectoryDataModel[]>(`${environment.apiUrl}/data/parse-gpx`, formData));
   }

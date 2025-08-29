@@ -27,27 +27,31 @@
       <mat-header-cell
         *matHeaderCellDef mat-sort-header sortActionDescription="Sort by name"> Latitude
       </mat-header-cell>
-      <mat-cell *matCellDef="let row"> {{ row.programName }}</mat-cell>
+      <mat-cell *matCellDef="let element"> {{ element.latitude }}</mat-cell>
     </ng-container>
 
     <ng-container matColumnDef="longitude">
       <mat-header-cell
         *matHeaderCellDef mat-sort-header sortActionDescription="Sort by name"> Longitude
       </mat-header-cell>
-      <mat-cell *matCellDef="let row"> {{ row.university }}</mat-cell>
+      <mat-cell *matCellDef="let element"> {{ element.longitude }}</mat-cell>
     </ng-container>
 
     <ng-container matColumnDef="timestamp">
       <mat-header-cell
         *matHeaderCellDef mat-sort-header sortActionDescription="Sort by name"> Timestamp
       </mat-header-cell>
-      <mat-cell *matCellDef="let row"> {{ row.faculty }}</mat-cell>
+      <mat-cell *matCellDef="let element"> {{ element.timestamp }}</mat-cell>
     </ng-container>
 
 
     <!-- Header and Row Declarations -->
     <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-    <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+    <mat-row
+      *matRowDef="let row; columns: displayedColumns;"
+      (click)="onRowClicked(row)"
+      class="clickable-row">
+    </mat-row>
   </mat-table>
 
   <mat-paginator [pageSizeOptions]="[10, 50, 100]"

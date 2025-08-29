@@ -2,11 +2,15 @@ spring:
   application:
     name: backend
   profiles:
-    active: docker
+    active: dev
   datasource:
     driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://postgresql_db:5432/master
     username: user
     password: password
+    hikari:
+      connection-timeout: 20000
+      maximum-pool-size: 10
   sql:
     init:
       mode: always

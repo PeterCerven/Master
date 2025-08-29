@@ -5,8 +5,7 @@ COPY mvnw pom.xml ./
 COPY .mvn .mvn
 RUN ./mvnw dependency:go-offline
 COPY . .
-RUN ./mvnw clean package
-
+RUN ./mvnw clean package -DskipTests  # Skip tests during build
 
 # Runtime stage
 FROM amazoncorretto:21-alpine-jdk

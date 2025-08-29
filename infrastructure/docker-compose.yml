@@ -5,9 +5,12 @@ services:
       dockerfile: Dockerfile
     depends_on:
       postgresql_db:
-        condition: service_started
+        condition: service_healthy
     environment:
-      DB_DOCKER_URL: jdbc:postgresql://postgresql_db:5432/master
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgresql_db:5432/master
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
     ports:
       - "8080:8080"
 
@@ -27,6 +30,12 @@ services:
     ports:
       - "5432:5432"
     environment:
+        SPRING_PROFILES_ACTIVE: dev
         POSTGRES_USER: user
         POSTGRES_PASSWORD: password
         POSTGRES_DB: master
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d master"]
+      interval: 10s
+      timeout: 5s
+      retries: 5

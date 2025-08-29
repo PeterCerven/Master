@@ -72,10 +72,10 @@ export class Tables implements AfterViewInit {
       if (this.dataSource.paginator) {
         this.dataSource.paginator.firstPage();
       }
-      console.log('Excel file parsed and data loaded successfully.');
+      console.log('GPX file parsed successfully.');
 
     } catch (error) {
-      console.error('Error while parsing the Excel file:', error);
+      console.error('Error while parsing the GPX file:', error);
     }
   }
 

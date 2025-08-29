@@ -1,11 +1,16 @@
 package sk.master.backend.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import sk.master.backend.persistence.dto.TrajectoryDataDto;
 import sk.master.backend.persistence.model.TrajectoryData;
 import sk.master.backend.persistence.repository.TrajectoryDataRepository;
 
+import io.jenetics.jpx.GPX;
+
+import java.io.InputStream;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class FileServiceImpl implements FileService {
@@ -15,6 +20,8 @@ public class FileServiceImpl implements FileService {
     public FileServiceImpl(TrajectoryDataRepository trajectoryDataRepository) {
         this.trajectoryDataRepository = trajectoryDataRepository;
     }
+
+
 
     @Override
     public void importTrajectoryData(List<TrajectoryDataDto> data) {
@@ -26,5 +33,21 @@ public class FileServiceImpl implements FileService {
                     entity.setTimestamp(td.timestamp());
                     return trajectoryDataRepository.save(entity);
                 }));
+    }
+
+    public List<TrajectoryDataDto> parseGpxFile(MultipartFile file) throws Exception {
+        try (InputStream inputStream = file.getInputStream()) {
+            GPX gpx = GPX.Reader.of(GPX.Reader.Mode.LENIENT).read(inputStream);
+
+            return gpx.getTracks().stream()
+                    .flatMap(track -> track.getSegments().stream())
+                    .flatMap(segment -> segment.getPoints().stream())
+                    .map(point -> new TrajectoryDataDto(
+                            point.getLatitude().doubleValue(),
+                            point.getLongitude().doubleValue(),
+                            point.getTime().orElse(null)
+                    ))
+                    .collect(Collectors.toList());
+        }
     }
 }

@@ -1,10 +1,8 @@
 package sk.master.backend.controller;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import sk.master.backend.persistence.dto.TrajectoryDataDto;
 import sk.master.backend.service.FileService;
 
@@ -27,6 +25,16 @@ public class DataController {
             return ResponseEntity.ok("Data imported successfully.");
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error importing data: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/parse-gpx")
+    public ResponseEntity<List<TrajectoryDataDto>> parseGpx(@RequestParam("file") MultipartFile file) {
+        try {
+            List<TrajectoryDataDto> data = fileService.parseGpxFile(file);
+            return ResponseEntity.ok(data);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
         }
     }
 }

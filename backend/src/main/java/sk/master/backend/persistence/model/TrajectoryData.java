@@ -1,12 +1,11 @@
 package sk.master.backend.persistence.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.time.Instant;
 
 @Entity
 @NoArgsConstructor
@@ -18,7 +17,11 @@ public class TrajectoryData {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    @Column(precision = 9, scale = 6, nullable = false)
     private Double latitude;
+
+    @Column(precision = 9, scale = 6, nullable = false)
     private Double longitude;
-    private Long timestamp;
+
+    private Instant timestamp;
 }

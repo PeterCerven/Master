@@ -11,10 +11,11 @@ import java.time.Instant;
 @NoArgsConstructor
 @Getter
 @Setter
+@Table(name = "trajectory_data")
 public class TrajectoryData {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(precision = 9, nullable = false)

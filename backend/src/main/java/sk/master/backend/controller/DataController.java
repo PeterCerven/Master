@@ -18,11 +18,17 @@ public class DataController {
         this.fileService = fileService;
     }
 
-    @PostMapping("/import")
-    public ResponseEntity<String> importData(@RequestBody List<TrajectoryDataDto> data) {
+    @GetMapping()
+    public ResponseEntity<List<TrajectoryDataDto>> getAllTrajectoryData() {
+        List<TrajectoryDataDto> data = fileService.getAllTrajectoryData();
+        return ResponseEntity.ok(data);
+    }
+
+    @PostMapping("/save")
+    public ResponseEntity<String> savaData(@RequestBody List<TrajectoryDataDto> data) {
         try {
-            fileService.importTrajectoryData(data);
-            return ResponseEntity.ok("Data imported successfully.");
+            fileService.saveTrajectoryData(data);
+            return ResponseEntity.ok("Data saved successfully.");
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error importing data: " + e.getMessage());
         }

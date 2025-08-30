@@ -24,7 +24,7 @@ public class FileServiceImpl implements FileService {
 
 
     @Override
-    public void importTrajectoryData(List<TrajectoryDataDto> data) {
+    public void saveTrajectoryData(List<TrajectoryDataDto> data) {
         data.forEach(td -> trajectoryDataRepository.findByLatitudeAndLongitudeAndTimestamp(td.latitude(), td.longitude(), td.timestamp())
                 .orElseGet(() -> {
                     var entity = new TrajectoryData();
@@ -35,6 +35,18 @@ public class FileServiceImpl implements FileService {
                 }));
     }
 
+    @Override
+    public List<TrajectoryDataDto> getAllTrajectoryData() {
+        return trajectoryDataRepository.findAll().stream()
+                .map(entity -> new TrajectoryDataDto(
+                        entity.getLatitude(),
+                        entity.getLongitude(),
+                        entity.getTimestamp()
+                ))
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<TrajectoryDataDto> parseGpxFile(MultipartFile file) throws Exception {
         try (InputStream inputStream = file.getInputStream()) {
             GPX gpx = GPX.Reader.of(GPX.Reader.Mode.LENIENT).read(inputStream);

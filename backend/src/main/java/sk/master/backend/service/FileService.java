@@ -6,7 +6,8 @@ import sk.master.backend.persistence.dto.TrajectoryDataDto;
 import java.util.List;
 
 public interface FileService {
-    void importTrajectoryData(List<TrajectoryDataDto> data);
+    void saveTrajectoryData(List<TrajectoryDataDto> data);
+    List<TrajectoryDataDto> getAllTrajectoryData();
 
     List<TrajectoryDataDto> parseGpxFile(MultipartFile file) throws Exception;
 }

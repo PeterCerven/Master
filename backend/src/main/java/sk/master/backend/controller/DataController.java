@@ -7,6 +7,7 @@ import sk.master.backend.persistence.dto.TrajectoryDataDto;
 import sk.master.backend.service.FileService;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/data")
@@ -25,12 +26,12 @@ public class DataController {
     }
 
     @PostMapping("/save")
-    public ResponseEntity<String> savaData(@RequestBody List<TrajectoryDataDto> data) {
+    public ResponseEntity<Map<String, String>> saveData(@RequestBody List<TrajectoryDataDto> data) {
         try {
             fileService.saveTrajectoryData(data);
-            return ResponseEntity.ok("Data saved successfully.");
+            return ResponseEntity.ok(Map.of("message", "Data imported successfully"));
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error importing data: " + e.getMessage());
+            return ResponseEntity.status(500).body(Map.of("message", e.getMessage()));
         }
     }
 

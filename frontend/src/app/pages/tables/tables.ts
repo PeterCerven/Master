@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ViewChild } from '@angular/core';
+import {AfterViewInit, Component, inject, OnDestroy, ViewChild} from '@angular/core';
 import {
   MatCell,
   MatCellDef,
@@ -12,14 +12,14 @@ import {
   MatTable,
   MatTableDataSource,
 } from '@angular/material/table';
-import { MatPaginator } from '@angular/material/paginator';
-import { MatSort, MatSortHeader, MatSortModule } from '@angular/material/sort';
-import { MatFormField, MatInput, MatLabel } from '@angular/material/input';
-import { MatFabButton } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { TrajectoryDataModel } from '../../models/trajectory-data.model';
-import { ParseService } from '../../services/parse.service';
-import { DataService } from '../../services/data.service';
+import {MatPaginator} from '@angular/material/paginator';
+import {MatSort, MatSortHeader, MatSortModule} from '@angular/material/sort';
+import {MatFormField, MatInput, MatLabel} from '@angular/material/input';
+import {MatFabButton} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
+import {TrajectoryDataModel} from '../../models/trajectory-data.model';
+import {DataService} from '../../services/data.service';
+import {Subject, takeUntil} from 'rxjs';
 
 @Component({
   selector: 'app-tables',
@@ -31,12 +31,9 @@ import { DataService } from '../../services/data.service';
   templateUrl: './tables.html',
   styleUrl: './tables.scss',
 })
-export class Tables implements AfterViewInit {
-  constructor(
-    private fileParseService: ParseService,
-    private dataService: DataService,
-  ) {
-  }
+export class Tables implements AfterViewInit, OnDestroy {
+  private destroy$ = new Subject<void>();
+  private dataService = inject(DataService);
 
   displayedColumns: string[] = [
     'latitude',
@@ -58,7 +55,7 @@ export class Tables implements AfterViewInit {
     this.dataSource.filter = filterValue.trim().toLowerCase();
   }
 
-  async importData(event: Event) {
+  async parseData(event: Event) {
     const files = (event.target as HTMLInputElement).files;
     if (!files || files.length === 0) {
       console.error('No file selected');
@@ -66,29 +63,60 @@ export class Tables implements AfterViewInit {
     }
 
     const file = files[0];
-    try {
-      this.dataSource.data = await this.fileParseService.parseFile(file);
-
-      if (this.dataSource.paginator) {
-        this.dataSource.paginator.firstPage();
-      }
-      console.log('GPX file parsed successfully.');
-
-    } catch (error) {
-      console.error('Error while parsing the GPX file:', error);
-    }
+    this.dataService.parseFile(file)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+          next: (data) => {
+            this.dataSource.data = data;
+            if (this.dataSource.paginator) {
+              this.dataSource.paginator.firstPage();
+            }
+            console.log('GPX file parsed successfully.');
+          },
+          error: (error) => {
+            console.error('Error while parsing the GPX file:', error);
+          }
+        }
+      )
   }
 
 
   saveData() {
-    this.dataService.saveData(this.dataSource.data);
+    this.dataService.saveData(this.dataSource.data)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data) => {
+          console.log('Data saved successfully:', data);
+        },
+        error: (error) => {
+          console.error('Error saving data:', error);
+        }
+      });
   }
 
   showData() {
-    this.dataService.showData();
+    this.dataService.showData()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data) => {
+          this.dataSource.data = data;
+          if (this.dataSource.paginator) {
+            this.dataSource.paginator.firstPage();
+          }
+          console.log('Data fetched successfully:', data);
+        },
+        error: (error) => {
+          console.error('Error fetching data:', error);
+        }
+      })
   }
 
   onRowClicked(row: TrajectoryDataModel) {
     console.log('Row clicked: ', row);
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

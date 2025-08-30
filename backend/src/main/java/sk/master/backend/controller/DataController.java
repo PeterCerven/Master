@@ -18,7 +18,7 @@ public class DataController {
         this.fileService = fileService;
     }
 
-    @GetMapping()
+    @GetMapping("/")
     public ResponseEntity<List<TrajectoryDataDto>> getAllTrajectoryData() {
         List<TrajectoryDataDto> data = fileService.getAllTrajectoryData();
         return ResponseEntity.ok(data);

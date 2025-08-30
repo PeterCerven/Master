@@ -95,7 +95,7 @@ export class Tables implements AfterViewInit, OnDestroy {
   }
 
   showData() {
-    this.dataService.showData()
+    this.dataService.getData()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => {

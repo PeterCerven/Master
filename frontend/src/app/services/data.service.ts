@@ -14,14 +14,14 @@ export class DataService {
 
 
   public saveData(data: TrajectoryDataModel[]): Observable<TrajectoryDataModel[]> {
-    return this.http.post<TrajectoryDataModel[]>(this.apiUrl, data).pipe(
+    return this.http.post<TrajectoryDataModel[]>(`${this.apiUrl}/save`, data).pipe(
       tap((response) => console.log('Successfully added trajectory data', response)),
       catchError(this.handleError)
     );
   }
 
-  public showData(): Observable<TrajectoryDataModel[]> {
-    return this.http.get<TrajectoryDataModel[]>(`${this.apiUrl}/show`).pipe(
+  public getData(): Observable<TrajectoryDataModel[]> {
+    return this.http.get<TrajectoryDataModel[]>(`${this.apiUrl}/`).pipe(
       tap((response) => console.log('Successfully fetched trajectory data', response)),
       catchError(this.handleError)
     );

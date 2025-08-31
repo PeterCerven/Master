@@ -20,6 +20,6 @@ public class ConfigController {
 
     @GetMapping("/google-maps-key")
     public Map<String, String> getGoogleMapsApiKey() {
-        return Collections.singletonMap("apiKey", apiConfig.getGoogleMapsApiKey());
+        return Collections.singletonMap("apiKey", apiConfig.getGoogleMaps());
     }
 }

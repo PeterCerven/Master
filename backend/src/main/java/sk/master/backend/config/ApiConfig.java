@@ -11,6 +11,6 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "secret.api")
 public class ApiConfig {
 
-    private String googleMapsApiKey;
+    private String googleMaps;
 
 }

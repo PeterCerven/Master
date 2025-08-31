@@ -7,6 +7,7 @@ import sk.master.backend.persistence.model.TrajectoryData;
 import sk.master.backend.persistence.repository.TrajectoryDataRepository;
 
 import io.jenetics.jpx.GPX;
+import org.apache.commons.io.FilenameUtils;
 
 import java.io.InputStream;
 import java.util.List;
@@ -20,7 +21,6 @@ public class FileServiceImpl implements FileService {
     public FileServiceImpl(TrajectoryDataRepository trajectoryDataRepository) {
         this.trajectoryDataRepository = trajectoryDataRepository;
     }
-
 
 
     @Override
@@ -47,7 +47,15 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public List<TrajectoryDataDto> parseGpxFile(MultipartFile file) throws Exception {
+    public List<TrajectoryDataDto> parseFile(MultipartFile file) throws Exception {
+        String fileExtension = FilenameUtils.getExtension(file.getOriginalFilename());
+        return switch (fileExtension) {
+            case "gpx" -> parseGpxFile(file);
+            case null, default -> throw new IllegalArgumentException("Unsupported file format: " + fileExtension);
+        };
+    }
+
+    private List<TrajectoryDataDto> parseGpxFile(MultipartFile file) throws Exception {
         try (InputStream inputStream = file.getInputStream()) {
             GPX gpx = GPX.Reader.of(GPX.Reader.Mode.LENIENT).read(inputStream);
 

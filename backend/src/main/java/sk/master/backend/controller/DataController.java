@@ -35,10 +35,10 @@ public class DataController {
         }
     }
 
-    @PostMapping("/parse-gpx")
+    @PostMapping("/parse")
     public ResponseEntity<List<TrajectoryDataDto>> parseGpx(@RequestParam("file") MultipartFile file) {
         try {
-            List<TrajectoryDataDto> data = fileService.parseGpxFile(file);
+            List<TrajectoryDataDto> data = fileService.parseFile(file);
             return ResponseEntity.ok(data);
         } catch (Exception e) {
             return ResponseEntity.status(500).build();

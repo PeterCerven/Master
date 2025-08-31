@@ -9,5 +9,6 @@ public interface FileService {
     void saveTrajectoryData(List<TrajectoryDataDto> data);
     List<TrajectoryDataDto> getAllTrajectoryData();
 
-    List<TrajectoryDataDto> parseGpxFile(MultipartFile file) throws Exception;
+    List<TrajectoryDataDto> parseFile(MultipartFile file) throws Exception;
+
 }

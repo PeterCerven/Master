@@ -6,6 +6,3 @@ frontend:
   url: http://localhost:4200
 server:
   port: 8080
-secret:
-  api:
-    google-maps: YOUR_GOOGLE_MAPS_API_KEY_HERE

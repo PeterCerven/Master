@@ -2,7 +2,7 @@ import {inject, Injectable} from '@angular/core';
 import {TrajectoryDataModel} from '../models/trajectory-data.model';
 import {HttpClient} from '@angular/common/http';
 import {environment} from '../../environments/environment.production'
-import {catchError, Observable, tap, throwError} from 'rxjs';
+import {catchError, Observable, throwError} from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -15,19 +15,23 @@ export class DataService {
 
   public saveData(data: TrajectoryDataModel[]): Observable<TrajectoryDataModel[]> {
     return this.http.post<TrajectoryDataModel[]>(`${this.apiUrl}/save`, data).pipe(
-      tap((response) => console.log('Successfully added trajectory data', response)),
       catchError(this.handleError)
     );
   }
 
   public getData(): Observable<TrajectoryDataModel[]> {
     return this.http.get<TrajectoryDataModel[]>(`${this.apiUrl}/`).pipe(
-      tap((response) => console.log('Successfully fetched trajectory data', response)),
       catchError(this.handleError)
     );
   }
 
-  public parseFile(file: File): Observable<TrajectoryDataModel[]> {
+  public parseFile(event: Event): Observable<TrajectoryDataModel[]> {
+    const files = (event.target as HTMLInputElement).files;
+    if (!files || files.length === 0 ) {
+      return throwError(() => new Error('No file selected'));
+    }
+
+    const file = files[0];
     const fileExtension = file.name.split('.').pop()?.toLowerCase();
     switch (fileExtension) {
       case 'gpx':
@@ -42,14 +46,12 @@ export class DataService {
     const formData = new FormData();
     formData.append('file', file);
 
-    return this.http.post<TrajectoryDataModel[]>(`${this.apiUrl}/parse-gpx`, formData).pipe(
-      tap((response) => console.log('GPX file parsed successfully', response)),
+    return this.http.post<TrajectoryDataModel[]>(`${this.apiUrl}/parse`, formData).pipe(
       catchError(this.handleError)
     );
   }
 
   private handleError(error: any): Observable<never> {
-    console.error('An error occurred', error);
     return throwError(() => new Error(error.message || 'Server Error'));
   }
 }

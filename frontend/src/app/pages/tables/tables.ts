@@ -55,15 +55,8 @@ export class Tables implements AfterViewInit, OnDestroy {
     this.dataSource.filter = filterValue.trim().toLowerCase();
   }
 
-  async parseData(event: Event) {
-    const files = (event.target as HTMLInputElement).files;
-    if (!files || files.length === 0) {
-      console.error('No file selected');
-      return;
-    }
-
-    const file = files[0];
-    this.dataService.parseFile(file)
+  parseData(event: Event) {
+    this.dataService.parseFile(event)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
           next: (data) => {

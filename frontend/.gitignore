@@ -44,3 +44,4 @@ Thumbs.db
 *.iml
 /src/environments/environment.secrets.ts
 /src/environments/environment.development.ts
+/src/api-keys/google.js

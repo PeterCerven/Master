@@ -3,12 +3,12 @@ import {Component} from '@angular/core';
 
 
 @Component({
-  selector: 'app-dashboard',
+  selector: 'app-map',
   imports: [GoogleMapsModule, GoogleMap],
-  templateUrl: './dashboard.html',
-  styleUrl: './dashboard.scss'
+  templateUrl: './map.html',
+  styleUrl: './map.scss'
 })
-export class Dashboard {
+export class Map {
 
   options: google.maps.MapOptions = {
     center: {lat: 40, lng: -20},

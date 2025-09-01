@@ -25,7 +25,7 @@ export class CustomSidenav {
   menuItems = signal<MenuItem[]>([
     {
       icon: 'dashboard',
-      label: 'Dashboard',
+      label: 'Map',
       route: 'dashboard'
     },
     {

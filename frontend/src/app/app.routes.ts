@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { Dashboard } from './pages/dashboard/dashboard';
+import { Map } from './pages/map/map';
 import { Settings } from './pages/settings/settings';
 import { Tables } from './pages/tables/tables';
 
@@ -7,11 +7,11 @@ export const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'dashboard'
+    redirectTo: 'map'
   },
   {
-    path: 'dashboard',
-    component: Dashboard,
+    path: 'map',
+    component: Map,
   },
   {
     path: 'tables',

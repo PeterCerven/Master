@@ -11,8 +11,13 @@ import {Component} from '@angular/core';
 export class Map {
 
   options: google.maps.MapOptions = {
-    center: {lat: 40, lng: -20},
-    zoom: 4
+    center: { lat: 40, lng: -20 },
+    zoom: 4,
+    disableDefaultUI: true,
+    zoomControl: false,
+    mapTypeControl: false,
+    streetViewControl: false,
+    fullscreenControl: false
   };
 
 }

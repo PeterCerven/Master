@@ -9,18 +9,18 @@
     Import Data
   </button>
   <input hidden (change)="parseData($event)" #fileInput type="file" accept=".gpx">
-</div>
-
-<div class="mat-elevation-z8 table">
-  <mat-form-field class="filter-input">
-    <mat-label>Filter</mat-label>
-    <input matInput (keyup)="applyFilter($event)">
-  </mat-form-field>
 
   <button matFab extended (click)="saveData()">
     <mat-icon>save_alt</mat-icon>
     Save Data
   </button>
+</div>
+
+<div class="elevation-level3 table">
+  <mat-form-field class="filter-input">
+    <mat-label>Filter</mat-label>
+    <input matInput (keyup)="applyFilter($event)">
+  </mat-form-field>
 
   <mat-table [dataSource]="dataSource" matSort>
     <ng-container matColumnDef="latitude">

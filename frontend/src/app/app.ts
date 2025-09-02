@@ -22,8 +22,18 @@ import {CustomSidenav} from './components/custom-sidenav/custom-sidenav';
   styleUrl: './app.scss'
 })
 export class App {
-  protected readonly title = signal('frontend');
-
   collapsed = signal(false);
   sideNavWidth = computed(() => this.collapsed() ? '60px' : '250px');
+
+  isDarkMode = signal(false);
+
+  toggleDarkMode() {
+    this.isDarkMode.update(v => !v);
+
+    if (this.isDarkMode()) {
+      document.body.classList.add('dark-mode');
+    } else {
+      document.body.classList.remove('dark-mode');
+    }
+  }
 }

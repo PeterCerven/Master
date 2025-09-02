@@ -11,8 +11,12 @@
        routerLinkActive="selected-menu-item"
        [activated]="rla.isActive"
     >
-      <mat-icon [fontSet]="rla.isActive ? 'material-icons' : 'material-icons-outlined'" matListItemIcon>{{item.icon}}</mat-icon>
-      @if (!collapsed()) { <span matListItemTitle>{{item.label}}</span>}
+      <mat-icon [fontSet]="rla.isActive ? 'material-icons' : 'material-icons-outlined'"
+                matListItemIcon>{{ item.icon }}
+      </mat-icon>
+      @if (!collapsed()) {
+        <span matListItemTitle>{{ item.label }}</span>
+      }
     </a>
   }
 </mat-nav-list>

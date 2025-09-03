@@ -5,9 +5,11 @@
     [options]="options">
 
     @for (marker of markers; track marker) {
-      <map-marker
-        [position]="marker.position">
-      </map-marker>
+      <map-advanced-marker
+        [position]="marker.position"
+      >
+
+      </map-advanced-marker>
     }
 
   </google-map>

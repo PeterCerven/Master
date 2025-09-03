@@ -20,4 +20,10 @@ export class Map {
     fullscreenControl: false
   };
 
+  markers = [
+    { position: { lat: 40.7128, lng: -74.0060 }, title: 'New York' },
+    { position: { lat: 34.0522, lng: -118.2437 }, title: 'Los Angeles' },
+    { position: { lat: 41.8781, lng: -87.6298 }, title: 'Chicago' }
+  ];
+
 }

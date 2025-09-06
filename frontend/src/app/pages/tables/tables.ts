@@ -1,4 +1,4 @@
-import {Component, effect, inject, viewChild} from '@angular/core';
+import {Component, DestroyRef, effect, inject, viewChild} from '@angular/core';
 import {
   MatCell,
   MatCellDef,
@@ -33,6 +33,7 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 })
 export class Tables {
   private dataService = inject(DataService);
+  destroyRef = inject(DestroyRef);
 
   displayedColumns: string[] = [
     'latitude',
@@ -66,7 +67,7 @@ export class Tables {
 
   parseData(event: Event) {
     this.dataService.parseFile(event)
-      .pipe(takeUntilDestroyed())
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
           next: (data) => {
             this.dataSource.data = data;
@@ -85,7 +86,7 @@ export class Tables {
 
   saveData() {
     this.dataService.saveData(this.dataSource.data)
-      .pipe(takeUntilDestroyed())
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (data) => {
           console.log('Data saved successfully:', data);
@@ -98,7 +99,7 @@ export class Tables {
 
   showData() {
     this.dataService.getData()
-      .pipe(takeUntilDestroyed())
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (data) => {
           this.dataSource.data = data;

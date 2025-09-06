@@ -24,8 +24,8 @@ import {CustomSidenav} from '@components/custom-sidenav/custom-sidenav';
 export class App {
   collapsed = signal(false);
   sideNavWidth = computed(() => this.collapsed() ? '60px' : '250px');
-
   isDarkMode = signal(false);
+  currentLanguage = signal('SK');
 
   toggleDarkMode() {
     this.isDarkMode.update(v => !v);
@@ -35,5 +35,9 @@ export class App {
     } else {
       document.body.classList.remove('dark-mode');
     }
+  }
+
+  switchLanguage() {
+    this.currentLanguage.update(current => current === 'SK' ? 'EN' : 'SK');
   }
 }

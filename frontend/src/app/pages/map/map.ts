@@ -1,5 +1,5 @@
 import {GoogleMapsModule, GoogleMap} from '@angular/google-maps';
-import {AfterViewInit, Component, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, viewChild} from '@angular/core';
 import {environment} from '../../../environments/environment.production';
 
 
@@ -10,15 +10,20 @@ import {environment} from '../../../environments/environment.production';
   styleUrl: './map.scss'
 })
 export class Map implements AfterViewInit {
-
   protected readonly google = google;
-  @ViewChild('googleMap', {static: false}) map!: GoogleMap;
+  map = viewChild.required<GoogleMap>('googleMap');
 
   ngAfterViewInit(): void {
-    this.map.tilesloaded.subscribe(async () => {
-      if (this.map.googleMap) {
-        const {AdvancedMarkerElement} = await google.maps.importLibrary("marker") as google.maps.MarkerLibrary;
-        this.addAdvancedMarkers(this.map.googleMap);
+    const mapInstance = this.map();
+
+    mapInstance.tilesloaded.subscribe(async () => {
+      if (mapInstance.googleMap) {
+        const {AdvancedMarkerElement: _AdvancedMarkerElement} = await google.maps.importLibrary("marker") as google.maps.MarkerLibrary;
+        if (!_AdvancedMarkerElement) {
+          console.error('AdvancedMarkerElement not available in the Google Maps library');
+          return;
+        }
+        this.addAdvancedMarkers(mapInstance.googleMap);
       } else {
         console.error('Google Map object not available');
       }
@@ -45,7 +50,7 @@ export class Map implements AfterViewInit {
 
 
   addAdvancedMarkers(nativeMap: google.maps.Map): void {
-    const {AdvancedMarkerElement, PinElement} = google.maps.marker;
+    const {AdvancedMarkerElement} = google.maps.marker;
 
     this.markerData.forEach(data => {
 
@@ -57,14 +62,6 @@ export class Map implements AfterViewInit {
       dot.style.border = '2px solid #ffffff';
       dot.style.borderRadius = '50%';
       dot.style.boxShadow = '0 0 2px rgba(0,0,0,0.5)';
-
-      const pin = new PinElement({
-        scale: 1.2,
-        background: '#1a73e8',
-        borderColor: '#ffffff',
-        glyphColor: '#ffffff',
-      });
-
 
       const marker = new AdvancedMarkerElement({
         map: nativeMap,

@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, inject, OnDestroy, ViewChild} from '@angular/core';
+import {Component, effect, inject, viewChild} from '@angular/core';
 import {
   MatCell,
   MatCellDef,
@@ -19,7 +19,7 @@ import {MatFabButton} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
 import {TrajectoryDataModel} from '../../models/trajectory-data.model';
 import {DataService} from '../../services/data.service';
-import {Subject, takeUntil} from 'rxjs';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-tables',
@@ -31,8 +31,7 @@ import {Subject, takeUntil} from 'rxjs';
   templateUrl: './tables.html',
   styleUrl: './tables.scss',
 })
-export class Tables implements AfterViewInit, OnDestroy {
-  private destroy$ = new Subject<void>();
+export class Tables {
   private dataService = inject(DataService);
 
   displayedColumns: string[] = [
@@ -42,12 +41,22 @@ export class Tables implements AfterViewInit, OnDestroy {
   ];
   dataSource = new MatTableDataSource<TrajectoryDataModel>();
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort) sort!: MatSort;
+  paginator = viewChild<MatPaginator>(MatPaginator);
+  sort = viewChild<MatSort>(MatSort);
 
-  ngAfterViewInit() {
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
+  constructor() {
+    effect(() => {
+      const paginatorInstance = this.paginator();
+      const sortInstance = this.sort();
+
+      if (paginatorInstance) {
+        this.dataSource.paginator = paginatorInstance;
+      }
+
+      if (sortInstance) {
+        this.dataSource.sort = sortInstance;
+      }
+    });
   }
 
   applyFilter(event: Event) {
@@ -57,7 +66,7 @@ export class Tables implements AfterViewInit, OnDestroy {
 
   parseData(event: Event) {
     this.dataService.parseFile(event)
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed())
       .subscribe({
           next: (data) => {
             this.dataSource.data = data;
@@ -76,7 +85,7 @@ export class Tables implements AfterViewInit, OnDestroy {
 
   saveData() {
     this.dataService.saveData(this.dataSource.data)
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed())
       .subscribe({
         next: (data) => {
           console.log('Data saved successfully:', data);
@@ -89,7 +98,7 @@ export class Tables implements AfterViewInit, OnDestroy {
 
   showData() {
     this.dataService.getData()
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed())
       .subscribe({
         next: (data) => {
           this.dataSource.data = data;
@@ -106,10 +115,5 @@ export class Tables implements AfterViewInit, OnDestroy {
 
   onRowClicked(row: TrajectoryDataModel) {
     console.log('Row clicked: ', row);
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }

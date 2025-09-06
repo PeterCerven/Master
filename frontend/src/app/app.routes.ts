@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
-import { Map } from './pages/map/map';
-import { Settings } from './pages/settings/settings';
-import { Tables } from './pages/tables/tables';
+import { Map } from '@pages/map/map';
+import { Settings } from '@pages/settings/settings';
+import { Tables } from '@pages/tables/tables';
 
 export const routes: Routes = [
   {

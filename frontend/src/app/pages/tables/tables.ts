@@ -17,8 +17,8 @@ import {MatSort, MatSortHeader, MatSortModule} from '@angular/material/sort';
 import {MatFormField, MatInput, MatLabel} from '@angular/material/input';
 import {MatFabButton} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
-import {TrajectoryDataModel} from '../../models/trajectory-data.model';
-import {DataService} from '../../services/data.service';
+import {TrajectoryDataModel} from '@models/trajectory-data.model';
+import {DataService} from '@services/data.service';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 
 @Component({

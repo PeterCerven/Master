@@ -1,6 +1,6 @@
 import {GoogleMapsModule, GoogleMap} from '@angular/google-maps';
 import {AfterViewInit, Component, viewChild} from '@angular/core';
-import {environment} from '../../../environments/environment.production';
+import {environment} from '@env/environment.production';
 
 
 @Component({

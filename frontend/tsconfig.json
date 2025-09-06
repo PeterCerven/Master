@@ -16,6 +16,15 @@
     "module": "preserve",
     "types": ["google.maps"],
     "typeRoots": ["node_modules/@types"],
+    "baseUrl": "src",
+    "paths": {
+      "@env/*": ["environments/*"],
+      "@app/*": ["app/*"],
+      "@models/*": ["app/models/*"],
+      "@services/*": ["app/services/*"],
+      "@components/*": ["app/components/*"],
+      "@pages/*": ["app/pages/*"],
+    }
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

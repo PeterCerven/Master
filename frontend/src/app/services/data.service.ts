@@ -1,7 +1,7 @@
 import {inject, Injectable} from '@angular/core';
-import {TrajectoryDataModel} from '../models/trajectory-data.model';
+import {TrajectoryDataModel} from '@models/trajectory-data.model';
 import {HttpClient} from '@angular/common/http';
-import {environment} from '../../environments/environment.production'
+import {environment} from '@env/environment.production'
 import {catchError, Observable, throwError} from 'rxjs';
 
 @Injectable({

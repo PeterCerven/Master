@@ -4,7 +4,7 @@ import {RouterOutlet} from '@angular/router';
 import {MatToolbar} from '@angular/material/toolbar';
 import {MatIconButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
-import {CustomSidenav} from './components/custom-sidenav/custom-sidenav';
+import {CustomSidenav} from '@components/custom-sidenav/custom-sidenav';
 
 @Component({
   selector: 'app-root',

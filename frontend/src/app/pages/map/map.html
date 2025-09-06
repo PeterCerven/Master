@@ -1,17 +1,9 @@
 <div class="map-container elevation-level3">
   <google-map
+    #googleMap
     height="80vh"
     width="100%"
     [options]="options">
-
-    @for (marker of markers; track marker) {
-      <map-advanced-marker
-        [position]="marker.position"
-      >
-
-      </map-advanced-marker>
-    }
-
   </google-map>
 </div>
 

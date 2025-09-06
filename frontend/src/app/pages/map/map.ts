@@ -31,8 +31,8 @@ export class Map implements AfterViewInit {
   }
 
   options: google.maps.MapOptions = {
-    center: {lat: 40, lng: -20},
-    zoom: 4,
+    center: {lat: 48.1478, lng: 17.1072},
+    zoom: 13,
     disableDefaultUI: true,
     zoomControl: false,
     mapTypeControl: false,
@@ -42,10 +42,10 @@ export class Map implements AfterViewInit {
   };
 
   markerData = [
-    {position: {lat: 40.7128, lng: -74.0060}, title: 'New York City'},
-    {position: {lat: 34.0522, lng: -118.2437}, title: 'Los Angeles'},
-    {position: {lat: 41.8781, lng: -87.6298}, title: 'Chicago'},
-    {position: {lat: 29.7604, lng: -95.3698}, title: 'Houston'}
+    {position: {lat: 48.1472, lng: 17.1070}, title: 'Location1'},
+    {position: {lat: 48.1448, lng: 17.1062}, title: 'Location2'},
+    {position: {lat: 48.1428, lng: 17.1272}, title: 'Location3'},
+    {position: {lat: 48.1458, lng: 17.1062}, title: 'Location4'}
   ];
 
 
@@ -56,8 +56,8 @@ export class Map implements AfterViewInit {
 
       const dot = document.createElement('div');
 
-      dot.style.width = '14px';
-      dot.style.height = '14px';
+      dot.style.width = '20px';
+      dot.style.height = '20px';
       dot.style.backgroundColor = '#1a73e8';
       dot.style.border = '2px solid #ffffff';
       dot.style.borderRadius = '50%';

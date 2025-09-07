@@ -1,0 +1,10 @@
+{
+  "locale": "sk",
+  "translations": {
+    "sideBarHeader": "Majster",
+    "showData": "Ukaž dáta",
+    "importData": "Importovať dáta",
+    "saveData": "Uložiť dáta",
+    "filter": "Filtrovať"
+  }
+}

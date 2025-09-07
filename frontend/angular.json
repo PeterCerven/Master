@@ -5,6 +5,12 @@
   "projects": {
     "frontend": {
       "projectType": "application",
+      "i18n": {
+        "sourceLocale": "en-US",
+        "locales": {
+          "sk": "src/locale/messages.sk.json"
+        }
+      },
       "schematics": {
         "@schematics/angular:component": {
           "style": "scss"
@@ -19,7 +25,8 @@
           "options": {
             "browser": "src/main.ts",
             "polyfills": [
-              "zone.js"
+              "zone.js",
+              "@angular/localize/init"
             ],
             "tsConfig": "tsconfig.app.json",
             "assets": [
@@ -36,6 +43,9 @@
             ]
           },
           "configurations": {
+            "sk": {
+              "localize": ["sk"]
+            },
             "production": {
               "budgets": [
                 {
@@ -73,6 +83,9 @@
             },
             "development": {
               "buildTarget": "frontend:build:development"
+            },
+            "sk": {
+              "buildTarget": "frontend:build:development,sk"
             }
           },
           "defaultConfiguration": "development",
@@ -88,7 +101,8 @@
           "options": {
             "polyfills": [
               "zone.js",
-              "zone.js/testing"
+              "zone.js/testing",
+              "@angular/localize/init"
             ],
             "tsConfig": "tsconfig.spec.json",
             "assets": [

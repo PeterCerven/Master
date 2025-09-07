@@ -1,0 +1,10 @@
+{
+  "locale": "en-US",
+  "translations": {
+    "sideBarHeader": "Master",
+    "showData": "Show Data",
+    "importData": "Import Data",
+    "saveData": "Save Data",
+    "filter": "Filter"
+  }
+}

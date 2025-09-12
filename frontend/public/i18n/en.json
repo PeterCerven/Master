@@ -1,0 +1,29 @@
+{
+  "pages": {
+    "map": {
+      "title": "Map"
+    },
+    "settings": {
+      "title": "Settings",
+      "language": "Language",
+      "theme": "Theme",
+      "dark": "Dark",
+      "light": "Light",
+      "system": "System Default"
+    },
+    "tables": {
+      "title": "Tables",
+      "search": "Search...",
+      "noData": "No data available"
+    }
+  },
+  "sidebar": {
+    "map": "Map",
+    "master": "Master",
+    "settings": "Settings",
+    "tables": "Tables"
+  },
+  "header": {
+    "title": "My Application"
+  }
+}

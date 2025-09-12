@@ -1,7 +1,8 @@
-import { Component, computed, input, signal } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
-import { MatListModule } from '@angular/material/list';
-import { RouterModule } from '@angular/router';
+import {Component, computed, input, signal} from '@angular/core';
+import {MatIconModule} from '@angular/material/icon';
+import {MatListModule} from '@angular/material/list';
+import {RouterModule} from '@angular/router';
+import {TranslocoDirective} from '@jsverse/transloco';
 
 
 export type MenuItem = {
@@ -13,7 +14,7 @@ export type MenuItem = {
 @Component({
   selector: 'custom-sidenav',
   imports: [
-    MatListModule, MatIconModule, RouterModule
+    MatListModule, MatIconModule, RouterModule, TranslocoDirective
   ],
   templateUrl: './custom-sidenav.html',
   styleUrl: './custom-sidenav.scss'
@@ -38,7 +39,7 @@ export class CustomSidenav {
       label: 'Settings',
       route: 'settings'
     },
-    ]);
+  ]);
 
   profilePicSize = computed(() => this.collapsed() ? '32' : '100');
 }

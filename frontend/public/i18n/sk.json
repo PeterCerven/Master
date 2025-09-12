@@ -1,0 +1,29 @@
+{
+  "pages": {
+    "map": {
+      "title": "Mapa"
+    },
+    "settings": {
+      "title": "Nastavenia",
+      "language": "Jazyk",
+      "theme": "Téma",
+      "dark": "Tmavá",
+      "light": "Svetlá",
+      "system": "Predvolená systémová"
+    },
+    "tables": {
+      "title": "Tabuľky",
+      "search": "Hľadať...",
+      "noData": "Žiadne dostupné údaje"
+    }
+  },
+  "sidebar": {
+    "map": "Mapa",
+    "master": "Majster",
+    "settings": "Nastavenia",
+    "tables": "Tabuľky"
+  },
+  "header": {
+    "title": "Moja aplikácia"
+  }
+}

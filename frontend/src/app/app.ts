@@ -1,10 +1,11 @@
-import {Component, computed, signal} from '@angular/core';
+import {Component, computed, inject, signal} from '@angular/core';
 import {MatSidenav, MatSidenavContainer, MatSidenavContent} from '@angular/material/sidenav';
 import {RouterOutlet} from '@angular/router';
 import {MatToolbar} from '@angular/material/toolbar';
 import {MatIconButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
 import {CustomSidenav} from '@components/custom-sidenav/custom-sidenav';
+import { TranslocoService } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-root',
@@ -22,10 +23,11 @@ import {CustomSidenav} from '@components/custom-sidenav/custom-sidenav';
   styleUrl: './app.scss'
 })
 export class App {
+  private translocoService = inject(TranslocoService);
   collapsed = signal(false);
   sideNavWidth = computed(() => this.collapsed() ? '60px' : '250px');
   isDarkMode = signal(false);
-  currentLanguage = signal('SK');
+  currentLanguage = signal('SK')
 
   toggleDarkMode() {
     this.isDarkMode.update(v => !v);
@@ -38,6 +40,7 @@ export class App {
   }
 
   switchLanguage() {
-    this.currentLanguage.update(current => current === 'SK' ? 'EN' : 'SK');
+    this.translocoService.setActiveLang(this.currentLanguage() === 'SK' ? 'en' : 'sk');
+    this.currentLanguage.set(this.currentLanguage() === 'SK' ? 'EN' : 'SK');
   }
 }

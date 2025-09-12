@@ -1,24 +1,24 @@
 <div class="button-container">
   <button matFab extended (click)="showData()">
     <mat-icon>storage</mat-icon>
-    <span i18n="@@showData">Show Data</span>
+    Show Data
   </button>
 
   <button matFab extended (click)="fileInput.click()">
     <mat-icon>file_upload</mat-icon>
-    <span i18n="@@importData">Import Data</span>
+    Import Data
   </button>
   <input hidden (change)="parseData($event)" #fileInput type="file" accept=".gpx">
 
   <button matFab extended (click)="saveData()">
     <mat-icon>save_alt</mat-icon>
-    <span i18n="@@saveData">Save Data</span>
+    Save Data
   </button>
 </div>
 
 <div class="elevation-level3 table">
   <mat-form-field class="filter-input">
-    <mat-label i18n="@@filter">Filter</mat-label>
+    <mat-label>Filter</mat-label>
     <input matInput (keyup)="applyFilter($event)">
   </mat-form-field>
 

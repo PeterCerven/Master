@@ -1,29 +1,23 @@
 {
-  "pages": {
-    "map": {
-      "title": "Mapa"
-    },
-    "settings": {
-      "title": "Nastavenia",
-      "language": "Jazyk",
-      "theme": "Téma",
-      "dark": "Tmavá",
-      "light": "Svetlá",
-      "system": "Predvolená systémová"
-    },
-    "tables": {
-      "title": "Tabuľky",
-      "search": "Hľadať...",
-      "noData": "Žiadne dostupné údaje"
+  "components" :
+  {
+    "sidebar": {
+      "map": "Mapa",
+      "master": "Majster",
+      "settings": "Nastavenia",
+      "tables": "Tabuľky"
     }
   },
-  "sidebar": {
-    "map": "Mapa",
-    "master": "Majster",
-    "settings": "Nastavenia",
-    "tables": "Tabuľky"
-  },
-  "header": {
-    "title": "Moja aplikácia"
+  "pages": {
+    "tables": {
+      "showData": "Ukázať dáta",
+      "importData": "Importovať dáta...",
+      "saveData": "Uložiť dáta",
+      "filter": "filtruj",
+      "latitude": "zemepisná šírka",
+      "longitude": "zemepisná dĺžka",
+      "timestamp": "časová značka",
+      "itemsPerPage": "Počet položiek na stránku"
+    }
   }
 }

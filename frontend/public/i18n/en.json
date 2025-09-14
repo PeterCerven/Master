@@ -1,29 +1,23 @@
 {
-  "pages": {
-    "map": {
-      "title": "Map"
-    },
-    "settings": {
-      "title": "Settings",
-      "language": "Language",
-      "theme": "Theme",
-      "dark": "Dark",
-      "light": "Light",
-      "system": "System Default"
-    },
-    "tables": {
-      "title": "Tables",
-      "search": "Search...",
-      "noData": "No data available"
+  "components" :
+  {
+    "sidebar": {
+      "map": "Map",
+      "master": "Master",
+      "settings": "Settings",
+      "tables": "Tables"
     }
   },
-  "sidebar": {
-    "map": "Map",
-    "master": "Master",
-    "settings": "Settings",
-    "tables": "Tables"
-  },
-  "header": {
-    "title": "My Application"
+  "pages": {
+    "tables": {
+      "showData": "Tables",
+      "importData": "Search...",
+      "saveData": "No data available",
+      "filter": "Filter",
+      "latitude": "Latitude",
+      "longitude": "Longitude",
+      "timestamp": "Timestamp",
+      "itemsPerPage": "Items per page"
+    }
   }
 }

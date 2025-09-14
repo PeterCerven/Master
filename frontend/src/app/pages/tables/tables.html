@@ -1,61 +1,66 @@
-<div class="button-container">
-  <button matFab extended (click)="showData()">
-    <mat-icon>storage</mat-icon>
-    Show Data
-  </button>
+<div *transloco="let t; prefix 'pages.tables'">
+  <div class="button-container">
+    <button matFab extended (click)="showData()">
+      <mat-icon>storage</mat-icon>
+      {{ t('showData') }}
+    </button>
 
-  <button matFab extended (click)="fileInput.click()">
-    <mat-icon>file_upload</mat-icon>
-    Import Data
-  </button>
-  <input hidden (change)="parseData($event)" #fileInput type="file" accept=".gpx">
+    <button matFab extended (click)="fileInput.click()">
+      <mat-icon>file_upload</mat-icon>
+      {{ t('importData') }}
+    </button>
+    <input hidden (change)="parseData($event)" #fileInput type="file" accept=".gpx">
 
-  <button matFab extended (click)="saveData()">
-    <mat-icon>save_alt</mat-icon>
-    Save Data
-  </button>
-</div>
+    <button matFab extended (click)="saveData()">
+      <mat-icon>save_alt</mat-icon>
+      {{ t('saveData') }}
+    </button>
+  </div>
 
-<div class="elevation-level3 table">
-  <mat-form-field class="filter-input">
-    <mat-label>Filter</mat-label>
-    <input matInput (keyup)="applyFilter($event)">
-  </mat-form-field>
+  <div class="elevation-level3 table">
+    <mat-form-field class="filter-input">
+      <mat-label>{{ t('filter') }}</mat-label>
+      <input matInput (keyup)="applyFilter($event)">
+    </mat-form-field>
 
-  <mat-table [dataSource]="dataSource" matSort>
-    <ng-container matColumnDef="latitude">
-      <mat-header-cell
-        *matHeaderCellDef mat-sort-header sortActionDescription="Sort by name"> Latitude
-      </mat-header-cell>
-      <mat-cell *matCellDef="let element"> {{ element.latitude }}</mat-cell>
-    </ng-container>
+    <mat-table [dataSource]="dataSource" matSort>
+      <ng-container matColumnDef="latitude">
+        <mat-header-cell
+          *matHeaderCellDef mat-sort-header sortActionDescription="Sort by name">
+          {{ t('latitude') }}
+        </mat-header-cell>
+        <mat-cell *matCellDef="let element"> {{ element.latitude }}</mat-cell>
+      </ng-container>
 
-    <ng-container matColumnDef="longitude">
-      <mat-header-cell
-        *matHeaderCellDef mat-sort-header sortActionDescription="Sort by name"> Longitude
-      </mat-header-cell>
-      <mat-cell *matCellDef="let element"> {{ element.longitude }}</mat-cell>
-    </ng-container>
+      <ng-container matColumnDef="longitude">
+        <mat-header-cell
+          *matHeaderCellDef mat-sort-header sortActionDescription="Sort by name">
+          {{ t('longitude') }}
+        </mat-header-cell>
+        <mat-cell *matCellDef="let element"> {{ element.longitude }}</mat-cell>
+      </ng-container>
 
-    <ng-container matColumnDef="timestamp">
-      <mat-header-cell
-        *matHeaderCellDef mat-sort-header sortActionDescription="Sort by name"> Timestamp
-      </mat-header-cell>
-      <mat-cell *matCellDef="let element"> {{ element.timestamp }}</mat-cell>
-    </ng-container>
+      <ng-container matColumnDef="timestamp">
+        <mat-header-cell
+          *matHeaderCellDef mat-sort-header sortActionDescription="Sort by name">
+          {{ t('timestamp') }}
+        </mat-header-cell>
+        <mat-cell *matCellDef="let element"> {{ element.timestamp }}</mat-cell>
+      </ng-container>
 
 
-    <!-- Header and Row Declarations -->
-    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-    <mat-row
-      *matRowDef="let row; columns: displayedColumns;"
-      (click)="onRowClicked(row)"
-      class="clickable-row">
-    </mat-row>
-  </mat-table>
+      <!-- Header and Row Declarations -->
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row
+        *matRowDef="let row; columns: displayedColumns;"
+        (click)="onRowClicked(row)"
+        class="clickable-row">
+      </mat-row>
+    </mat-table>
 
-  <mat-paginator [pageSizeOptions]="[10, 50, 100]"
-                 showFirstLastButtons
-                 aria-label="Select page">
-  </mat-paginator>
+    <mat-paginator [pageSizeOptions]="[10, 50, 100]"
+                   showFirstLastButtons
+                   aria-label="Select page">
+    </mat-paginator>
+  </div>
 </div>

@@ -26,17 +26,17 @@ export class CustomSidenav {
   menuItems = signal<MenuItem[]>([
     {
       icon: 'map',
-      label: 'Map',
+      label: 'map',
       route: 'map'
     },
     {
       icon: 'table_chart',
-      label: 'Tables',
+      label: 'tables',
       route: 'tables'
     },
     {
       icon: 'settings',
-      label: 'Settings',
+      label: 'settings',
       route: 'settings'
     },
   ]);

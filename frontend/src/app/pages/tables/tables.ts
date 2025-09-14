@@ -20,13 +20,14 @@ import {MatIconModule} from '@angular/material/icon';
 import {TrajectoryDataModel} from '@models/trajectory-data.model';
 import {DataService} from '@services/data.service';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {TranslocoDirective} from '@jsverse/transloco';
 
 @Component({
   selector: 'app-tables',
   imports: [
     MatTable, MatPaginator, MatCell, MatHeaderCell, MatHeaderRow, MatRow, MatCellDef,
     MatHeaderCellDef, MatHeaderRowDef, MatRowDef, MatColumnDef, MatSortHeader, MatSortModule,
-    MatFormField, MatLabel, MatInput, MatLabel, MatFormField, MatFabButton, MatIconModule,
+    MatFormField, MatLabel, MatInput, MatLabel, MatFormField, MatFabButton, MatIconModule, TranslocoDirective,
   ],
   templateUrl: './tables.html',
   styleUrl: './tables.scss',

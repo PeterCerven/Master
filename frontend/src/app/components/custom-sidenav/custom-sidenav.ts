@@ -1,4 +1,4 @@
-import {Component, computed, input, signal} from '@angular/core';
+import {Component, input, signal} from '@angular/core';
 import {MatIconModule} from '@angular/material/icon';
 import {MatListModule} from '@angular/material/list';
 import {RouterModule} from '@angular/router';
@@ -40,6 +40,4 @@ export class CustomSidenav {
       route: 'settings'
     },
   ]);
-
-  profilePicSize = computed(() => this.collapsed() ? '32' : '100');
 }

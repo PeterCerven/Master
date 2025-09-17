@@ -32,5 +32,4 @@ build/
 ### VS Code ###
 .vscode/
 /.env
-/.mvn/wrapper/maven-wrapper.properties
 /src/main/resources/application-dev.yml

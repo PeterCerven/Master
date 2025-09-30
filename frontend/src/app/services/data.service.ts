@@ -8,7 +8,6 @@ import {catchError, Observable, throwError} from 'rxjs';
   providedIn: 'root'
 })
 export class DataService {
-
   private readonly apiUrl = `${environment.apiUrl}/data`;
   private readonly http = inject(HttpClient);
 

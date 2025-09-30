@@ -34,7 +34,7 @@ import {TranslocoDirective} from '@jsverse/transloco';
 })
 export class Tables {
   private dataService = inject(DataService);
-  destroyRef = inject(DestroyRef);
+  private destroyRef = inject(DestroyRef);
 
   displayedColumns: string[] = [
     'latitude',

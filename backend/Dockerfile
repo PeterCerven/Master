@@ -1,5 +1,5 @@
 # Build stage
-FROM amazoncorretto:21-alpine-jdk AS build
+FROM amazoncorretto:25-alpine-jdk AS build
 WORKDIR /app
 COPY mvnw pom.xml ./
 COPY .mvn .mvn
@@ -8,7 +8,7 @@ COPY . .
 RUN ./mvnw clean package -DskipTests  # Skip tests during build
 
 # Runtime stage
-FROM amazoncorretto:21-alpine-jdk
+FROM amazoncorretto:25-alpine-jdk
 WORKDIR /app
 COPY --from=build /app/target/backend-*-SNAPSHOT.jar ./app.jar
 RUN apk add --no-cache curl

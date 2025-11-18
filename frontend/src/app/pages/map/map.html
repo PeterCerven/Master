@@ -1,4 +1,11 @@
 <div class="map-container elevation-level3">
+  <button
+    class="load-graph-btn"
+    (click)="loadGraph()"
+    [disabled]="loading">
+    {{ loading ? 'Loading Graph...' : 'Load Graph from Backend' }}
+  </button>
+
   <google-map
     #googleMap
     height="80vh"

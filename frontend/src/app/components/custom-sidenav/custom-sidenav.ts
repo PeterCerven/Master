@@ -30,11 +30,6 @@ export class CustomSidenav {
       route: 'map'
     },
     {
-      icon: 'table_chart',
-      label: 'tables',
-      route: 'tables'
-    },
-    {
       icon: 'settings',
       label: 'settings',
       route: 'settings'

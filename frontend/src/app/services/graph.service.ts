@@ -11,8 +11,28 @@ export class GraphService {
   private readonly apiUrl = `${environment.apiUrl}/graph`;
   private readonly http = inject(HttpClient);
 
-  public getGraph(): Observable<MyGraph> {
-    return this.http.get<MyGraph>(`${this.apiUrl}/`).pipe(
+  public getGraph(event: Event): Observable<MyGraph> {
+    const files = (event.target as HTMLInputElement).files;
+    if (!files || files.length === 0 ) {
+      return throwError(() => new Error('No file selected'));
+    }
+
+    const file = files[0];
+    const fileExtension = file.name.split('.').pop()?.toLowerCase();
+
+    switch (fileExtension) {
+      case 'gpx':
+        return this.parseGpxFile(file);
+      default:
+        return throwError(() => new Error('Unsupported file format'));
+    }
+  }
+
+  private parseGpxFile(file: File): Observable<MyGraph> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return this.http.post<MyGraph>(`${this.apiUrl}/import`, formData).pipe(
       catchError(this.handleError)
     );
   }

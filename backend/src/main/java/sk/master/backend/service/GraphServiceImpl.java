@@ -6,91 +6,33 @@ import io.jenetics.jpx.Track;
 import io.jenetics.jpx.TrackSegment;
 import io.jenetics.jpx.WayPoint;
 import org.jgrapht.Graph;
-import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 import org.jgrapht.graph.DefaultWeightedEdge;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.jgrapht.graph.SimpleWeightedGraph;
 import org.springframework.stereotype.Service;
 import sk.master.backend.persistence.model.MyGraph;
 
-import jakarta.annotation.PostConstruct;
-import org.springframework.core.io.ClassPathResource;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class GraphServiceImpl implements GraphService {
+    private final Graph<GraphNode, DefaultWeightedEdge> graph;
+    private final List<GraphNode> allNodes;
 
-    private static final Logger logger = LoggerFactory.getLogger(GraphServiceImpl.class);
-
-    private Graph<GraphNode, DefaultWeightedEdge> graph;
-    private List<GraphNode> allNodes;
+    public GraphServiceImpl() {
+        this.graph = new SimpleWeightedGraph<>(DefaultWeightedEdge.class);
+        this.allNodes = new ArrayList<>();
+    }
 
     private long nodeIdCounter = 1;
     private static final double SNAP_THRESHOLD_METERS = 15.0;
-    private static final String GPX_FILE_PATH = "onthegomap-0.7-km-route.gpx";
-
-    @PostConstruct
-    public void init() {
-        this.graph = new DefaultDirectedWeightedGraph<>(DefaultWeightedEdge.class);
-        this.allNodes = new ArrayList<>();
-
-        Path tempFile = null;
-        try {
-            logger.info("Starting to load GPX file from resources: {}", GPX_FILE_PATH);
-            ClassPathResource resource = new ClassPathResource(GPX_FILE_PATH);
-            logger.info("Resource exists: {}, isReadable: {}", resource.exists(), resource.isReadable());
-
-            tempFile = Files.createTempFile("gpx-temp-", ".gpx");
-            logger.info("Created temporary file: {}", tempFile);
-
-            try (InputStream inputStream = resource.getInputStream()) {
-                long bytescopied = Files.copy(inputStream, tempFile, StandardCopyOption.REPLACE_EXISTING);
-                logger.info("Copied {} bytes to temporary file", bytescopied);
-            }
-
-            logger.info("Reading GPX file from temporary path...");
-            GPX gpx = GPX.read(tempFile);
-            logger.info("GPX file loaded successfully. Processing tracks...");
-
-            gpx.tracks()
-                    .flatMap(Track::segments)
-                    .forEach(segment -> {
-                        try {
-                            logger.info("Processing segment with {} points", segment.getPoints().size());
-                            processSegment(segment);
-                        } catch (Exception e) {
-                            logger.error("Error processing segment", e);
-                            throw new RuntimeException("Error processing segment", e);
-                        }
-                    });
-
-            logger.info("Graph created with {} nodes and {} edges",
-                       graph.vertexSet().size(), graph.edgeSet().size());
-
-        } catch (IOException e) {
-            logger.error("Failed to load GPX file from resources: {}", GPX_FILE_PATH, e);
-            throw new RuntimeException("Failed to load GPX file from resources: " + GPX_FILE_PATH, e);
-        } finally {
-            if (tempFile != null) {
-                try {
-                    Files.deleteIfExists(tempFile);
-                    logger.debug("Deleted temporary file: {}", tempFile);
-                } catch (IOException e) {
-                    logger.warn("Could not delete temp GPX file: {}", e.getMessage());
-                }
-            }
-        }
-    }
 
     @Override
-    public MyGraph generateGraph() {
+    public MyGraph generateGraph(GPX gpx) {
+        gpx.tracks()
+                .flatMap(Track::segments)
+                .forEach(this::processSegment);
+
         List<MyGraph.Node> nodes = new ArrayList<>();
         List<MyGraph.Edge> edges = new ArrayList<>();
 

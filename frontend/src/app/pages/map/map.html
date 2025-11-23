@@ -1,10 +1,12 @@
 <div class="map-container elevation-level3">
   <button
+    matFab extended
     class="load-graph-btn"
-    (click)="loadGraph()"
-    [disabled]="loading">
+    [disabled]="loading"
+    (click)="fileInput.click()">
     {{ loading ? 'Loading Graph...' : 'Load Graph from Backend' }}
   </button>
+  <input hidden (change)="importData($event)" #fileInput type="file" accept=".gpx">
 
   <google-map
     #googleMap

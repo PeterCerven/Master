@@ -1,13 +1,15 @@
 import {GoogleMapsModule, GoogleMap} from '@angular/google-maps';
-import {AfterViewInit, Component, inject, viewChild} from '@angular/core';
+import {AfterViewInit, Component, DestroyRef, inject, viewChild} from '@angular/core';
 import {environment} from '@env/environment.production';
 import {GraphService} from '@services/graph.service';
 import {MyGraph, GraphNode, GraphEdge} from '@models/my-graph.model';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {MatFabButton} from '@angular/material/button';
 
 
 @Component({
   selector: 'app-map',
-  imports: [GoogleMapsModule, GoogleMap],
+  imports: [GoogleMapsModule, GoogleMap, MatFabButton],
   templateUrl: './map.html',
   styleUrl: './map.scss'
 })
@@ -15,6 +17,7 @@ export class Map implements AfterViewInit {
   protected readonly google = google;
   map = viewChild.required<GoogleMap>('googleMap');
   private readonly graphService = inject(GraphService);
+  private destroyRef = inject(DestroyRef);
 
   loading = false;
   graphData: MyGraph | null = null;
@@ -88,9 +91,11 @@ export class Map implements AfterViewInit {
     });
   }
 
-  loadGraph(): void {
+  importData(event: Event): void {
     this.loading = true;
-    this.graphService.getGraph().subscribe({
+    this.graphService.getGraph(event)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
       next: (graph: MyGraph) => {
         this.graphData = graph;
         this.displayGraphOnMap(graph);

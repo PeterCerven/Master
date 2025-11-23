@@ -1,10 +1,11 @@
 package sk.master.backend.controller;
 
+import io.jenetics.jpx.GPX;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import sk.master.backend.persistence.model.MyGraph;
+import sk.master.backend.service.FileService;
 import sk.master.backend.service.GraphService;
 
 @RestController
@@ -12,14 +13,17 @@ import sk.master.backend.service.GraphService;
 public class GraphController {
 
     private final GraphService graphService;
+    private final FileService fileService;
 
-    public GraphController(GraphService graphService) {
+    public GraphController(GraphService graphService, FileService fileService) {
+        this.fileService = fileService;
         this.graphService = graphService;
     }
 
-    @GetMapping("/")
-    public ResponseEntity<MyGraph> getGraph() {
-        MyGraph myGraph = graphService.generateGraph();
-        return ResponseEntity.ok(myGraph);
+    @PostMapping("/import")
+    public ResponseEntity<MyGraph> parseGpx(@RequestParam("file") MultipartFile file) throws Exception {
+        GPX gpx = fileService.parseFile(file);
+        MyGraph data = graphService.generateGraph(gpx);
+        return ResponseEntity.ok(data);
     }
 }

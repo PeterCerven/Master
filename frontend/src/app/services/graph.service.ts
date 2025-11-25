@@ -37,6 +37,13 @@ export class GraphService {
     );
   }
 
+  public saveGraph(graph: MyGraph, name: string): Observable<any> {
+    const request = { name, graph };
+    return this.http.post(`${this.apiUrl}/save`, request).pipe(
+      catchError(this.handleError)
+    );
+  }
+
   private handleError(error: any): Observable<never> {
     console.error('Error fetching graph:', error);
     return throwError(() => new Error(error.message || 'Server Error'));

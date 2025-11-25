@@ -9,19 +9,26 @@ import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 import org.springframework.stereotype.Service;
+import sk.master.backend.persistence.entity.GraphEdgeEntity;
+import sk.master.backend.persistence.entity.GraphNodeEntity;
+import sk.master.backend.persistence.entity.SavedGraph;
 import sk.master.backend.persistence.model.MyGraph;
+import sk.master.backend.persistence.repository.GraphRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class GraphServiceImpl implements GraphService {
     private final Graph<GraphNode, DefaultWeightedEdge> graph;
     private final List<GraphNode> allNodes;
+    private final GraphRepository graphRepository;
 
-    public GraphServiceImpl() {
+    public GraphServiceImpl(GraphRepository graphRepository) {
         this.graph = new SimpleWeightedGraph<>(DefaultWeightedEdge.class);
         this.allNodes = new ArrayList<>();
+        this.graphRepository = graphRepository;
     }
 
     private long nodeIdCounter = 1;
@@ -124,5 +131,25 @@ public class GraphServiceImpl implements GraphService {
                 + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
                 * Math.sin(lonDist / 2) * Math.sin(lonDist / 2);
         return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    @Override
+    public SavedGraph saveGraph(MyGraph graph, String name) {
+        SavedGraph savedGraph = new SavedGraph();
+        savedGraph.setName(name);
+
+        // Convert MyGraph.Node to GraphNodeEntity
+        List<GraphNodeEntity> nodeEntities = graph.getNodes().stream()
+                .map(node -> new GraphNodeEntity(node.getId(), node.getLat(), node.getLon()))
+                .collect(Collectors.toList());
+        savedGraph.setNodes(nodeEntities);
+
+        // Convert MyGraph.Edge to GraphEdgeEntity
+        List<GraphEdgeEntity> edgeEntities = graph.getEdges().stream()
+                .map(edge -> new GraphEdgeEntity(edge.getSourceId(), edge.getTargetId(), edge.getWeight()))
+                .collect(Collectors.toList());
+        savedGraph.setEdges(edgeEntities);
+
+        return graphRepository.save(savedGraph);
     }
 }

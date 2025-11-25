@@ -20,6 +20,7 @@ export class Map implements AfterViewInit {
   private destroyRef = inject(DestroyRef);
 
   loading = false;
+  saving = false;
   graphData: MyGraph | null = null;
   private graphMarkers: google.maps.marker.AdvancedMarkerElement[] = [];
   private graphPolylines: google.maps.Polyline[] = [];
@@ -238,6 +239,35 @@ export class Map implements AfterViewInit {
       polyline.setMap(null);
     });
     this.graphPolylines = [];
+  }
+
+  saveCurrentGraph(): void {
+    if (!this.graphData) {
+      alert('No graph data to save');
+      return;
+    }
+
+    const name = window.prompt('Enter a name for this graph:');
+    if (!name || name.trim() === '') {
+      alert('Graph name is required');
+      return;
+    }
+
+    this.saving = true;
+    this.graphService.saveGraph(this.graphData, name.trim())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          this.saving = false;
+          alert(`Graph "${name}" saved successfully!`);
+          console.log('Graph saved:', response);
+        },
+        error: (error) => {
+          console.error('Error saving graph:', error);
+          this.saving = false;
+          alert('Failed to save graph. Please check the console for details.');
+        }
+      });
   }
 
 }

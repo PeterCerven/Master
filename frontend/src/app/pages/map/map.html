@@ -8,6 +8,16 @@
   </button>
   <input hidden (change)="importData($event)" #fileInput type="file" accept=".gpx">
 
+  @if (graphData) {
+    <button
+      matFab extended
+      class="save-graph-btn"
+      [disabled]="saving"
+      (click)="saveCurrentGraph()">
+      {{ saving ? 'Saving...' : 'Save Graph' }}
+    </button>
+  }
+
   <google-map
     #googleMap
     height="80vh"

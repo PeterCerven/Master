@@ -1,5 +1,5 @@
 import {GoogleMapsModule, GoogleMap} from '@angular/google-maps';
-import {AfterViewInit, Component, DestroyRef, inject, viewChild} from '@angular/core';
+import {AfterViewInit, Component, DestroyRef, inject, signal, viewChild} from '@angular/core';
 import {environment} from '@env/environment.production';
 import {GraphService} from '@services/graph.service';
 import {MyGraph, GraphNode, GraphEdge} from '@models/my-graph.model';
@@ -21,23 +21,29 @@ export class Map implements AfterViewInit {
 
   loading = false;
   saving = false;
+  processing = false;
   graphData: MyGraph | null = null;
+  pendingPoints = signal<Array<{ lat: number, lon: number }>>([]);
   private graphMarkers: google.maps.marker.AdvancedMarkerElement[] = [];
   private graphPolylines: google.maps.Polyline[] = [];
+  private pendingMarkers: google.maps.marker.AdvancedMarkerElement[] = [];
+  private rightClickListenerSetup = false;
 
   ngAfterViewInit(): void {
     const mapInstance = this.map();
 
-    mapInstance.tilesloaded.subscribe(async () => {
-      if (mapInstance.googleMap) {
+    const subscription = mapInstance.tilesloaded.subscribe(async () => {
+      if (mapInstance.googleMap && !this.rightClickListenerSetup) {
         const {AdvancedMarkerElement: _AdvancedMarkerElement} = await google.maps.importLibrary("marker") as google.maps.MarkerLibrary;
         if (!_AdvancedMarkerElement) {
           console.error('AdvancedMarkerElement not available in the Google Maps library');
+          subscription.unsubscribe();
           return;
         }
-        this.addAdvancedMarkers(mapInstance.googleMap);
-      } else {
-        console.error('Google Map object not available');
+        this.setupRightClickListener(mapInstance.googleMap);
+        this.rightClickListenerSetup = true;
+        // Unsubscribe after successful setup
+        subscription.unsubscribe();
       }
     });
   }
@@ -53,62 +59,23 @@ export class Map implements AfterViewInit {
     mapId: environment.googleMapId,
   };
 
-  markerData = [
-    {position: {lat: 48.1472, lng: 17.1070}, title: 'Location1'},
-    {position: {lat: 48.1448, lng: 17.1062}, title: 'Location2'},
-    {position: {lat: 48.1428, lng: 17.1272}, title: 'Location3'},
-    {position: {lat: 48.1458, lng: 17.1062}, title: 'Location4'}
-  ];
-
-
-  addAdvancedMarkers(nativeMap: google.maps.Map): void {
-    const {AdvancedMarkerElement} = google.maps.marker;
-
-    this.markerData.forEach(data => {
-
-      const dot = document.createElement('div');
-
-      dot.style.width = '20px';
-      dot.style.height = '20px';
-      dot.style.backgroundColor = '#1a73e8';
-      dot.style.border = '2px solid #ffffff';
-      dot.style.borderRadius = '50%';
-      dot.style.boxShadow = '0 0 2px rgba(0,0,0,0.5)';
-
-      const marker = new AdvancedMarkerElement({
-        map: nativeMap,
-        position: data.position,
-        title: data.title,
-        content: dot,
-      });
-
-
-      marker.addListener('click', () => {
-        const infoWindow = new google.maps.InfoWindow({
-          content: `<h3 style="color: #333;">${data.title}</h3>`
-        });
-        infoWindow.open(nativeMap, marker);
-      });
-    });
-  }
-
-  importData(event: Event): void {
+  importGraphFromFile(event: Event): void {
     this.loading = true;
-    this.graphService.getGraph(event)
+    this.graphService.generateGraphFromFile(event)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-      next: (graph: MyGraph) => {
-        this.graphData = graph;
-        this.displayGraphOnMap(graph);
-        this.loading = false;
-        console.log('Graph loaded successfully:', graph);
-      },
-      error: (error) => {
-        console.error('Error loading graph:', error);
-        this.loading = false;
-        alert('Failed to load graph from backend. Please check the console for details.');
-      }
-    });
+        next: (graph: MyGraph) => {
+          this.graphData = graph;
+          this.displayGraphOnMap(graph);
+          this.loading = false;
+          console.log('Graph loaded successfully:', graph);
+        },
+        error: (error) => {
+          console.error('Error loading graph:', error);
+          this.loading = false;
+          alert('Failed to load graph from backend. Please check the console for details.');
+        }
+      });
   }
 
   private displayGraphOnMap(graph: MyGraph): void {
@@ -228,13 +195,11 @@ export class Map implements AfterViewInit {
   }
 
   private clearGraph(): void {
-    // Remove all graph markers
     this.graphMarkers.forEach(marker => {
       marker.map = null;
     });
     this.graphMarkers = [];
 
-    // Remove all graph polylines
     this.graphPolylines.forEach(polyline => {
       polyline.setMap(null);
     });
@@ -268,6 +233,110 @@ export class Map implements AfterViewInit {
           alert('Failed to save graph. Please check the console for details.');
         }
       });
+  }
+
+  private setupRightClickListener(nativeMap: google.maps.Map): void {
+    nativeMap.addListener('rightclick', (event: google.maps.MapMouseEvent) => {
+      if (event.latLng) {
+        const lat = event.latLng.lat();
+        const lon = event.latLng.lng();
+        this.addPendingPoint(lat, lon);
+      }
+    });
+  }
+
+  private addPendingPoint(lat: number, lon: number): void {
+    const mapInstance = this.map().googleMap;
+    if (!mapInstance) {
+      console.error('Map instance not available');
+      return;
+    }
+
+    this.pendingPoints.update(points => [...points, {lat, lon}]);
+
+    // Pending yellow marker
+    const {AdvancedMarkerElement} = google.maps.marker;
+
+    const dot = document.createElement('div');
+    dot.style.width = '10px';
+    dot.style.height = '10px';
+    dot.style.backgroundColor = '#f39c12';
+    dot.style.border = '2px solid #ffffff';
+    dot.style.borderRadius = '50%';
+    dot.style.boxShadow = '0 0 3px rgba(0,0,0,0.6)';
+
+    const marker = new AdvancedMarkerElement({
+      map: mapInstance,
+      position: {lat, lng: lon},
+      title: 'Pending Point',
+      content: dot,
+    });
+
+    this.pendingMarkers.push(marker);
+    console.log(`Added pending point at (${lat.toFixed(5)}, ${lon.toFixed(5)}). Total: ${this.pendingPoints().length}`);
+  }
+
+  processGraph(): void {
+    if (this.pendingPoints().length === 0) {
+      alert('Please add some points by right-clicking on the map first');
+      return;
+    }
+
+    this.processing = true;
+    const points = this.pendingPoints().map(p => ({lat: p.lat, lon: p.lon}));
+
+    this.graphService.updateGraphWithPoints(points)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (graph: MyGraph) => {
+          this.graphData = graph;
+          this.clearPendingPoints();
+          this.displayGraphOnMap(graph);
+
+          this.processing = false;
+          console.log('Graph processed successfully:', graph);
+          alert(`Graph created with ${graph.nodes.length} nodes and ${graph.edges.length} edges`);
+        },
+        error: (error) => {
+          console.error('Error processing graph:', error);
+          this.processing = false;
+          alert('Failed to process graph. Please check the console for details.');
+        }
+      });
+  }
+
+  private clearPendingPoints(): void {
+    this.pendingMarkers.forEach(marker => {
+      marker.map = null;
+    });
+    this.pendingMarkers = [];
+    this.pendingPoints.set([]);
+  }
+
+  importGraphFromDatabase() {
+    this.loading = true;
+    this.graphService.loadGraphFromDatabase(1)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (graph: MyGraph) => {
+          this.graphData = graph;
+          this.displayGraphOnMap(graph);
+          this.loading = false;
+          console.log('Graph loaded successfully:', graph);
+        },
+        error: (error) => {
+          console.error('Error loading graph from database:', error);
+          this.loading = false;
+          alert('Failed to load graph from database. Please check the console for details.');
+        }
+      });
+  }
+
+  clearAll(): void {
+    this.graphData = null;
+    this.clearGraph();
+    this.clearPendingPoints();
+    console.log('All graph data and pending points cleared');
   }
 
 }

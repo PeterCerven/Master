@@ -9,11 +9,15 @@ import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 import org.springframework.stereotype.Service;
+
 import sk.master.backend.persistence.entity.GraphEdgeEntity;
 import sk.master.backend.persistence.entity.GraphNodeEntity;
 import sk.master.backend.persistence.entity.SavedGraph;
 import sk.master.backend.persistence.model.MyGraph;
 import sk.master.backend.persistence.repository.GraphRepository;
+
+import static sk.master.backend.persistence.dto.UpdatePointsRequest.MyPoint;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -151,5 +155,15 @@ public class GraphServiceImpl implements GraphService {
         savedGraph.setEdges(edgeEntities);
 
         return graphRepository.save(savedGraph);
+    }
+
+    @Override
+    public MyGraph processPoints(List<MyPoint> points) {
+        return null;
+    }
+
+    @Override
+    public MyGraph importGraphFromDatabase(Long graphId) {
+        return null;
     }
 }

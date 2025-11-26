@@ -1,8 +1,0 @@
-spring:
-  datasource:
-    username: user
-    password: password
-frontend:
-  url: http://localhost:4200
-server:
-  port: 8080

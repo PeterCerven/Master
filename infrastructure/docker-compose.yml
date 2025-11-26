@@ -25,6 +25,7 @@ services:
     ports:
       - "5432:5432"
     environment:
+        SPRING_PROFILES_ACTIVE: docker
         POSTGRES_USER: user
         POSTGRES_PASSWORD: password
         POSTGRES_DB: master

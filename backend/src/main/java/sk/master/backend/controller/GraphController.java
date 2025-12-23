@@ -26,7 +26,7 @@ public class GraphController {
     @PostMapping("/file-import")
     public ResponseEntity<MyGraph> generateGraphFromFile(@RequestParam("file") MultipartFile file) throws Exception {
         GPX gpx = fileService.parseFile(file);
-        MyGraph data = graphService.generateGraph(gpx);
+        MyGraph data = graphService.generateGraphFromGpx(gpx);
         return ResponseEntity.ok(data);
     }
 
@@ -44,7 +44,7 @@ public class GraphController {
 
     @PutMapping("/add-points")
     public ResponseEntity<MyGraph> updateGraphWithPoints(@RequestBody UpdatePointsRequest request) {
-        MyGraph graph = graphService.processPoints(request.getMyPoints());
+        MyGraph graph = graphService.processPoints(request.getGraph(), request.getMyPoints());
         return ResponseEntity.ok(graph);
     }
 }

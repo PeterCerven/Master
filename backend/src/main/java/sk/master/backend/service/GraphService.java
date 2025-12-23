@@ -8,9 +8,9 @@ import sk.master.backend.persistence.model.MyGraph;
 import java.util.List;
 
 public interface GraphService {
-    MyGraph generateGraph(GPX gpx);
+    MyGraph generateGraphFromGpx(GPX gpx);
     SavedGraph saveGraph(MyGraph graph, String name);
-    MyGraph processPoints(List<UpdatePointsRequest.MyPoint> myPoints);
+    MyGraph processPoints(MyGraph graph, List<UpdatePointsRequest.MyPoint> myPoints);
 
     MyGraph importGraphFromDatabase(Long graphId);
 }

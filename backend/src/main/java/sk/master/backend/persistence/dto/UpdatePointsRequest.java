@@ -3,6 +3,7 @@ package sk.master.backend.persistence.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import sk.master.backend.persistence.model.MyGraph;
 
 import java.util.List;
 
@@ -11,6 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 public class UpdatePointsRequest {
     private List<MyPoint> myPoints;
+    private MyGraph graph;
 
     @Data
     @NoArgsConstructor

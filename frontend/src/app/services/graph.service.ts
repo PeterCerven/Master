@@ -46,8 +46,8 @@ export class GraphService {
     return this.http.post(`${this.apiUrl}/save`, request).pipe(catchError(this.handleError));
   }
 
-  public updateGraphWithPoints(points: Array<GraphPoint>): Observable<MyGraph> {
-    const request = { points: points };
+  public updateGraphWithPoints(graph: MyGraph | null, points: Array<GraphPoint>): Observable<MyGraph> {
+    const request = { points: points, graph };
     return this.http.post<MyGraph>(`${this.apiUrl}/add-points`, request).pipe(
       catchError(this.handleError)
     );

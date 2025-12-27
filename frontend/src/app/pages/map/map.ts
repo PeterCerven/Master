@@ -42,7 +42,6 @@ export class Map implements AfterViewInit {
         }
         this.setupRightClickListener(mapInstance.googleMap);
         this.rightClickListenerSetup = true;
-        // Unsubscribe after successful setup
         subscription.unsubscribe();
       }
     });
@@ -284,7 +283,8 @@ export class Map implements AfterViewInit {
 
     this.processing = true;
     const points = this.pendingPoints().map(p => ({lat: p.lat, lon: p.lon}));
-    this.graphService.updateGraphWithPoints(points)
+
+    this.graphService.updateGraphWithPoints(this.graphData, points)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (graph: MyGraph) => {

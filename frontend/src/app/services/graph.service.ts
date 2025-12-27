@@ -2,7 +2,7 @@ import {inject, Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {environment} from '@env/environment.production';
 import {catchError, Observable, throwError} from 'rxjs';
-import {MyGraph} from '@models/my-graph.model';
+import {GraphPoint, MyGraph} from '@models/my-graph.model';
 
 @Injectable({
   providedIn: 'root'
@@ -46,8 +46,8 @@ export class GraphService {
     return this.http.post(`${this.apiUrl}/save`, request).pipe(catchError(this.handleError));
   }
 
-  public updateGraphWithPoints(points: Array<{lat: number, lon: number}>): Observable<MyGraph> {
-    const request = { points };
+  public updateGraphWithPoints(points: Array<GraphPoint>): Observable<MyGraph> {
+    const request = { points: points };
     return this.http.post<MyGraph>(`${this.apiUrl}/add-points`, request).pipe(
       catchError(this.handleError)
     );

@@ -9,25 +9,25 @@ import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 import org.springframework.stereotype.Service;
-
 import sk.master.backend.persistence.entity.GraphEdgeEntity;
 import sk.master.backend.persistence.entity.GraphNodeEntity;
 import sk.master.backend.persistence.entity.SavedGraph;
 import sk.master.backend.persistence.model.MyGraph;
 import sk.master.backend.persistence.repository.GraphRepository;
 
-import static sk.master.backend.persistence.dto.UpdatePointsRequest.MyPoint;
-
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static sk.master.backend.persistence.dto.AddPointsRequest.MyPoint;
+
 @Service
 public class GraphServiceImpl implements GraphService {
+    private static final double SNAP_THRESHOLD_METERS = 15.0;
     private final Graph<GraphNode, DefaultWeightedEdge> graph;
     private final List<GraphNode> allNodes;
     private final GraphRepository graphRepository;
+    private long nodeIdCounter = 1;
 
     public GraphServiceImpl(GraphRepository graphRepository) {
         this.graph = new SimpleWeightedGraph<>(DefaultWeightedEdge.class);
@@ -35,12 +35,10 @@ public class GraphServiceImpl implements GraphService {
         this.graphRepository = graphRepository;
     }
 
-    private long nodeIdCounter = 1;
-    private static final double SNAP_THRESHOLD_METERS = 15.0;
-
     @Override
     public MyGraph generateGraph(GPX gpx) {
-        gpx.tracks()
+        gpx
+                .tracks()
                 .flatMap(Track::segments)
                 .forEach(this::processSegment);
 
@@ -61,10 +59,6 @@ public class GraphServiceImpl implements GraphService {
         }
 
         return new MyGraph(nodes, edges);
-    }
-
-    // Record pre náš uzol
-    public record GraphNode(long id, double lat, double lon) {
     }
 
     private void processSegment(TrackSegment segment) {
@@ -165,5 +159,8 @@ public class GraphServiceImpl implements GraphService {
     @Override
     public MyGraph importGraphFromDatabase(Long graphId) {
         return null;
+    }
+
+    public record GraphNode(long id, double lat, double lon) {
     }
 }

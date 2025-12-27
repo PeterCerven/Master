@@ -284,7 +284,6 @@ export class Map implements AfterViewInit {
 
     this.processing = true;
     const points = this.pendingPoints().map(p => ({lat: p.lat, lon: p.lon}));
-
     this.graphService.updateGraphWithPoints(points)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({

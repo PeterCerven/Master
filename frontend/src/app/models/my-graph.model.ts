@@ -14,3 +14,8 @@ export interface GraphEdge {
   targetId: number;
   weight: number;
 }
+
+export interface GraphPoint {
+  lat: number;
+  lon: number;
+}

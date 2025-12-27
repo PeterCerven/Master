@@ -4,7 +4,7 @@ import io.jenetics.jpx.GPX;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import sk.master.backend.persistence.dto.UpdatePointsRequest;
+import sk.master.backend.persistence.dto.AddPointsRequest;
 import sk.master.backend.persistence.dto.SaveGraphRequest;
 import sk.master.backend.persistence.entity.SavedGraph;
 import sk.master.backend.persistence.model.MyGraph;
@@ -42,9 +42,9 @@ public class GraphController {
         return ResponseEntity.ok(savedGraph);
     }
 
-    @PutMapping("/add-points")
-    public ResponseEntity<MyGraph> updateGraphWithPoints(@RequestBody UpdatePointsRequest request) {
-        MyGraph graph = graphService.processPoints(request.getMyPoints());
+    @PostMapping("/add-points")
+    public ResponseEntity<MyGraph> updateGraphWithPoints(@RequestBody AddPointsRequest request) {
+        MyGraph graph = graphService.processPoints(request.getPoints());
         return ResponseEntity.ok(graph);
     }
 }

@@ -9,8 +9,8 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpdatePointsRequest {
-    private List<MyPoint> myPoints;
+public class AddPointsRequest {
+    private List<MyPoint> points;
 
     @Data
     @NoArgsConstructor

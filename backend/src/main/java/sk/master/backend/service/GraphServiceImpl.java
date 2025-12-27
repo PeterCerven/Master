@@ -13,7 +13,7 @@ import sk.master.backend.persistence.entity.SavedGraph;
 import sk.master.backend.persistence.model.MyGraph;
 import sk.master.backend.persistence.repository.GraphRepository;
 
-import static sk.master.backend.persistence.dto.UpdatePointsRequest.MyPoint;
+import static sk.master.backend.persistence.dto.AddPointsRequest.MyPoint;
 
 import java.util.ArrayList;
 import java.util.List;

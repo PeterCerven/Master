@@ -1,16 +1,30 @@
+.map-page-container {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  gap: 0;
+}
+
 .map-container {
-  width: 80%;
+  flex: 1;
+  height: 100%;
   position: relative;
 }
 
-.load-graph-file-btn {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  z-index: 1000;
-  width: 240px;
+.control-panel {
+  width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
+  background-color: var(--mat-sys-surface-container);
+  box-shadow: -2px 0 6px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+}
+
+.control-btn {
+  width: 100%;
   padding: 12px 24px;
-  background-color: #3498db;
   color: white;
   border: none;
   border-radius: 6px;
@@ -21,7 +35,6 @@
   transition: all 0.3s ease;
 
   &:hover:not(:disabled) {
-    background-color: #2980b9;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
     transform: translateY(-2px);
   }
@@ -35,145 +48,45 @@
     background-color: #95a5a6;
     cursor: not-allowed;
     opacity: 0.6;
+  }
+}
+
+.load-graph-file-btn {
+  background-color: #3498db;
+
+  &:hover:not(:disabled) {
+    background-color: #2980b9;
   }
 }
 
 .load-graph-database-btn {
-  position: absolute;
-  top: 80px;
-  right: 20px;
-  z-index: 1000;
-  width: 240px;
-  padding: 12px 24px;
   background-color: #9b59b6;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-  transition: all 0.3s ease;
 
   &:hover:not(:disabled) {
     background-color: #8e44ad;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
-    transform: translateY(-2px);
-  }
-
-  &:active:not(:disabled) {
-    transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  }
-
-  &:disabled {
-    background-color: #95a5a6;
-    cursor: not-allowed;
-    opacity: 0.6;
   }
 }
 
 .process-graph-btn {
-  position: absolute;
-  top: 140px;
-  right: 20px;
-  z-index: 1000;
-  width: 240px;
-  padding: 12px 24px;
   background-color: #f39c12;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-  transition: all 0.3s ease;
 
   &:hover:not(:disabled) {
     background-color: #e67e22;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
-    transform: translateY(-2px);
-  }
-
-  &:active:not(:disabled) {
-    transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  }
-
-  &:disabled {
-    background-color: #95a5a6;
-    cursor: not-allowed;
-    opacity: 0.6;
   }
 }
 
 .save-graph-btn {
-  position: absolute;
-  top: 200px;
-  right: 20px;
-  z-index: 1000;
-  width: 240px;
-  padding: 12px 24px;
   background-color: #27ae60;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-  transition: all 0.3s ease;
 
   &:hover:not(:disabled) {
     background-color: #229954;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
-    transform: translateY(-2px);
-  }
-
-  &:active:not(:disabled) {
-    transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  }
-
-  &:disabled {
-    background-color: #95a5a6;
-    cursor: not-allowed;
-    opacity: 0.6;
   }
 }
 
 .clear-graph-btn {
-  position: absolute;
-  top: 260px;
-  right: 20px;
-  z-index: 1000;
-  width: 240px;
-  padding: 12px 24px;
   background-color: #e74c3c;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-  transition: all 0.3s ease;
 
   &:hover:not(:disabled) {
     background-color: #c0392b;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
-    transform: translateY(-2px);
-  }
-
-  &:active:not(:disabled) {
-    transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  }
-
-  &:disabled {
-    background-color: #95a5a6;
-    cursor: not-allowed;
-    opacity: 0.6;
   }
 }

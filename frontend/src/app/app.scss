@@ -18,19 +18,8 @@
 
 .content {
   padding: 16px;
-}
-
-mat-sidenav-container {
   height: calc(100vh - 64px);
-}
-
-mat-sidenav,
-mat-sidenav-content {
-  transition: all 500ms ease-in-out;
-}
-
-.mat-sidenav {
-  box-shadow: var(--mat-sys-level3);
+  overflow: auto;
 }
 
 .language-toggle {

@@ -1,52 +1,54 @@
-<div class="map-container elevation-level3">
+<div class="map-page-container">
+  <div class="map-container elevation-level3">
+    <google-map
+      #googleMap
+      height="100%"
+      width="100%"
+      [options]="options">
+    </google-map>
+  </div>
 
+  <div class="control-panel">
+    <button
+      matFab extended
+      class="control-btn load-graph-file-btn"
+      [disabled]="loading"
+      (click)="fileInput.click()">
+      {{ loading ? 'Loading Graph...' : 'Load Graph from File' }}
+    </button>
+    <input hidden (change)="importGraphFromFile($event)" #fileInput type="file" accept=".gpx">
 
-  <google-map
-    #googleMap
-    height="80vh"
-    width="100%"
-    [options]="options">
-  </google-map>
+    <button
+      matFab extended
+      class="control-btn load-graph-database-btn"
+      [disabled]="loading"
+      (click)="importGraphFromDatabase()">
+      {{ loading ? 'Loading Graph...' : 'Load Graph from Database' }}
+    </button>
+
+    <button
+      matFab extended
+      class="control-btn process-graph-btn"
+      [disabled]="processing || pendingPoints().length === 0"
+      (click)="processGraph()">
+      {{ processing ? 'Processing...' : 'Process Graph (' + pendingPoints().length + ' points)' }}
+    </button>
+
+    <button
+      matFab extended
+      class="control-btn save-graph-btn"
+      [disabled]="saving || !graphData"
+      (click)="saveCurrentGraph()">
+      {{ saving ? 'Saving...' : 'Save Graph' }}
+    </button>
+
+    <button
+      matFab extended
+      class="control-btn clear-graph-btn"
+      [disabled]="!graphData && pendingPoints().length === 0"
+      (click)="clearAll()">
+      Clear All
+    </button>
+  </div>
 </div>
-
-<button
-  matFab extended
-  class="load-graph-file-btn"
-  [disabled]="loading"
-  (click)="fileInput.click()">
-  {{ loading ? 'Loading Graph...' : 'Load Graph from File' }}
-</button>
-<input hidden (change)="importGraphFromFile($event)" #fileInput type="file" accept=".gpx">
-
-<button
-  matFab extended
-  class="load-graph-database-btn"
-  [disabled]="loading"
-  (click)="importGraphFromDatabase()">
-  {{ loading ? 'Loading Graph...' : 'Load Graph from Database' }}
-</button>
-
-<button
-  matFab extended
-  class="process-graph-btn"
-  [disabled]="processing || pendingPoints().length === 0"
-  (click)="processGraph()">
-  {{ processing ? 'Processing...' : 'Process Graph (' + pendingPoints().length + ' points)' }}
-</button>
-
-<button
-  matFab extended
-  class="save-graph-btn"
-  [disabled]="saving || !graphData"
-  (click)="saveCurrentGraph()">
-  {{ saving ? 'Saving...' : 'Save Graph' }}
-</button>
-
-<button
-  matFab extended
-  class="clear-graph-btn"
-  [disabled]="!graphData && pendingPoints().length === 0"
-  (click)="clearAll()">
-  Clear All
-</button>
 

@@ -1,31 +1,23 @@
-import {Component, computed, inject, signal} from '@angular/core';
-import {MatSidenav, MatSidenavContainer, MatSidenavContent} from '@angular/material/sidenav';
+import {Component, inject, signal} from '@angular/core';
 import {RouterOutlet} from '@angular/router';
 import {MatToolbar} from '@angular/material/toolbar';
 import {MatIconButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
-import {CustomSidenav} from '@components/custom-sidenav/custom-sidenav';
 import { TranslocoService } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-root',
   imports: [
-    MatSidenav,
-    MatSidenavContent,
     RouterOutlet,
     MatToolbar,
     MatIconButton,
-    MatSidenavContainer,
     MatIcon,
-    CustomSidenav,
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
 export class App {
   private translocoService = inject(TranslocoService);
-  collapsed = signal(false);
-  sideNavWidth = computed(() => this.collapsed() ? '60px' : '250px');
   isDarkMode = signal(false);
   currentLanguage = signal('SK')
 

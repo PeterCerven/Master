@@ -1,148 +1,65 @@
 @startuml Master Project Architecture
 
-!define RECTANGLE class
 
-skinparam rectangle {
-    BackgroundColor<<frontend>> LightBlue
-    BackgroundColor<<backend>> LightGreen
-    BackgroundColor<<database>> LightYellow
-    BackgroundColor<<docker>> LightGray
-}
+actor User
 
-title Master Project - System Architecture
 
-package "Docker Infrastructure" <<docker>> {
+'cloud "Google Maps API" as maps
 
-    package "Frontend Container" <<frontend>> {
-        component "Angular 20.1" as angular {
-            [Router] as router
-            [Angular Material] as material
-            [Google Maps] as maps
-            [Transloco i18n] as transloco
-        }
+package "Docker Environment" {
 
-        package "Frontend Services" {
-            [DataService] as dataService
-            [GraphService] as graphService
-        }
 
-        package "Frontend Models" {
-            [TrajectoryData Model] as trajModel
-            [MyGraph Model] as graphModel
-        }
-
-        package "Pages/Components" {
-            [Map Page] as mapPage
-            [Tables Page] as tablesPage
-            [Settings Page] as settingsPage
-            [Custom Sidenav] as sidenav
-        }
-
-        node "Node.js 24 (Alpine)" as nodeRuntime
+    database "PostgreSQL" as db #F5A623 {
+        [Graph Storage]
     }
 
-    package "Backend Container" <<backend>> {
-        component "Spring Boot 3.5.7" as springBoot {
-            [REST Controllers] as controllers
-            [Service Layer] as services
-            [JPA Repositories] as repositories
-        }
-
-        package "Controllers" {
-            [DataController] as dataController
-            [GraphController] as graphController
-        }
-
-        package "Services" {
-            [FileService] as fileService
-            [GraphService] as graphService
-        }
-
-        package "Persistence" {
-            [TrajectoryData Entity] as trajEntity
-            [MyGraph Entity] as graphEntity
-            [TrajectoryDataRepository] as trajRepo
-        }
-
-        package "Libraries" {
-            [JGraphT\nGraph Algorithms] as jgrapht
-            [JPX\nGPX Parser] as jpx
-            [JTS\nSpatial Operations] as jts
-        }
-
-        node "Amazon Corretto 25 (JDK)" as javaRuntime
+    component "Backend" as backend #7ED321 {
+            [Graph Processing]
+            [Parse GPX files]
     }
 
-    database "PostgreSQL Container" <<database>> {
-        [PostgreSQL Alpine] as postgres
-        database "master" as masterDB {
-            [trajectory_data] as trajTable
-            [graph_data] as graphTable
-        }
+
+    component "Frontend" as frontend #4A90E2 {
+            [Map UI]
+            [Graph Visualization]
     }
+
 }
+left to right direction
+' Relationships
+User --> frontend
+'frontend -right-> maps : Display map
+frontend --> backend : REST API
+backend -down-> db : JPA
 
-package "External/Browser" {
-    actor User
-    [Web Browser] as browser
-}
-
-' Relationships - User to Frontend
-User --> browser
-browser --> angular : HTTP :4200
-
-' Frontend internal relationships
-router --> mapPage
-router --> tablesPage
-router --> settingsPage
-mapPage --> maps
-mapPage --> dataService
-mapPage --> graphService
-tablesPage --> dataService
-settingsPage --> material
-dataService --> trajModel
-graphService --> graphModel
-
-' Frontend to Backend
-dataService --> dataController : REST API\n:8080/api
-graphService --> graphController : REST API\n:8080/api
-
-' Backend internal relationships
-dataController --> fileService
-dataController --> services
-graphController --> graphService
-
-fileService --> jpx : Parse GPX
-graphService --> jgrapht : Graph Ops
-graphService --> jts : Spatial Ops
-
-fileService --> repositories
-graphService --> repositories
-
-repositories --> trajRepo
-trajRepo --> trajEntity
-trajRepo --> graphEntity
-
-' Backend to Database
-trajRepo --> postgres : JDBC\nHikari Pool :5432
-postgres --> masterDB
-
-' Docker dependencies
-note right of postgres
-  Health Check:
-  pg_isready -U user -d master
-  Interval: 10s
-  Retries: 5
-end note
-
-note bottom of springBoot
-  Backend depends on PostgreSQL
-  health check before starting
-end note
-
-note bottom of angular
-  Development mode with
-  hot-reload (Chokidar)
-end note
+'' Notes
+'note right of frontend
+'  **Technology:**
+'  Angular 20, Google Maps
+'  Material Design
+'
+'  **Features:**
+'  • Interactive map
+'  • GPX file import
+'  • Graph visualization
+'  • Multi-language (SK/EN)
+'end note
+'
+'note right of backend
+'  **Technology:**
+'  Spring Boot, Java 25
+'
+'  **Capabilities:**
+'  • Parse GPX files
+'  • Process graphs
+'  • REST API endpoints
+'end note
+'
+'note right of db
+'  **Stores:**
+'  • Graphs
+'  • Nodes (coordinates)
+'  • Edges (connections)
+'end note
 
 @enduml

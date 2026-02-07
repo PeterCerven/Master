@@ -1,18 +1,22 @@
 package sk.master.backend.service;
 
+import io.jenetics.jpx.GPX;
+import io.jenetics.jpx.Track;
+import io.jenetics.jpx.TrackSegment;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import io.jenetics.jpx.GPX;
-import org.apache.commons.io.FilenameUtils;
+import sk.master.backend.persistence.model.Position;
 
 import java.io.InputStream;
+import java.util.List;
 
 @Service
 public class FileServiceImpl implements FileService {
 
 
     @Override
-    public GPX parseFile(MultipartFile file) throws Exception {
+    public List<Position> parseFile(MultipartFile file) throws Exception {
         String fileExtension = FilenameUtils.getExtension(file.getOriginalFilename());
         return switch (fileExtension) {
             case "gpx" -> parseGpxFile(file);
@@ -20,9 +24,17 @@ public class FileServiceImpl implements FileService {
         };
     }
 
-    private GPX parseGpxFile(MultipartFile file) throws Exception {
+    private List<Position> parseGpxFile(MultipartFile file) throws Exception {
         try (InputStream inputStream = file.getInputStream()) {
-            return GPX.Reader.of(GPX.Reader.Mode.LENIENT).read(inputStream);
+            GPX gpx = GPX.Reader.of(GPX.Reader.Mode.LENIENT).read(inputStream);
+            if (gpx.tracks() != null) {
+                return gpx.tracks()
+                        .flatMap(Track::segments)
+                        .flatMap(TrackSegment::points)
+                        .map(point -> new Position(point.getLatitude().doubleValue(), point.getLongitude().doubleValue()))
+                        .toList();
+            }
+            throw new Exception("No GPS points");
         } catch (Exception e) {
             throw new Exception("Failed to parse GPX file", e);
         }

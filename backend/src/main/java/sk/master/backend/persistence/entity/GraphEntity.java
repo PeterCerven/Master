@@ -14,7 +14,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class SavedGraph {
+public class GraphEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

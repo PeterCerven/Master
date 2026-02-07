@@ -1,16 +1,16 @@
 package sk.master.backend.service;
 
-import io.jenetics.jpx.GPX;
 import sk.master.backend.persistence.dto.AddPointsRequest;
-import sk.master.backend.persistence.entity.SavedGraph;
-import sk.master.backend.persistence.model.MyGraph;
+import sk.master.backend.persistence.entity.GraphEntity;
+import sk.master.backend.persistence.model.Position;
+import sk.master.backend.persistence.model.RoadGraph;
 
 import java.util.List;
 
 public interface GraphService {
-    MyGraph generateGraphFromGpx(GPX gpx);
-    SavedGraph saveGraph(MyGraph graph, String name);
-    MyGraph processPoints(MyGraph graph, List<AddPointsRequest.MyPoint> myPoints);
+    GraphEntity saveGraph(RoadGraph graph, String name);
 
-    MyGraph importGraphFromDatabase(Long graphId);
+    RoadGraph processPoints(RoadGraph graph, List<Position> positions);
+
+    RoadGraph importGraphFromDatabase(Long graphId);
 }

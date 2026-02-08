@@ -13,11 +13,11 @@ import lombok.NoArgsConstructor;
 public class GraphEdgeEntity {
 
     @Column(name = "source_id", nullable = false)
-    private long sourceId;
+    private String sourceId;
 
     @Column(name = "target_id", nullable = false)
-    private long targetId;
+    private String targetId;
 
     @Column(nullable = false)
-    private double weight;
+    private double distance;
 }

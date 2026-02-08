@@ -1,30 +1,33 @@
 package sk.master.backend.persistence.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.util.Objects;
+import com.graphhopper.routing.ev.RoadClass;
+import lombok.*;
 
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Getter
 public class RoadEdge {
 
-    private long sourceId;
-    private long targetId;
-    private double weight;
+    private final String sourceId;
+    private final String targetId;
+    @Setter
+    private double distanceMeters;
 
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        RoadEdge edge = (RoadEdge) o;
-        return sourceId == edge.sourceId && targetId == edge.targetId;
+    // Metadáta obohatené map matchingom
+    @Setter
+    private String roadName;
+    @Setter
+    private RoadClass roadClass;
+    @Setter
+    private double maxSpeed;     // km/h
+
+    public RoadEdge(String sourceId, String targetId, double distanceMeters) {
+        this.sourceId = sourceId;
+        this.targetId = targetId;
+        this.distanceMeters = distanceMeters;
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(sourceId, targetId);
+    public String toString() {
+        return String.format("RoadEdge[%s -> %s, %.1fm, %s]", sourceId, targetId, distanceMeters, roadName);
     }
 }

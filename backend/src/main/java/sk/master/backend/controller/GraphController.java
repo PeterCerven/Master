@@ -6,7 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 import sk.master.backend.persistence.dto.AddPointsRequest;
 import sk.master.backend.persistence.dto.SaveGraphRequest;
 import sk.master.backend.persistence.entity.GraphEntity;
-import sk.master.backend.persistence.model.Position;
+import sk.master.backend.persistence.model.PositionalData;
 import sk.master.backend.persistence.model.RoadGraph;
 import sk.master.backend.service.FileService;
 import sk.master.backend.service.GraphService;
@@ -27,8 +27,8 @@ public class GraphController {
 
     @PostMapping("/file-import")
     public ResponseEntity<RoadGraph> generateGraphFromFile(@RequestParam("file") MultipartFile file) throws Exception {
-        List<Position> positions = fileService.parseFile(file);
-        RoadGraph data = graphService.processPoints(null, positions);
+        List<PositionalData> positionalData = fileService.parseFile(file);
+        RoadGraph data = graphService.generateRoadNetwork(null, positionalData);
         return ResponseEntity.ok(data);
     }
 
@@ -40,13 +40,13 @@ public class GraphController {
 
     @PostMapping("/save")
     public ResponseEntity<GraphEntity> saveGraph(@RequestBody SaveGraphRequest request) {
-        GraphEntity graphEntity = graphService.saveGraph(request.getGraph(), request.getName());
+        GraphEntity graphEntity = graphService.saveGraphToDatabase(request.getGraph(), request.getName());
         return ResponseEntity.ok(graphEntity);
     }
 
-    @PutMapping("/add-points")
+    @PostMapping("/add-points")
     public ResponseEntity<RoadGraph> updateGraphWithPoints(@RequestBody AddPointsRequest request) {
-        RoadGraph graph = graphService.processPoints(request.getGraph(), request.getPositions());
+        RoadGraph graph = graphService.generateRoadNetwork(request.getGraph(), request.getPositionalData());
         return ResponseEntity.ok(graph);
     }
 }

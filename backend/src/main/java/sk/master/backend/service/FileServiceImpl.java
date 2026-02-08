@@ -1,14 +1,16 @@
 package sk.master.backend.service;
 
 import io.jenetics.jpx.GPX;
+import io.jenetics.jpx.Metadata;
 import io.jenetics.jpx.Track;
 import io.jenetics.jpx.TrackSegment;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import sk.master.backend.persistence.model.Position;
+import sk.master.backend.persistence.model.PositionalData;
 
 import java.io.InputStream;
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -16,7 +18,7 @@ public class FileServiceImpl implements FileService {
 
 
     @Override
-    public List<Position> parseFile(MultipartFile file) throws Exception {
+    public List<PositionalData> parseFile(MultipartFile file) throws Exception {
         String fileExtension = FilenameUtils.getExtension(file.getOriginalFilename());
         return switch (fileExtension) {
             case "gpx" -> parseGpxFile(file);
@@ -24,14 +26,23 @@ public class FileServiceImpl implements FileService {
         };
     }
 
-    private List<Position> parseGpxFile(MultipartFile file) throws Exception {
+    private List<PositionalData> parseGpxFile(MultipartFile file) throws Exception {
         try (InputStream inputStream = file.getInputStream()) {
             GPX gpx = GPX.Reader.of(GPX.Reader.Mode.LENIENT).read(inputStream);
+
+            Instant metadataTime = gpx.getMetadata()
+                    .flatMap(Metadata::getTime)
+                    .orElse(null);
+
             if (gpx.tracks() != null) {
                 return gpx.tracks()
                         .flatMap(Track::segments)
                         .flatMap(TrackSegment::points)
-                        .map(point -> new Position(point.getLatitude().doubleValue(), point.getLongitude().doubleValue()))
+                        .map(point -> new PositionalData(
+                                point.getLatitude().doubleValue(),
+                                point.getLongitude().doubleValue(),
+                                point.getTime().orElse(metadataTime)
+                                ))
                         .toList();
             }
             throw new Exception("No GPS points");

@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class GraphNodeEntity {
 
     @Column(name = "node_id", nullable = false)
-    private long nodeId;
+    private String nodeId;
 
     @Column(nullable = false)
     private double lat;

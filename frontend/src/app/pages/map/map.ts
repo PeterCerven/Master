@@ -2,7 +2,7 @@ import {GoogleMapsModule, GoogleMap} from '@angular/google-maps';
 import {AfterViewInit, Component, DestroyRef, inject, signal, viewChild} from '@angular/core';
 import {environment} from '@env/environment.production';
 import {GraphService} from '@services/graph.service';
-import {MyGraph, GraphNode, GraphEdge} from '@models/my-graph.model';
+import {GraphResponseDto, GraphNodeDto, GraphEdgeDto} from '@models/my-graph.model';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {MatFabButton} from '@angular/material/button';
 
@@ -22,7 +22,7 @@ export class Map implements AfterViewInit {
   loading = false;
   saving = false;
   processing = false;
-  graphData: MyGraph | null = null;
+  graphData: GraphResponseDto | null = null;
   pendingPoints = signal<Array<{ lat: number, lon: number }>>([]);
   private graphMarkers: google.maps.marker.AdvancedMarkerElement[] = [];
   private graphPolylines: google.maps.Polyline[] = [];
@@ -63,7 +63,7 @@ export class Map implements AfterViewInit {
     this.graphService.generateGraphFromFile(event)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (graph: MyGraph) => {
+        next: (graph: GraphResponseDto) => {
           this.graphData = graph;
           this.displayGraphOnMap(graph);
           this.loading = false;
@@ -77,7 +77,7 @@ export class Map implements AfterViewInit {
       });
   }
 
-  private displayGraphOnMap(graph: MyGraph): void {
+  private displayGraphOnMap(graph: GraphResponseDto): void {
     const mapInstance = this.map().googleMap;
     if (!mapInstance) {
       console.error('Map instance not available');
@@ -88,7 +88,7 @@ export class Map implements AfterViewInit {
     this.clearGraph();
 
     // Create a lookup object for quick node access
-    const nodeMap: Record<number, GraphNode> = {};
+    const nodeMap: Record<string, GraphNodeDto> = {};
     graph.nodes.forEach(node => nodeMap[node.id] = node);
 
     // Display nodes as markers
@@ -101,7 +101,7 @@ export class Map implements AfterViewInit {
     this.fitGraphBounds(mapInstance, graph.nodes);
   }
 
-  private async displayGraphNodes(nativeMap: google.maps.Map, nodes: GraphNode[]): Promise<void> {
+  private async displayGraphNodes(nativeMap: google.maps.Map, nodes: GraphNodeDto[]): Promise<void> {
     const {AdvancedMarkerElement} = google.maps.marker;
 
     nodes.forEach(node => {
@@ -126,6 +126,8 @@ export class Map implements AfterViewInit {
                       <h4>Node ${node.id}</h4>
                       <p>Lat: ${node.lat.toFixed(5)}</p>
                       <p>Lon: ${node.lon.toFixed(5)}</p>
+                      ${node.roadName ? `<p>Road: ${node.roadName}</p>` : ''}
+                      ${node.roadClass ? `<p>Class: ${node.roadClass}</p>` : ''}
                     </div>`
         });
         infoWindow.open(nativeMap, marker);
@@ -137,8 +139,8 @@ export class Map implements AfterViewInit {
 
   private displayGraphEdges(
     nativeMap: google.maps.Map,
-    edges: GraphEdge[],
-    nodeMap: Record<number, GraphNode>
+    edges: GraphEdgeDto[],
+    nodeMap: Record<string, GraphNodeDto>
   ): void {
     edges.forEach(edge => {
       const sourceNode = nodeMap[edge.sourceId];
@@ -166,9 +168,10 @@ export class Map implements AfterViewInit {
         const infoWindow = new google.maps.InfoWindow({
           content: `<div style="color: #333;">
                       <h4>Edge</h4>
-                      <p>From Node: ${edge.sourceId}</p>
-                      <p>To Node: ${edge.targetId}</p>
-                      <p>Weight: ${edge.weight.toFixed(2)}m</p>
+                      <p>From: ${edge.sourceId}</p>
+                      <p>To: ${edge.targetId}</p>
+                      <p>Distance: ${edge.distanceMeters.toFixed(2)}m</p>
+                      ${edge.roadName ? `<p>Road: ${edge.roadName}</p>` : ''}
                     </div>`,
           position: {lat: sourceNode.lat, lng: sourceNode.lon}
         });
@@ -179,7 +182,7 @@ export class Map implements AfterViewInit {
     });
   }
 
-  private fitGraphBounds(nativeMap: google.maps.Map, nodes: GraphNode[]): void {
+  private fitGraphBounds(nativeMap: google.maps.Map, nodes: GraphNodeDto[]): void {
     if (nodes.length === 0) return;
 
     const bounds = new google.maps.LatLngBounds();
@@ -287,7 +290,7 @@ export class Map implements AfterViewInit {
     this.graphService.updateGraphWithPoints(this.graphData, points)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (graph: MyGraph) => {
+        next: (graph: GraphResponseDto) => {
           this.graphData = graph;
           this.clearPendingPoints();
           this.displayGraphOnMap(graph);
@@ -317,7 +320,7 @@ export class Map implements AfterViewInit {
     this.graphService.loadGraphFromDatabase(1)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (graph: MyGraph) => {
+        next: (graph: GraphResponseDto) => {
           this.graphData = graph;
           this.displayGraphOnMap(graph);
           this.loading = false;

@@ -1,18 +1,21 @@
-export interface MyGraph {
-  nodes: GraphNode[];
-  edges: GraphEdge[];
+export interface GraphResponseDto {
+  nodes: GraphNodeDto[];
+  edges: GraphEdgeDto[];
 }
 
-export interface GraphNode {
-  id: number;
+export interface GraphNodeDto {
+  id: string;
   lat: number;
   lon: number;
+  roadName: string | null;
+  roadClass: string | null;
 }
 
-export interface GraphEdge {
-  sourceId: number;
-  targetId: number;
-  weight: number;
+export interface GraphEdgeDto {
+  sourceId: string;
+  targetId: string;
+  distanceMeters: number;
+  roadName: string | null;
 }
 
 export interface GraphPoint {

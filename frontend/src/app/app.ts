@@ -1,5 +1,5 @@
 import {Component, inject, signal} from '@angular/core';
-import {RouterOutlet} from '@angular/router';
+import {RouterLink, RouterLinkActive, RouterOutlet} from '@angular/router';
 import {MatToolbar} from '@angular/material/toolbar';
 import {MatIconButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
@@ -12,6 +12,8 @@ import { TranslocoService } from '@jsverse/transloco';
     MatToolbar,
     MatIconButton,
     MatIcon,
+    RouterLink,
+    RouterLinkActive,
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss'

@@ -1,0 +1,136 @@
+package sk.master.backend.service;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import sk.master.backend.config.PipelineConfig;
+import sk.master.backend.persistence.dto.PipelineConfigDto;
+import sk.master.backend.persistence.entity.PipelineConfigEntity;
+import sk.master.backend.persistence.repository.PipelineConfigRepository;
+
+@Service
+public class PipelineConfigServiceImpl implements PipelineConfigService {
+
+    private static final Logger log = LoggerFactory.getLogger(PipelineConfigServiceImpl.class);
+
+    private final PipelineConfigRepository repository;
+
+    public PipelineConfigServiceImpl(PipelineConfigRepository repository) {
+        this.repository = repository;
+    }
+
+    @Override
+    public PipelineConfigDto getActiveConfig() {
+        PipelineConfigEntity entity = repository.findByUserIdIsNullAndActiveTrue()
+                .orElseThrow(() -> new IllegalStateException("No active pipeline configuration found"));
+        return toDto(entity);
+    }
+
+    @Override
+    @Transactional
+    public PipelineConfigDto updateConfig(PipelineConfigDto dto) {
+        PipelineConfigEntity entity = repository.findByUserIdIsNullAndActiveTrue()
+                .orElseThrow(() -> new IllegalStateException("No active pipeline configuration found"));
+
+        updateEntityFromDto(entity, dto);
+        entity = repository.save(entity);
+        log.info("Configuration updated: id={}", entity.getId());
+        return toDto(entity);
+    }
+
+    @Override
+    @Transactional
+    public PipelineConfigDto resetToDefaults() {
+        PipelineConfigEntity entity = repository.findByUserIdIsNullAndActiveTrue()
+                .orElseThrow(() -> new IllegalStateException("No active pipeline configuration found"));
+
+        applyDefaults(entity);
+        entity = repository.save(entity);
+        log.info("Configuration reset to defaults: id={}", entity.getId());
+        return toDto(entity);
+    }
+
+    @Override
+    public PipelineConfig getActivePipelineConfig() {
+        PipelineConfigEntity entity = repository.findByUserIdIsNullAndActiveTrue()
+                .orElseThrow(() -> new IllegalStateException("No active pipeline configuration found"));
+        return toPipelineConfig(entity);
+    }
+
+    // ====== Mapping methods ======
+
+    private PipelineConfigDto toDto(PipelineConfigEntity e) {
+        return new PipelineConfigDto(
+                e.getId(), e.getName(),
+                e.getMinLat(), e.getMaxLat(), e.getMinLon(), e.getMaxLon(),
+                e.getNearDuplicateThresholdM(), e.getOutlierMinNeighbors(),
+                e.getOutlierRadiusM(), e.getMaxSpeedKmh(), e.getTripGapMinutes(),
+                e.getH3DedupResolution(), e.getH3ClusterResolution(),
+                e.getDbscanEpsMeters(), e.getDbscanMinPts(),
+                e.getMaxEdgeLengthM(), e.getMergeThresholdM(), e.getKnnK(),
+                e.getMaxSnapDistanceM()
+        );
+    }
+
+    private void updateEntityFromDto(PipelineConfigEntity e, PipelineConfigDto d) {
+        if (d.getName() != null) e.setName(d.getName());
+        e.setMinLat(d.getMinLat());
+        e.setMaxLat(d.getMaxLat());
+        e.setMinLon(d.getMinLon());
+        e.setMaxLon(d.getMaxLon());
+        e.setNearDuplicateThresholdM(d.getNearDuplicateThresholdM());
+        e.setOutlierMinNeighbors(d.getOutlierMinNeighbors());
+        e.setOutlierRadiusM(d.getOutlierRadiusM());
+        e.setMaxSpeedKmh(d.getMaxSpeedKmh());
+        e.setTripGapMinutes(d.getTripGapMinutes());
+        e.setH3DedupResolution(d.getH3DedupResolution());
+        e.setH3ClusterResolution(d.getH3ClusterResolution());
+        e.setDbscanEpsMeters(d.getDbscanEpsMeters());
+        e.setDbscanMinPts(d.getDbscanMinPts());
+        e.setMaxEdgeLengthM(d.getMaxEdgeLengthM());
+        e.setMergeThresholdM(d.getMergeThresholdM());
+        e.setKnnK(d.getKnnK());
+        e.setMaxSnapDistanceM(d.getMaxSnapDistanceM());
+    }
+
+    private PipelineConfig toPipelineConfig(PipelineConfigEntity e) {
+        return new PipelineConfig(
+                e.getMinLat(), e.getMaxLat(), e.getMinLon(), e.getMaxLon(),
+                e.getNearDuplicateThresholdM(), e.getOutlierMinNeighbors(),
+                e.getOutlierRadiusM(), e.getMaxSpeedKmh(), e.getTripGapMinutes(),
+                e.getH3DedupResolution(), e.getH3ClusterResolution(),
+                e.getDbscanEpsMeters(), e.getDbscanMinPts(),
+                e.getMaxEdgeLengthM(), e.getMergeThresholdM(), e.getKnnK(),
+                e.getMaxSnapDistanceM()
+        );
+    }
+
+    /** Default values corresponding to the original application.yml */
+    public static void applyDefaults(PipelineConfigEntity e) {
+        e.setName("Predvolená konfigurácia");
+        e.setActive(true);
+        e.setUserId(null);
+        // Predspracovanie
+        e.setMinLat(47.5);
+        e.setMaxLat(49.7);
+        e.setMinLon(16.8);
+        e.setMaxLon(22.6);
+        e.setNearDuplicateThresholdM(15);
+        e.setOutlierMinNeighbors(2);
+        e.setOutlierRadiusM(75);
+        e.setMaxSpeedKmh(200);
+        e.setTripGapMinutes(30);
+        // H3
+        e.setH3DedupResolution(11);
+        e.setH3ClusterResolution(9);
+        // DBSCAN + Graf
+        e.setDbscanEpsMeters(25);
+        e.setDbscanMinPts(5);
+        e.setMaxEdgeLengthM(300);
+        e.setMergeThresholdM(10);
+        e.setKnnK(5);
+        // Map Matching
+        e.setMaxSnapDistanceM(50);
+    }
+}

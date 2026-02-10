@@ -12,7 +12,7 @@ public class RoadEdge {
     @Setter
     private double distanceMeters;
 
-    // Metadáta obohatené map matchingom
+    // Metadata enriched by map matching
     @Setter
     private String roadName;
     @Setter

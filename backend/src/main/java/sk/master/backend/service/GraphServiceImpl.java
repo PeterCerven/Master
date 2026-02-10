@@ -31,14 +31,14 @@ import java.util.stream.Collectors;
 public class GraphServiceImpl implements GraphService {
     private static final Logger log = LoggerFactory.getLogger(GraphServiceImpl.class);
 
-    private final PipelineConfig config;
+    private final PipelineConfigService configService;
     private final MapMatchingService mapMatchingService;
     private final H3Core h3;
     private final GraphRepository graphRepository;
 
-    public GraphServiceImpl(GraphRepository graphRepository, PipelineConfig config, MapMatchingServiceGraphHopper mapMatchingService) {
+    public GraphServiceImpl(GraphRepository graphRepository, PipelineConfigService configService, MapMatchingServiceGraphHopper mapMatchingService) {
         this.graphRepository = graphRepository;
-        this.config = config;
+        this.configService = configService;
         this.mapMatchingService = mapMatchingService;
         try {
             this.h3 = H3Core.newInstance();
@@ -50,103 +50,104 @@ public class GraphServiceImpl implements GraphService {
     @Override
     public RoadGraph generateRoadNetwork(RoadGraph existingGraph, List<PositionalData> positionalData) {
         if (positionalData == null || positionalData.isEmpty()) {
-            log.warn("Prázdny list pozícií — vraciam existujúci graf alebo prázdny nový.");
+            log.warn("Empty position list — returning existing graph or new empty one.");
             return existingGraph != null ? existingGraph : new RoadGraph();
         }
 
-        log.info("=== Štart pipeline: {} vstupných bodov ===", positionalData.size());
+        PipelineConfig config = configService.getActivePipelineConfig();
+        log.info("=== Pipeline start: {} input points ===", positionalData.size());
 
         // Krok 1: Predspracovanie
-        List<PositionalData> filtered = preprocess(positionalData);
-        log.info("Krok 1 (predspracovanie): {} → {} bodov", positionalData.size(), filtered.size());
+        List<PositionalData> filtered = preprocess(positionalData, config);
+        log.info("Step 1 (preprocessing): {} → {} points", positionalData.size(), filtered.size());
 
         if (filtered.isEmpty()) {
-            log.warn("Všetky body boli odfiltrované — vraciam existujúci graf alebo prázdny.");
+            log.warn("All points were filtered out — returning existing graph or empty one.");
             return existingGraph != null ? existingGraph : new RoadGraph();
         }
 
-        // Krok 2: H3 Spatial Index + deduplikácia
-        List<PositionalData> indexed = spatialIndexAndDedup(filtered);
-        log.info("Krok 2 (H3 dedup): {} → {} bodov", filtered.size(), indexed.size());
+        // Step 2: H3 Spatial Index + deduplication
+        List<PositionalData> indexed = spatialIndexAndDedup(filtered, config);
+        log.info("Step 2 (H3 dedup): {} → {} points", filtered.size(), indexed.size());
 
-        // Krok 3: Inkrementálne vkladanie do grafu
+        // Step 3: Incremental graph insertion
         RoadGraph graph = existingGraph != null ? existingGraph : new RoadGraph();
-        buildGraph(graph, indexed);
-        log.info("Krok 3 (graf): {} nodov, {} hrán", graph.getNodeCount(), graph.getEdgeCount());
+        buildGraph(graph, indexed, config);
+        log.info("Step 3 (graph): {} nodes, {} edges", graph.getNodeCount(), graph.getEdgeCount());
 
         // Krok 4: Map Matching (GraphHopper)
-        applyMapMatching(graph);
-        log.info("Krok 4 (map matching): {} nodov, {} hrán (po korekcii)",
+        applyMapMatching(graph, config);
+        log.info("Step 4 (map matching): {} nodes, {} edges (after correction)",
                 graph.getNodeCount(), graph.getEdgeCount());
 
-        log.info("=== Pipeline dokončený ===");
+        log.info("=== Pipeline completed ===");
         return graph;
     }
 
-    private List<PositionalData> preprocess(List<PositionalData> positionalData) {
+    private List<PositionalData> preprocess(List<PositionalData> positionalData, PipelineConfig config) {
         List<PositionalData> result = new ArrayList<>();
 
-        // 1a) Validácia súradníc + bounding box
+        // 1a) Coordinate validation + bounding box
         for (PositionalData p : positionalData) {
-            if (isValidCoordinate(p) && isWithinBoundingBox(p)) {
+            if (isValidCoordinate(p) && isWithinBoundingBox(p, config)) {
                 result.add(p);
             }
         }
-        log.debug("  Po validácii + bounding box: {}", result.size());
+        log.debug("  After validation + bounding box: {}", result.size());
 
-        // 1b) Zoradenie podľa timestamp (body bez timestamp idú na koniec)
+        // 1b) Sort by timestamp (points without timestamp go to end)
         result.sort(Comparator.comparing(
                 PositionalData::getTimestamp,
                 Comparator.nullsLast(Comparator.naturalOrder())
         ));
-        log.debug("  Po zoradení podľa timestamp");
+        log.debug("  After sorting by timestamp");
 
-        // 1c) Speed-based outlier removal — body s nerealistickou rýchlosťou voči predchádzajúcemu
-        result = removeSpeedOutliers(result);
-        log.debug("  Po speed filter: {}", result.size());
+        // 1c) Speed-based outlier removal — points with unrealistic speed relative to previous
+        result = removeSpeedOutliers(result, config);
+        log.debug("  After speed filter: {}", result.size());
 
-        // 1d) Exact duplicate removal (cez HashSet — využíva PositionalData.equals/hashCode)
+        // 1d) Exact duplicate removal (via HashSet — uses PositionalData.equals/hashCode)
         result = new ArrayList<>(new LinkedHashSet<>(result));
-        log.debug("  Po exact dedup: {}", result.size());
+        log.debug("  After exact dedup: {}", result.size());
 
         // 1e) Near-duplicate removal
-        result = removeNearDuplicates(result);
-        log.debug("  Po near-dedup: {}", result.size());
+        result = removeNearDuplicates(result, config);
+        log.debug("  After near-dedup: {}", result.size());
 
         // 1f) Density-based outlier removal
-        result = removeOutliers(result);
-        log.debug("  Po outlier removal: {}", result.size());
+        result = removeOutliers(result, config);
+        log.debug("  After outlier removal: {}", result.size());
 
         return result;
     }
 
     /**
-     * Overí, či sú súradnice platné a nie sú null-island (0,0).
+     * Validates that coordinates are valid and not null-island (0,0).
      */
     private boolean isValidCoordinate(PositionalData p) {
         if (p.getLat() < -90 || p.getLat() > 90 || p.getLon() < -180 || p.getLon() > 180) {
             return false;
         }
-        // Null island check — (0,0) je v Guinejskom zálive, určite nie na Slovensku
+        // Null island check — (0,0) is in the Gulf of Guinea, definitely not in Slovakia
         return !(Math.abs(p.getLat()) < 0.001 && Math.abs(p.getLon()) < 0.001);
     }
 
     /**
-     * Overí, či bod leží v rámci konfigurovaného bounding boxu (default: Slovensko).
+     * Checks whether the point lies within the configured bounding box (default: Slovakia).
      */
-    private boolean isWithinBoundingBox(PositionalData p) {
+    private boolean isWithinBoundingBox(PositionalData p, PipelineConfig config) {
         return p.getLat() >= config.getMinLat() && p.getLat() <= config.getMaxLat()
                 && p.getLon() >= config.getMinLon() && p.getLon() <= config.getMaxLon();
     }
 
     /**
-     * Odstráni body, ktoré implikujú nerealistickú rýchlosť voči predchádzajúcemu bodu.
-     * Predpokladá, že vstupný zoznam je zoradený podľa timestamp.
-     * Body bez timestamp sú ponechané (nie je možné vypočítať rýchlosť).
-     * Rýchlosť sa počíta len medzi po sebe idúcimi bodmi v rámci rovnakej jazdy
-     * (medzera > tripGapMinutes znamená novú jazdu).
+     * Removes points that imply unrealistic speed relative to the previous point.
+     * Assumes the input list is sorted by timestamp.
+     * Points without timestamp are kept (speed cannot be calculated).
+     * Speed is calculated only between consecutive points within the same trip
+     * (gap > tripGapMinutes means a new trip).
      */
-    private List<PositionalData> removeSpeedOutliers(List<PositionalData> positionalData) {
+    private List<PositionalData> removeSpeedOutliers(List<PositionalData> positionalData, PipelineConfig config) {
         double maxSpeedKmh = config.getMaxSpeedKmh();
         long tripGapMinutes = config.getTripGapMinutes();
         double maxSpeedMs = maxSpeedKmh / 3.6; // km/h → m/s
@@ -157,7 +158,7 @@ public class GraphServiceImpl implements GraphService {
 
         for (PositionalData p : positionalData) {
             if (prev == null || p.getTimestamp() == null || prev.getTimestamp() == null) {
-                // Prvý bod alebo body bez timestamp — vždy ponechaj
+                // First point or points without timestamp — always keep
                 result.add(p);
                 if (p.getTimestamp() != null) {
                     prev = p;
@@ -168,14 +169,14 @@ public class GraphServiceImpl implements GraphService {
             Duration timeDiff = Duration.between(prev.getTimestamp(), p.getTimestamp());
             long seconds = timeDiff.getSeconds();
 
-            // Ak je medzera väčšia než trip gap, je to nová jazda — resetuj
+            // If gap is larger than trip gap, it's a new trip — reset
             if (seconds > tripGapMinutes * 60) {
                 result.add(p);
                 prev = p;
                 continue;
             }
 
-            // Ak je časový rozdiel nulový alebo záporný, ponechaj bod (rovnaký čas)
+            // If time difference is zero or negative, keep the point (same time)
             if (seconds <= 0) {
                 result.add(p);
                 continue;
@@ -191,24 +192,24 @@ public class GraphServiceImpl implements GraphService {
                 prev = p;
             } else {
                 removed++;
-                // Nemeníme prev — preskočený bod neovplyvní ďalšie porovnania
+                // Don't update prev — skipped point shouldn't affect further comparisons
             }
         }
 
         if (removed > 0) {
-            log.debug("  Speed filter: odstránených {} bodov (>{} km/h)", removed, maxSpeedKmh);
+            log.debug("  Speed filter: removed {} points (>{} km/h)", removed, maxSpeedKmh);
         }
         return result;
     }
 
     /**
-     * Odstráni near-duplicate body — body bližšie než threshold sa zlúčia.
-     * Používa grid-based spatial hashing pre O(n) priemernú komplexnosť.
+     * Removes near-duplicate points — points closer than threshold are merged.
+     * Uses grid-based spatial hashing for O(n) average complexity.
      */
     private List<PositionalData>
-    removeNearDuplicates(List<PositionalData> positionalData) {
+    removeNearDuplicates(List<PositionalData> positionalData, PipelineConfig config) {
         double threshold = config.getNearDuplicateThresholdM();
-        // Veľkosť grid celly ~ threshold v stupňoch
+        // Grid cell size ~ threshold in degrees
         double cellSize = threshold / 111_320.0;
 
         Map<String, PositionalData> gridMap = new LinkedHashMap<>();
@@ -218,15 +219,15 @@ public class GraphServiceImpl implements GraphService {
             if (!gridMap.containsKey(cellKey)) {
                 gridMap.put(cellKey, p);
             }
-            // Ak cella už obsadená, kontroluj vzdialenosť
-            // Ak sú blízko, skip; inak použi unikátny kľúč
+            // If cell is already occupied, check distance
+            // If close, skip; otherwise use unique key
             else {
                 PositionalData existing = gridMap.get(cellKey);
                 double dist = GeoUtils.equirectangularDistance(
                         p.getLat(), p.getLon(), existing.getLat(), existing.getLon()
                 );
                 if (dist >= threshold) {
-                    // Sú v rovnakej celle ale dostatočne ďaleko — použi composite key
+                    // In the same cell but far enough apart — use composite key
                     String uniqueKey = cellKey + ":" + gridMap.size();
                     gridMap.put(uniqueKey, p);
                 }
@@ -237,18 +238,18 @@ public class GraphServiceImpl implements GraphService {
     }
 
     /**
-     * Odstráni izolované body (outliers) — body s menej než minNeighbors
-     * v okruhu outlierRadius sú považované za šum.
+     * Removes isolated points (outliers) — points with fewer than minNeighbors
+     * within outlierRadius are considered noise.
      *
-     * <p>Používa dočasný {@link Quadtree} pre O(n log n) range queries
-     * namiesto O(n²) brute force. Quadtree podporuje dynamický insert,
-     * takže rovnaký pattern funguje aj pre inkrementálne scenáre.
+     * <p>Uses a temporary {@link Quadtree} for O(n log n) range queries
+     * instead of O(n²) brute force. Quadtree supports dynamic insert,
+     * so the same pattern works for incremental scenarios too.
      */
-    private List<PositionalData> removeOutliers(List<PositionalData> positionalData) {
+    private List<PositionalData> removeOutliers(List<PositionalData> positionalData, PipelineConfig config) {
         int minNeighbors = config.getOutlierMinNeighbors();
         double radius = config.getOutlierRadiusM();
 
-        // 1) Vlož všetky body do dočasného Quadtree
+        // 1) Insert all points into temporary Quadtree
         Quadtree tree = new Quadtree();
         for (PositionalData p : positionalData) {
             Envelope env = new Envelope(
@@ -257,7 +258,7 @@ public class GraphServiceImpl implements GraphService {
             tree.insert(env, p);
         }
 
-        // 2) Pre každý bod sprav range query namiesto iterácie cez všetky body
+        // 2) For each point do a range query instead of iterating over all points
         double degreeApprox = radius / 111_320.0;
         List<PositionalData> result = new ArrayList<>();
 
@@ -270,7 +271,7 @@ public class GraphServiceImpl implements GraphService {
             @SuppressWarnings("unchecked")
             List<PositionalData> candidates = tree.query(searchEnv);
 
-            // Refinement: obdĺžnik → kruh (skontroluj reálnu vzdialenosť)
+            // Refinement: rectangle → circle (check actual distance)
             int neighborCount = 0;
             for (PositionalData candidate : candidates) {
                 if (candidate == p) continue;
@@ -291,32 +292,32 @@ public class GraphServiceImpl implements GraphService {
     }
 
     // =========================================================================
-    // KROK 2: H3 SPATIAL INDEX + DEDUPLIKÁCIA
+    // STEP 2: H3 SPATIAL INDEX + DEDUPLICATION
     // =========================================================================
 
     /**
-     * Indexuje body do H3 hexagonálnych buniek a deduplikuje —
-     * body v rovnakej resolution-11 bunke (~29m) sa zlúčia na centroid.
-     * Zachováva najskorší a najnovší timestamp z bodov v bunke.
+     * Indexes points into H3 hexagonal cells and deduplicates —
+     * points in the same resolution-11 cell (~29m) are merged to centroid.
+     * Preserves earliest and latest timestamps from points in the cell.
      */
-    private List<PositionalData> spatialIndexAndDedup(List<PositionalData> positionalData) {
+    private List<PositionalData> spatialIndexAndDedup(List<PositionalData> positionalData, PipelineConfig config) {
         int resolution = config.getH3DedupResolution();
 
-        // Zoskupi body podľa H3 cell ID
+        // Group points by H3 cell ID
         Map<Long, List<PositionalData>> cellMap = new HashMap<>();
         for (PositionalData p : positionalData) {
             long cellId = h3.latLngToCell(p.getLat(), p.getLon(), resolution);
             cellMap.computeIfAbsent(cellId, _ -> new ArrayList<>()).add(p);
         }
 
-        // Pre každú bunku vráti centroid všetkých bodov v bunke s najskorším timestamp
+        // For each cell, return centroid of all points in the cell with earliest timestamp
         List<PositionalData> deduplicated = new ArrayList<>();
         for (Map.Entry<Long, List<PositionalData>> entry : cellMap.entrySet()) {
             List<PositionalData> cellPoints = entry.getValue();
             double avgLat = cellPoints.stream().mapToDouble(PositionalData::getLat).average().orElse(0);
             double avgLon = cellPoints.stream().mapToDouble(PositionalData::getLon).average().orElse(0);
 
-            // Zachovaj najskorší timestamp z bodov v bunke (reprezentatívny čas)
+            // Keep earliest timestamp from points in the cell (representative time)
             Instant earliest = cellPoints.stream()
                     .map(PositionalData::getTimestamp)
                     .filter(Objects::nonNull)
@@ -330,35 +331,35 @@ public class GraphServiceImpl implements GraphService {
     }
 
     // =========================================================================
-    // KROK 3: INKREMENTÁLNE VKLADANIE DO GRAFU
+    // STEP 3: INCREMENTAL GRAPH INSERTION
     // =========================================================================
 
     /**
-     * Vloží body do grafu — buď merge do existujúcich nodov, alebo vytvor nové.
-     * Pre nový graf najprv spustí DBSCAN clustering a Delaunay triangulation.
-     * Pre existujúci graf použije inkrementálny merge-or-create pattern.
+     * Inserts points into the graph — either merge into existing nodes or create new ones.
+     * For a new graph, first runs DBSCAN clustering and Delaunay triangulation.
+     * For an existing graph, uses incremental merge-or-create pattern.
      */
-    private void buildGraph(RoadGraph graph, List<PositionalData> positionalData) {
+    private void buildGraph(RoadGraph graph, List<PositionalData> positionalData, PipelineConfig config) {
         if (graph.getNodeCount() == 0) {
-            // Nový graf — spusti plný pipeline: DBSCAN → Delaunay → Gabriel pruning
-            buildNewGraph(graph, positionalData);
+            // New graph — run full pipeline: DBSCAN → Delaunay → Gabriel pruning
+            buildNewGraph(graph, positionalData, config);
         } else {
-            // Existujúci graf — inkrementálne vloženie
-            incrementalInsert(graph, positionalData);
+            // Existing graph — incremental insertion
+            incrementalInsert(graph, positionalData, config);
         }
     }
 
     /**
-     * Buduje nový graf od nuly pomocou DBSCAN + Delaunay + Gabriel pruning.
+     * Builds a new graph from scratch using DBSCAN + Delaunay + Gabriel pruning.
      */
-    private void buildNewGraph(RoadGraph graph, List<PositionalData> positionalData) {
+    private void buildNewGraph(RoadGraph graph, List<PositionalData> positionalData, PipelineConfig config) {
         // 3a) DBSCAN clustering — nájde cestné koridory
-        List<PositionalData> clusterCentroids = clusterWithDbscan(positionalData);
-        log.debug("  DBSCAN: {} klastrov (z {} bodov)", clusterCentroids.size(), positionalData.size());
+        List<PositionalData> clusterCentroids = clusterWithDbscan(positionalData, config);
+        log.debug("  DBSCAN: {} clusters (from {} points)", clusterCentroids.size(), positionalData.size());
 
         if (clusterCentroids.isEmpty()) {
             // Fallback: ak DBSCAN nič nenájde, použi všetky body priamo
-            log.warn("  DBSCAN nenašiel žiadne klastre — použijem všetky body priamo");
+            log.warn("  DBSCAN found no clusters — using all points directly");
             clusterCentroids = positionalData;
         }
 
@@ -379,14 +380,14 @@ public class GraphServiceImpl implements GraphService {
         pruneToGabrielGraph(graph);
 
         // 3e) Odstráni hrany dlhšie než maxEdgeLength
-        pruneByMaxLength(graph);
+        pruneByMaxLength(graph, config);
     }
 
     /**
      * Spustí DBSCAN clustering a vráti centroidy klastrov.
      * Body označené ako šum sú odfiltrované.
      */
-    private List<PositionalData> clusterWithDbscan(List<PositionalData> positionalData) {
+    private List<PositionalData> clusterWithDbscan(List<PositionalData> positionalData, PipelineConfig config) {
         // Apache Commons Math DBSCAN vyžaduje Clusterable wrapper
         List<ClusterablePosition> clusterablePoints = positionalData.stream()
                 .map(ClusterablePosition::new)
@@ -508,14 +509,14 @@ public class GraphServiceImpl implements GraphService {
                 graph.getJGraphTGraph().removeEdge(source, target);
             }
         }
-        log.debug("  Gabriel pruning: odstránených {} hrán (z {} testovaných)",
+        log.debug("  Gabriel pruning: removed {} edges (from {} tested)",
                 toRemove.size(), graph.getEdgeCount() + toRemove.size());
     }
 
     /**
      * Odstráni hrany dlhšie než maxEdgeLength.
      */
-    private void pruneByMaxLength(RoadGraph graph) {
+    private void pruneByMaxLength(RoadGraph graph, PipelineConfig config) {
         double maxLen = config.getMaxEdgeLengthM();
         List<RoadEdge> toRemove = graph.getEdges().stream()
                 .filter(e -> e.getDistanceMeters() > maxLen)
@@ -528,14 +529,14 @@ public class GraphServiceImpl implements GraphService {
                 graph.getJGraphTGraph().removeEdge(source, target);
             }
         }
-        log.debug("  Max-length pruning: odstránených {} hrán (>{} m)", toRemove.size(), maxLen);
+        log.debug("  Max-length pruning: removed {} edges (>{} m)", toRemove.size(), maxLen);
     }
 
     /**
      * Inkrementálne vloží nové body do existujúceho grafu.
      * Pattern: merge-or-create + KNN spojenie.
      */
-    private void incrementalInsert(RoadGraph graph, List<PositionalData> positionalData) {
+    private void incrementalInsert(RoadGraph graph, List<PositionalData> positionalData, PipelineConfig config) {
         double mergeThreshold = config.getMergeThresholdM();
         double maxEdgeLen = config.getMaxEdgeLengthM();
         int k = config.getKnnK();
@@ -576,7 +577,7 @@ public class GraphServiceImpl implements GraphService {
                 created++;
             }
         }
-        log.debug("  Inkrementálne: {} merged, {} created", merged, created);
+        log.debug("  Incremental insert: {} merged, {} created", merged, created);
     }
 
     // =========================================================================
@@ -587,7 +588,7 @@ public class GraphServiceImpl implements GraphService {
      * Koriguje pozície nodov pomocou GraphHopper snap-to-road
      * a obohacuje nody/hrany o cestné metadáta.
      */
-    private void applyMapMatching(RoadGraph graph) {
+    private void applyMapMatching(RoadGraph graph, PipelineConfig config) {
         double maxSnapDist = config.getMaxSnapDistanceM();
         int snapped = 0;
         int offRoad = 0;
@@ -706,7 +707,7 @@ public class GraphServiceImpl implements GraphService {
         }
 
         if (mergeCount > 0) {
-            log.debug("  Same-edge merge: {} nodov zlúčených", mergeCount);
+            log.debug("  Same-edge merge: {} nodes merged", mergeCount);
         }
     }
 
@@ -741,7 +742,7 @@ public class GraphServiceImpl implements GraphService {
         }
 
         if (!offRoadNodes.isEmpty()) {
-            log.debug("  Odstránených {} off-road nodov", offRoadNodes.size());
+            log.debug("  Removed {} off-road nodes", offRoadNodes.size());
         }
     }
 

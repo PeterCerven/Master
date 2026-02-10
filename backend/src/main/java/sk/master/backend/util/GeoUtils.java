@@ -7,8 +7,8 @@ public final class GeoUtils {
     private GeoUtils() {} // utility class
 
     /**
-     * Haversine vzdialenosť v metroch.
-     * Presná pre akékoľvek dva body na Zemi (max chyba ~0.3% kvôli sférickému modelu).
+     * Haversine distance in meters.
+     * Accurate for any two points on Earth (max error ~0.3% due to spherical model).
      */
     public static double haversineDistance(double lat1, double lon1, double lat2, double lon2) {
         double dLat = Math.toRadians(lat2 - lat1);
@@ -21,9 +21,9 @@ public final class GeoUtils {
     }
 
     /**
-     * Equirectangular approximácia v metroch.
-     * Presná do ~0.5% pre vzdialenosti < 10 km. ~3× rýchlejšia ako Haversine.
-     * Vhodná pre high-frequency porovnávania (filtering, spatial queries, clustering).
+     * Equirectangular approximation in meters.
+     * Accurate to ~0.5% for distances < 10 km. ~3x faster than Haversine.
+     * Suitable for high-frequency comparisons (filtering, spatial queries, clustering).
      */
     public static double equirectangularDistance(double lat1, double lon1, double lat2, double lon2) {
         double x = Math.toRadians(lon2 - lon1) * Math.cos(Math.toRadians((lat1 + lat2) / 2));

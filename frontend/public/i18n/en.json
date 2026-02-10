@@ -1,13 +1,4 @@
 {
-  "components" :
-  {
-    "sidebar": {
-      "map": "Map",
-      "master": "Master",
-      "settings": "Settings",
-      "tables": "Tables"
-    }
-  },
   "pages": {
     "tables": {
       "showData": "Tables",
@@ -18,6 +9,35 @@
       "longitude": "Longitude",
       "timestamp": "Timestamp",
       "itemsPerPage": "Items per page"
+    },
+    "settings": {
+      "preprocessing": "1. Preprocessing",
+      "h3SpatialIndex": "2. H3 Spatial Index",
+      "dbscanGraph": "3. DBSCAN + Graph Building",
+      "mapMatching": "4. Map Matching",
+      "minLat": "Min Latitude",
+      "maxLat": "Max Latitude",
+      "minLon": "Min Longitude",
+      "maxLon": "Max Longitude",
+      "to": "to",
+      "nearDuplicateThresholdM": "Near-Duplicate Threshold",
+      "outlierMinNeighbors": "Outlier Min Neighbors",
+      "outlierRadiusM": "Outlier Radius",
+      "maxSpeedKmh": "Max Speed",
+      "tripGapMinutes": "Trip Gap",
+      "h3DedupResolution": "Dedup Resolution",
+      "h3ClusterResolution": "Cluster Resolution",
+      "h3ResolutionHint": "0-15 (higher = finer)",
+      "dbscanEpsMeters": "DBSCAN Epsilon",
+      "dbscanMinPts": "DBSCAN Min Points",
+      "maxEdgeLengthM": "Max Edge Length",
+      "mergeThresholdM": "Merge Threshold",
+      "knnK": "KNN K",
+      "maxSnapDistanceM": "Max Snap Distance",
+      "metersUnit": "meters",
+      "minutesUnit": "minutes",
+      "save": "Save Configuration",
+      "resetToDefaults": "Reset to Defaults"
     }
   }
 }

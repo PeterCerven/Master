@@ -4,8 +4,8 @@ import com.graphhopper.routing.ev.RoadClass;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * @param edgeDistance dĺžka celej hrany v metroch
- * @param edgeId       GraphHopper edge ID (pre detekciu rovnakého segmentu)
+ * @param edgeDistance full edge length in meters
+ * @param edgeId       GraphHopper edge ID (for same-segment detection)
  */
 public record SnappedPoint(double lat, double lon, String roadName, RoadClass roadClass, double maxSpeed,
                            double avgSpeed, double edgeDistance, int edgeId) {

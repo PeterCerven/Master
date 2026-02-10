@@ -18,55 +18,5 @@ graphhopper:
   graph:
     location: data/gh-cache
 
-pipeline:
-  # --- Krok 1: Predspracovanie ---
-  preprocessing:
-    # Bounding box pre Slovensko
-    min-lat: 47.5
-    max-lat: 49.7
-    min-lon: 16.8
-    max-lon: 22.6
-
-    # Near-duplicate threshold (metre) — body bližšie sa zlúčia
-    near-duplicate-threshold-m: 15
-
-    # Outlier detection — min susedov v danom okruhu
-    outlier-min-neighbors: 2
-    outlier-radius-m: 75
-
-    # Maximálna realistická rýchlosť (km/h) — body s vyššou rýchlosťou = GPS šum
-    max-speed-kmh: 200
-
-    # Pauza (minúty) na rozdelenie trás — väčšia medzera = iná jazda
-    trip-gap-minutes: 30
-
-  # --- Krok 2: H3 Spatial Index ---
-  h3:
-    # Resolution 11 (~29m edge) pre deduplikáciu
-    dedup-resolution: 11
-
-    # Resolution 9 (~200m edge) pre spatial partitioning
-    cluster-resolution: 9
-
-  # --- Krok 3: DBSCAN + Graf ---
-  dbscan:
-    # DBSCAN: epsilon = šírka cesty (~12m) + GPS scatter (~10m)
-    eps-meters: 25
-
-    # DBSCAN: minimálny počet bodov pre core point
-    min-pts: 5
-
-  graph:
-    # Max dĺžka hrany (metre) — dlhšie hrany sa nepridávajú
-    max-edge-length-m: 300
-
-    # Merge threshold (metre) — body bližšie k existujúcemu nodu sa zlúčia
-    merge-threshold-m: 10
-
-    # KNN K — počet najbližších susedov pri inkrementálnom spájaní
-    knn-k: 5
-
-  # --- Krok 4: Map Matching ---
-  matching:
-    # Max snap vzdialenosť (metre) — body ďalej sa označia off-road
-    max-snap-distance-m: 50
+# Pipeline konfigurácia je teraz uložená v databáze (tabuľka pipeline_configs).
+# Predvolené hodnoty sa seedujú pri prvom štarte cez PipelineConfigSeeder.

@@ -26,18 +26,18 @@ public class GraphHopperConfig {
 
     @PostConstruct
     public void init() {
-        log.info("Inicializujem GraphHopper s OSM súborom: {}", osmFile);
+        log.info("Initializing GraphHopper with OSM file: {}", osmFile);
 
         hopper = new GraphHopper();
         hopper.setOSMFile(osmFile);
         hopper.setGraphHopperLocation(graphLocation);
 
-        // Registruj encoded values, ktoré chceme čítať z hrán
+        // Register encoded values we want to read from edges
         hopper.setEncodedValuesString("car_access, car_average_speed, road_class, road_environment, max_speed, surface");
         hopper.setProfiles(new Profile("car").setCustomModel(GHUtility.loadCustomModelFromJar("car.json")));
 
         hopper.importOrLoad();
-        log.info("GraphHopper inicializovaný. Nodes: {}, Edges: {}", hopper.getBaseGraph().getNodes(), hopper.getBaseGraph().getEdges());
+        log.info("GraphHopper initialized. Nodes: {}, Edges: {}", hopper.getBaseGraph().getNodes(), hopper.getBaseGraph().getEdges());
     }
 
     @Bean
@@ -49,7 +49,7 @@ public class GraphHopperConfig {
     public void close() {
         if (hopper != null) {
             hopper.close();
-            log.info("GraphHopper zatvorený.");
+            log.info("GraphHopper closed.");
         }
     }
 }

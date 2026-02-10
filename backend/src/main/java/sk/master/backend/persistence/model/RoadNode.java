@@ -15,9 +15,9 @@ public class RoadNode {
     private double lat;
     @Setter
     private double lon;
-    private int mergeCount; // koľko bodov bolo do tohto nodu zlúčených
+    private int mergeCount; // how many points were merged into this node
 
-    // Metadáta z map matchingu (GraphHopper)
+    // Metadata from map matching (GraphHopper)
     @Setter
     private String roadName;
     @Setter
@@ -25,15 +25,15 @@ public class RoadNode {
     @Setter
     private double maxSpeed;     // km/h
     @Setter
-    private boolean offRoad;     // true ak bod nebol snapnutý na cestu
+    private boolean offRoad;     // true if point was not snapped to a road
 
-    // Temporálne metadáta — kedy boli prvý a posledný krát pozorované dáta na tomto uzle
+    // Temporal metadata — when data was first and last observed at this node
     @Setter
     private Instant firstSeen;
     @Setter
     private Instant lastSeen;
 
-    // H3 cell index pre rýchle priestorové vyhľadávanie
+    // H3 cell index for fast spatial lookups
     @Setter
     private long h3CellId;
 
@@ -46,8 +46,8 @@ public class RoadNode {
     }
 
     /**
-     * Zlúči nový bod do tohto nodu cez vážený priemer.
-     * Čím viac bodov bolo zlúčených, tým menší vplyv má nový bod.
+     * Merges a new point into this node via weighted average.
+     * The more points merged, the less impact a new point has.
      */
     public void mergeWith(double newLat, double newLon) {
         this.lat = (this.lat * mergeCount + newLat) / (mergeCount + 1);
@@ -56,8 +56,8 @@ public class RoadNode {
     }
 
     /**
-     * Zlúči nový bod vrátane timestamp do tohto nodu.
-     * Aktualizuje firstSeen/lastSeen rozsah.
+     * Merges a new point including timestamp into this node.
+     * Updates the firstSeen/lastSeen range.
      */
     public void mergeWith(double newLat, double newLon, Instant timestamp) {
         mergeWith(newLat, newLon);
@@ -65,7 +65,7 @@ public class RoadNode {
     }
 
     /**
-     * Rozšíri firstSeen/lastSeen rozsah o daný timestamp.
+     * Extends the firstSeen/lastSeen range with the given timestamp.
      */
     public void updateTimestampRange(Instant timestamp) {
         if (timestamp == null) return;

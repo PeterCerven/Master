@@ -8,6 +8,8 @@ body {
   height: 100%;
   margin: 0;
   padding: 0;
+  background-color: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
 }
 
 html {
@@ -19,7 +21,7 @@ html {
   ));
 }
 
-body.dark-mode {
+html:has(body.dark-mode) {
   color-scheme: dark;
 }
 
@@ -46,10 +48,6 @@ body.dark-mode {
 :root {
   @include mat.list-overrides((
     active-indicator-shape: 5px,
-  ));
-
-  @include mat.sidenav-overrides((
-    container-shape: 5px,
   ));
 }
 

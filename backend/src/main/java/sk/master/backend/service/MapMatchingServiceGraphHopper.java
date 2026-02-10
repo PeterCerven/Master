@@ -20,7 +20,7 @@ public class MapMatchingServiceGraphHopper implements MapMatchingService {
     private final LocationIndex locationIndex;
     private final EncodingManager encodingManager;
 
-    // Prednačítané encoded values pre rýchly prístup
+    // Pre-loaded encoded values for fast access
     private final EnumEncodedValue<RoadClass> roadClassEnc;
     private final DecimalEncodedValue maxSpeedEnc;
     private final DecimalEncodedValue avgSpeedEnc;
@@ -37,17 +37,17 @@ public class MapMatchingServiceGraphHopper implements MapMatchingService {
     }
 
     /**
-     * Snapne GPS bod na najbližšiu cestu prístupnú autom.
+     * Snaps a GPS point to the nearest car-accessible road.
      *
-     * @return snapnutý bod s metadátami, alebo {@code null} ak bod je mimo cestnej siete
+     * @return snapped point with metadata, or {@code null} if the point is outside the road network
      */
     @Override
     public SnappedPoint snapToRoad(double lat, double lon) {
-        // EdgeFilter — snapuj len na cesty prístupné autom (ignoruj chodníky, cyklotrasy)
+        // EdgeFilter — snap only to car-accessible roads (ignore footpaths, cycleways)
         Snap snap = locationIndex.findClosest(lat, lon, edgeState -> edgeState.get(carAccessEnc));
 
         if (!snap.isValid()) {
-            log.debug("Snap neúspešný pre bod [{}, {}] — príliš ďaleko od cestnej siete", lat, lon);
+            log.debug("Snap failed for point [{}, {}] — too far from road network", lat, lon);
             return null;
         }
 
@@ -57,11 +57,11 @@ public class MapMatchingServiceGraphHopper implements MapMatchingService {
         return new SnappedPoint(
                 snappedPoint.getLat(),
                 snappedPoint.getLon(),
-                edge.getName(),                    // napr. "Vajnorská", "D1"
+                edge.getName(),                    // e.g. "Vajnorská", "D1"
                 edge.get(roadClassEnc),            // MOTORWAY, PRIMARY, RESIDENTIAL...
-                edge.get(maxSpeedEnc),             // km/h (Double.POSITIVE_INFINITY ak nie je na mape)
-                edge.get(avgSpeedEnc),             // km/h odhadnutá rýchlosť
-                edge.getDistance(),                // dĺžka celej hrany v metroch
+                edge.get(maxSpeedEnc),             // km/h (Double.POSITIVE_INFINITY if not on map)
+                edge.get(avgSpeedEnc),             // km/h estimated speed
+                edge.getDistance(),                // full edge length in meters
                 edge.getEdge()                     // GraphHopper edge ID
         );
     }

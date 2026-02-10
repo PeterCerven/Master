@@ -23,12 +23,12 @@ public class RoadGraph {
     }
 
     // =====================================================================
-    // Node operácie
+    // Node operations
     // =====================================================================
 
     public void addNode(RoadNode node) {
         if (nodeMap.containsKey(node.getId())) {
-            return; // už existuje
+            return; // already exists
         }
         graph.addVertex(node);
         nodeMap.put(node.getId(), node);
@@ -48,18 +48,18 @@ public class RoadGraph {
     }
 
     public void removeNode(RoadNode node) {
-        graph.removeVertex(node); // automaticky zmaže aj pridružené hrany
+        graph.removeVertex(node); // automatically removes associated edges
         nodeMap.remove(node.getId());
         spatialIndex.remove(envelopeOf(node), node);
     }
 
     // =====================================================================
-    // Edge operácie
+    // Edge operations
     // =====================================================================
 
     /**
-     * Pridá hranu medzi dva nody. Ak hrana už existuje, nič sa nestane.
-     * Weight sa nastaví na vzdialenosť v metroch.
+     * Adds an edge between two nodes. If the edge already exists, nothing happens.
+     * Weight is set to distance in meters.
      */
     public void addEdge(RoadNode source, RoadNode target, double distanceMeters) {
         if (graph.containsEdge(source, target)) {
@@ -87,15 +87,15 @@ public class RoadGraph {
     }
 
     // =====================================================================
-    // Priestorové vyhľadávanie (cez JTS Quadtree)
+    // Spatial search (via JTS Quadtree)
     // =====================================================================
 
     /**
-     * Nájde najbližší node k daným súradniciam v rámci maxDistance (v metroch).
-     * Používa equirectangular approximáciu pre rýchlosť.
+     * Finds the nearest node to given coordinates within maxDistance (in meters).
+     * Uses equirectangular approximation for speed.
      */
     public RoadNode findNearest(double lat, double lon, double maxDistanceMeters) {
-        // Preveď maxDistance na približné stupne pre envelope query
+        // Convert maxDistance to approximate degrees for envelope query
         double degreeApprox = maxDistanceMeters / 111_320.0; // ~1° lat = 111.32 km
         Envelope searchEnv = new Envelope(
                 lon - degreeApprox, lon + degreeApprox,
@@ -119,7 +119,7 @@ public class RoadGraph {
     }
 
     /**
-     * Nájde K najbližších nodov k daným súradniciam.
+     * Finds the K nearest nodes to given coordinates.
      */
     public List<RoadNode> findKNearest(double lat, double lon, int k, double maxDistanceMeters) {
         double degreeApprox = maxDistanceMeters / 111_320.0;
@@ -144,17 +144,17 @@ public class RoadGraph {
     }
 
     /**
-     * Nájde všetky nody v danom okruhu (v metroch).
+     * Finds all nodes within the given radius (in meters).
      *
-     * <p>Používa Quadtree envelope query (obdĺžnik) ako rýchly filter,
-     * potom equirectangular refinement pre presný kruhový výber.
-     * Ideálne pre Gabriel pruning, density queries a collision detection.
+     * <p>Uses Quadtree envelope query (rectangle) as a fast filter,
+     * then equirectangular refinement for precise circular selection.
+     * Ideal for Gabriel pruning, density queries, and collision detection.
      *
-     * @param lat           stred kruhu — zemepisná šírka
-     * @param lon           stred kruhu — zemepisná dĺžka
-     * @param radiusMeters  polomer v metroch
-     * @param exclude        nody, ktoré sa majú vynechať z výsledku (napr. source/target hrany)
-     * @return všetky nody v kruhu okrem vylúčených
+     * @param lat           circle center — latitude
+     * @param lon           circle center — longitude
+     * @param radiusMeters  radius in meters
+     * @param exclude       nodes to exclude from the result (e.g. source/target of an edge)
+     * @return all nodes within the circle excluding excluded ones
      */
     public List<RoadNode> findInRadius(double lat, double lon, double radiusMeters,
                                        Set<RoadNode> exclude) {
@@ -179,11 +179,11 @@ public class RoadGraph {
     }
 
     // =====================================================================
-    // Prístup k JGraphT grafu pre pokročilé algoritmy
+    // Access to JGraphT graph for advanced algorithms
     // =====================================================================
 
     /**
-     * Vráti underlying JGraphT graf — pre Dijkstra, A*, atď.
+     * Returns the underlying JGraphT graph — for Dijkstra, A*, etc.
      */
     public Graph<RoadNode, RoadEdge> getJGraphTGraph() {
         return graph;

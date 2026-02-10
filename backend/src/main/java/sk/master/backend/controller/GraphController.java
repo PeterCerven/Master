@@ -1,5 +1,7 @@
 package sk.master.backend.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -11,12 +13,15 @@ import sk.master.backend.persistence.model.PositionalData;
 import sk.master.backend.persistence.model.RoadGraph;
 import sk.master.backend.service.FileService;
 import sk.master.backend.service.GraphService;
+import sk.master.backend.service.PipelineConfigServiceImpl;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/graph")
 public class GraphController {
+
+    private static final Logger log = LoggerFactory.getLogger(GraphController.class);
 
     private final GraphService graphService;
     private final FileService fileService;
@@ -47,7 +52,8 @@ public class GraphController {
 
     @PostMapping("/add-points")
     public ResponseEntity<GraphResponseDto> updateGraphWithPoints(@RequestBody AddPointsRequest request) {
-        RoadGraph graph = graphService.generateRoadNetwork(request.getGraph(), request.getPositionalData());
+        log.info(String.valueOf(request));
+        RoadGraph graph = graphService.generateRoadNetwork(null, request.getPositionalData());
         return ResponseEntity.ok(GraphResponseDto.fromRoadGraph(graph));
     }
 }

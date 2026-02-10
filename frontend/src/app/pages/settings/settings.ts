@@ -50,22 +50,22 @@ export class Settings implements OnInit {
       maxLat: [49.7, [Validators.required, Validators.min(-90), Validators.max(90)]],
       minLon: [16.8, [Validators.required, Validators.min(-180), Validators.max(180)]],
       maxLon: [22.6, [Validators.required, Validators.min(-180), Validators.max(180)]],
-      nearDuplicateThresholdM: [15, [Validators.required, Validators.min(0.1)]],
-      outlierMinNeighbors: [2, [Validators.required, Validators.min(1)]],
-      outlierRadiusM: [75, [Validators.required, Validators.min(1)]],
+      nearDuplicateThresholdM: [5, [Validators.required, Validators.min(0.1)]],
+      outlierMinNeighbors: [1, [Validators.required, Validators.min(1)]],
+      outlierRadiusM: [200, [Validators.required, Validators.min(1)]],
       maxSpeedKmh: [200, [Validators.required, Validators.min(1)]],
       tripGapMinutes: [30, [Validators.required, Validators.min(1)]],
       // H3
-      h3DedupResolution: [11, [Validators.required, Validators.min(0), Validators.max(15)]],
+      h3DedupResolution: [12, [Validators.required, Validators.min(0), Validators.max(15)]],
       h3ClusterResolution: [9, [Validators.required, Validators.min(0), Validators.max(15)]],
       // DBSCAN + Graph
-      dbscanEpsMeters: [25, [Validators.required, Validators.min(1)]],
-      dbscanMinPts: [5, [Validators.required, Validators.min(1)]],
+      dbscanEpsMeters: [50, [Validators.required, Validators.min(1)]],
+      dbscanMinPts: [2, [Validators.required, Validators.min(1)]],
       maxEdgeLengthM: [300, [Validators.required, Validators.min(1)]],
       mergeThresholdM: [10, [Validators.required, Validators.min(0.1)]],
       knnK: [5, [Validators.required, Validators.min(1)]],
       // Matching
-      maxSnapDistanceM: [50, [Validators.required, Validators.min(1)]],
+      maxSnapDistanceM: [100, [Validators.required, Validators.min(1)]],
     });
   }
 

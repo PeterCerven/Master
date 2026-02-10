@@ -13,5 +13,5 @@ import java.util.List;
 @AllArgsConstructor
 public class AddPointsRequest {
     private List<PositionalData> positionalData;
-    private RoadGraph graph;
+    private GraphResponseDto graph;
 }

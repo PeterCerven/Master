@@ -49,7 +49,10 @@ export class GraphService {
   }
 
   public updateGraphWithPoints(graph: GraphResponseDto | null, points: Array<GraphPoint>): Observable<GraphResponseDto> {
+    console.log("df" + graph)
+    console.log("fsd" + points)
     const request = { positionalData: points, graph };
+    console.log(JSON.stringify(request, null, 2));
     return this.http.post<GraphResponseDto>(`${this.apiUrl}/add-points`, request).pipe(
       catchError(this.handleError)
     );

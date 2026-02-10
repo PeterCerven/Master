@@ -116,21 +116,21 @@ public class PipelineConfigServiceImpl implements PipelineConfigService {
         e.setMaxLat(49.7);
         e.setMinLon(16.8);
         e.setMaxLon(22.6);
-        e.setNearDuplicateThresholdM(15);
-        e.setOutlierMinNeighbors(2);
-        e.setOutlierRadiusM(75);
+        e.setNearDuplicateThresholdM(5);
+        e.setOutlierMinNeighbors(1);
+        e.setOutlierRadiusM(200);
         e.setMaxSpeedKmh(200);
         e.setTripGapMinutes(30);
         // H3
-        e.setH3DedupResolution(11);
+        e.setH3DedupResolution(12);
         e.setH3ClusterResolution(9);
         // DBSCAN + Graf
-        e.setDbscanEpsMeters(25);
-        e.setDbscanMinPts(5);
+        e.setDbscanEpsMeters(50);
+        e.setDbscanMinPts(2);
         e.setMaxEdgeLengthM(300);
         e.setMergeThresholdM(10);
         e.setKnnK(5);
         // Map Matching
-        e.setMaxSnapDistanceM(50);
+        e.setMaxSnapDistanceM(100);
     }
 }

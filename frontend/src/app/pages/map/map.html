@@ -16,7 +16,7 @@
       (click)="fileInput.click()">
       {{ loading ? 'Loading Graph...' : 'Load Graph from File' }}
     </button>
-    <input hidden (change)="importGraphFromFile($event); fileInput.value = ''" #fileInput type="file" accept=".gpx">
+    <input hidden (change)="importGraphFromFile($event); fileInput.value = ''" #fileInput type="file" accept=".gpx,.json,.geojson">
 
     <button
       matFab extended

@@ -8,9 +8,14 @@ import org.apache.commons.io.FilenameUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import sk.master.backend.persistence.model.PositionalData;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 
+
+import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -22,6 +27,7 @@ public class FileServiceImpl implements FileService {
         String fileExtension = FilenameUtils.getExtension(file.getOriginalFilename());
         return switch (fileExtension) {
             case "gpx" -> parseGpxFile(file);
+            case "geojson", "json" -> parseGeoJsonFile(file);
             case null, default -> throw new IllegalArgumentException("Unsupported file format: " + fileExtension);
         };
     }
@@ -49,5 +55,25 @@ public class FileServiceImpl implements FileService {
         } catch (Exception e) {
             throw new Exception("Failed to parse GPX file", e);
         }
+    }
+
+    private List<PositionalData> parseGeoJsonFile(MultipartFile file) throws IOException {
+        JsonMapper mapper = JsonMapper.builder().build();
+        JsonNode root = mapper.readTree(file.getBytes());
+
+        List<PositionalData> result = new ArrayList<>();
+
+        for (JsonNode feature : root.get("features")) {
+            JsonNode coords = feature.get("geometry").get("coordinates");
+            JsonNode props = feature.get("properties");
+
+            double lon = coords.get(0).asDouble();
+            double lat = coords.get(1).asDouble();
+            Instant timestamp = Instant.parse(props.get("timestamp").asString());
+
+            result.add(new PositionalData(lat, lon, timestamp));
+        }
+
+        return result;
     }
 }

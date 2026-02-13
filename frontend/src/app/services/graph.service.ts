@@ -22,6 +22,8 @@ export class GraphService {
 
     switch (fileExtension) {
       case 'gpx':
+      case 'json':
+      case 'geojson':
         return this.parseGpxFile(file);
       default:
         return throwError(() => new Error('Unsupported file format'));

@@ -4,6 +4,7 @@ import {MatToolbar} from '@angular/material/toolbar';
 import {MatIconButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
 import { TranslocoService } from '@jsverse/transloco';
+import { ThemeService } from '@services/theme.service';
 
 @Component({
   selector: 'app-root',
@@ -20,17 +21,12 @@ import { TranslocoService } from '@jsverse/transloco';
 })
 export class App {
   private translocoService = inject(TranslocoService);
-  isDarkMode = signal(false);
+  private themeService = inject(ThemeService);
+  isDarkMode = this.themeService.isDarkMode;
   currentLanguage = signal('SK')
 
   toggleDarkMode() {
-    this.isDarkMode.update(v => !v);
-
-    if (this.isDarkMode()) {
-      document.body.classList.add('dark-mode');
-    } else {
-      document.body.classList.remove('dark-mode');
-    }
+    this.themeService.toggleDarkMode();
   }
 
   switchLanguage() {

@@ -1,10 +1,31 @@
 import {GoogleMapsModule, GoogleMap} from '@angular/google-maps';
-import {AfterViewInit, Component, DestroyRef, inject, signal, viewChild} from '@angular/core';
-import {environment} from '@env/environment.production';
+import {AfterViewInit, Component, DestroyRef, effect, inject, signal, viewChild} from '@angular/core';
 import {GraphService} from '@services/graph.service';
+import {ThemeService} from '@services/theme.service';
 import {GraphResponseDto, GraphNodeDto, GraphEdgeDto} from '@models/my-graph.model';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {MatFabButton} from '@angular/material/button';
+
+const DARK_MAP_STYLES: google.maps.MapTypeStyle[] = [
+  {elementType: 'geometry', stylers: [{color: '#242f3e'}]},
+  {elementType: 'labels.text.stroke', stylers: [{color: '#242f3e'}]},
+  {elementType: 'labels.text.fill', stylers: [{color: '#746855'}]},
+  {featureType: 'administrative.locality', elementType: 'labels.text.fill', stylers: [{color: '#d59563'}]},
+  {featureType: 'poi', elementType: 'labels.text.fill', stylers: [{color: '#d59563'}]},
+  {featureType: 'poi.park', elementType: 'geometry', stylers: [{color: '#263c3f'}]},
+  {featureType: 'poi.park', elementType: 'labels.text.fill', stylers: [{color: '#6b9a76'}]},
+  {featureType: 'road', elementType: 'geometry', stylers: [{color: '#38414e'}]},
+  {featureType: 'road', elementType: 'geometry.stroke', stylers: [{color: '#212a37'}]},
+  {featureType: 'road', elementType: 'labels.text.fill', stylers: [{color: '#9ca5b3'}]},
+  {featureType: 'road.highway', elementType: 'geometry', stylers: [{color: '#746855'}]},
+  {featureType: 'road.highway', elementType: 'geometry.stroke', stylers: [{color: '#1f2835'}]},
+  {featureType: 'road.highway', elementType: 'labels.text.fill', stylers: [{color: '#f3d19c'}]},
+  {featureType: 'transit', elementType: 'geometry', stylers: [{color: '#2f3948'}]},
+  {featureType: 'transit.station', elementType: 'labels.text.fill', stylers: [{color: '#d59563'}]},
+  {featureType: 'water', elementType: 'geometry', stylers: [{color: '#17263c'}]},
+  {featureType: 'water', elementType: 'labels.text.fill', stylers: [{color: '#515c6d'}]},
+  {featureType: 'water', elementType: 'labels.text.stroke', stylers: [{color: '#17263c'}]},
+];
 
 
 @Component({
@@ -17,6 +38,7 @@ export class Map implements AfterViewInit {
   protected readonly google = google;
   map = viewChild.required<GoogleMap>('googleMap');
   private readonly graphService = inject(GraphService);
+  private readonly themeService = inject(ThemeService);
   private destroyRef = inject(DestroyRef);
 
   loading = false;
@@ -55,8 +77,18 @@ export class Map implements AfterViewInit {
     mapTypeControl: false,
     streetViewControl: false,
     fullscreenControl: false,
-    mapId: environment.googleMapId,
   };
+
+  private darkModeEffect = effect(() => {
+    const isDark = this.themeService.isDarkMode();
+    const mapInstance = this.map()?.googleMap;
+    if (mapInstance) {
+      mapInstance.setOptions({
+        styles: isDark ? DARK_MAP_STYLES : [],
+        backgroundColor: isDark ? '#242f3e' : undefined,
+      });
+    }
+  });
 
   importGraphFromFile(event: Event): void {
     this.loading = true;

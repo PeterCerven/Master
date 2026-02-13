@@ -9,10 +9,6 @@
   flex: 1;
   height: 100%;
   position: relative;
-
-  ::ng-deep img[src*="googleapis"] {
-    margin: -0.5px;
-  }
 }
 
 .control-panel {

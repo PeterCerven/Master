@@ -87,6 +87,9 @@ public class PipelineConfigEntity {
     @Column(name = "max_snap_distance_m", nullable = false)
     private double maxSnapDistanceM;
 
+    @Column(name = "remove_off_road_nodes", nullable = false)
+    private boolean removeOffRoadNodes;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

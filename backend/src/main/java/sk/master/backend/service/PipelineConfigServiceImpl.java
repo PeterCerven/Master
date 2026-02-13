@@ -69,7 +69,8 @@ public class PipelineConfigServiceImpl implements PipelineConfigService {
                 e.getH3DedupResolution(), e.getH3ClusterResolution(),
                 e.getDbscanEpsMeters(), e.getDbscanMinPts(),
                 e.getMaxEdgeLengthM(), e.getMergeThresholdM(), e.getKnnK(),
-                e.getMaxSnapDistanceM()
+                e.getMaxSnapDistanceM(),
+                e.isRemoveOffRoadNodes()
         );
     }
 
@@ -92,6 +93,7 @@ public class PipelineConfigServiceImpl implements PipelineConfigService {
         e.setMergeThresholdM(d.getMergeThresholdM());
         e.setKnnK(d.getKnnK());
         e.setMaxSnapDistanceM(d.getMaxSnapDistanceM());
+        e.setRemoveOffRoadNodes(d.isRemoveOffRoadNodes());
     }
 
     private PipelineConfig toPipelineConfig(PipelineConfigEntity e) {
@@ -102,7 +104,8 @@ public class PipelineConfigServiceImpl implements PipelineConfigService {
                 e.getH3DedupResolution(), e.getH3ClusterResolution(),
                 e.getDbscanEpsMeters(), e.getDbscanMinPts(),
                 e.getMaxEdgeLengthM(), e.getMergeThresholdM(), e.getKnnK(),
-                e.getMaxSnapDistanceM()
+                e.getMaxSnapDistanceM(),
+                e.isRemoveOffRoadNodes()
         );
     }
 
@@ -125,12 +128,13 @@ public class PipelineConfigServiceImpl implements PipelineConfigService {
         e.setH3DedupResolution(12);
         e.setH3ClusterResolution(9);
         // DBSCAN + Graf
-        e.setDbscanEpsMeters(50);
+        e.setDbscanEpsMeters(35);
         e.setDbscanMinPts(2);
-        e.setMaxEdgeLengthM(300);
+        e.setMaxEdgeLengthM(200);
         e.setMergeThresholdM(10);
-        e.setKnnK(5);
+        e.setKnnK(2);
         // Map Matching
         e.setMaxSnapDistanceM(100);
+        e.setRemoveOffRoadNodes(false);
     }
 }

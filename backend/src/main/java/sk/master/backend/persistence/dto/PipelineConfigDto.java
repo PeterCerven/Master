@@ -67,4 +67,6 @@ public class PipelineConfigDto {
     // Map Matching
     @Positive
     private double maxSnapDistanceM;
+
+    private boolean removeOffRoadNodes;
 }

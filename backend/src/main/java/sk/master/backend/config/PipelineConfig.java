@@ -37,4 +37,5 @@ public class PipelineConfig {
     // ===== Krok 4: Map Matching =====
 
     private double maxSnapDistanceM;
+    private boolean removeOffRoadNodes;
 }

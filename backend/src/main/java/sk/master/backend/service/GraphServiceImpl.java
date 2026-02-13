@@ -1,9 +1,6 @@
 package sk.master.backend.service;
 
 import com.uber.h3core.H3Core;
-import org.apache.commons.math3.ml.clustering.Cluster;
-import org.apache.commons.math3.ml.clustering.Clusterable;
-import org.apache.commons.math3.ml.clustering.DBSCANClusterer;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
@@ -352,20 +349,15 @@ public class GraphServiceImpl implements GraphService {
     /**
      * Builds a new graph from scratch using DBSCAN + Delaunay + Gabriel pruning.
      */
-    private void buildNewGraph(RoadGraph graph, List<PositionalData> positionalData, PipelineConfig config) {
-        // 3a) DBSCAN clustering — nájde cestné koridory
-        List<PositionalData> clusterCentroids = clusterWithDbscan(positionalData, config);
-        log.debug("  DBSCAN: {} clusters (from {} points)", clusterCentroids.size(), positionalData.size());
+    private void buildNewGraph(RoadGraph graph, List<PositionalData> graphPoints, PipelineConfig config) {
+        // 3a) Použijem všetky H3-deduplikované body priamo ako uzly grafu.
+        // DBSCAN centroidy strácajú priestorovú kontinuitu — Delaunay + Gabriel
+        // pruning lepšie zachovajú topológiu cestnej siete.
+        log.debug("  Using all {} dedup points as nodes (DBSCAN bypassed)", graphPoints.size());
 
-        if (clusterCentroids.isEmpty()) {
-            // Fallback: ak DBSCAN nič nenájde, použi všetky body priamo
-            log.warn("  DBSCAN found no clusters — using all points directly");
-            clusterCentroids = positionalData;
-        }
-
-        // 3b) Vytvor nody z centroidov (vrátane temporálnych metadát)
+        // 3b) Vytvor nody z bodov (vrátane temporálnych metadát)
         List<RoadNode> nodes = new ArrayList<>();
-        for (PositionalData p : clusterCentroids) {
+        for (PositionalData p : graphPoints) {
             RoadNode node = new RoadNode(p.getLat(), p.getLon());
             node.setH3CellId(h3.latLngToCell(p.getLat(), p.getLon(), config.getH3ClusterResolution()));
             node.updateTimestampRange(p.getTimestamp());
@@ -381,44 +373,6 @@ public class GraphServiceImpl implements GraphService {
 
         // 3e) Odstráni hrany dlhšie než maxEdgeLength
         pruneByMaxLength(graph, config);
-    }
-
-    /**
-     * Spustí DBSCAN clustering a vráti centroidy klastrov.
-     * Body označené ako šum sú odfiltrované.
-     */
-    private List<PositionalData> clusterWithDbscan(List<PositionalData> positionalData, PipelineConfig config) {
-        // Apache Commons Math DBSCAN vyžaduje Clusterable wrapper
-        List<ClusterablePosition> clusterablePoints = positionalData.stream()
-                .map(ClusterablePosition::new)
-                .collect(Collectors.toList());
-
-        // eps musí byť v rovnakých jednotkách ako DistanceMeasure
-        // Používame vlastnú Haversine DistanceMeasure, takže eps je v metroch
-        DBSCANClusterer<ClusterablePosition> clusterer = new DBSCANClusterer<>(
-                config.getDbscanEpsMeters(),
-                config.getDbscanMinPts(),
-                new HaversineDistanceMeasure()
-        );
-
-        List<Cluster<ClusterablePosition>> clusters = clusterer.cluster(clusterablePoints);
-
-        // Pre každý klaster vráti centroid s najskorším timestamp
-        List<PositionalData> centroids = new ArrayList<>();
-        for (Cluster<ClusterablePosition> cluster : clusters) {
-            List<ClusterablePosition> points = cluster.getPoints();
-            double avgLat = points.stream().mapToDouble(p -> p.positionalData().getLat()).average().orElse(0);
-            double avgLon = points.stream().mapToDouble(p -> p.positionalData().getLon()).average().orElse(0);
-
-            Instant earliest = points.stream()
-                    .map(p -> p.positionalData().getTimestamp())
-                    .filter(Objects::nonNull)
-                    .min(Comparator.naturalOrder())
-                    .orElse(null);
-
-            centroids.add(new PositionalData(avgLat, avgLon, earliest));
-        }
-        return centroids;
     }
 
     /**
@@ -534,7 +488,7 @@ public class GraphServiceImpl implements GraphService {
 
     /**
      * Inkrementálne vloží nové body do existujúceho grafu.
-     * Pattern: merge-or-create + KNN spojenie.
+     * Pattern: merge-or-create + KNN spojenie + lokálny Gabriel pruning.
      */
     private void incrementalInsert(RoadGraph graph, List<PositionalData> positionalData, PipelineConfig config) {
         double mergeThreshold = config.getMergeThresholdM();
@@ -564,6 +518,7 @@ public class GraphServiceImpl implements GraphService {
                         p.getLat(), p.getLon(), k, maxEdgeLen
                 );
 
+                List<RoadEdge> newEdges = new ArrayList<>();
                 for (RoadNode neighbor : neighbors) {
                     if (neighbor.equals(newNode)) continue;
                     double dist = GeoUtils.haversineDistance(
@@ -572,12 +527,50 @@ public class GraphServiceImpl implements GraphService {
                     );
                     if (dist <= maxEdgeLen) {
                         graph.addEdge(newNode, neighbor, dist);
+                        RoadEdge edge = graph.getJGraphTGraph().getEdge(newNode, neighbor);
+                        if (edge != null) newEdges.add(edge);
                     }
                 }
+
+                // Lokálny Gabriel pruning — odstráni spurious cross-connections
+                pruneEdgesGabriel(graph, newEdges);
                 created++;
             }
         }
         log.debug("  Incremental insert: {} merged, {} created", merged, created);
+    }
+
+    /**
+     * Gabriel pruning na zadanej podmnožine hrán.
+     * Hrana prežije len ak žiadny iný node neleží v diametrálnom kruhu.
+     */
+    private void pruneEdgesGabriel(RoadGraph graph, List<RoadEdge> edges) {
+        List<RoadEdge> toRemove = new ArrayList<>();
+
+        for (RoadEdge edge : edges) {
+            RoadNode source = graph.getNode(edge.getSourceId());
+            RoadNode target = graph.getNode(edge.getTargetId());
+            if (source == null || target == null) continue;
+
+            double midLat = (source.getLat() + target.getLat()) / 2;
+            double midLon = (source.getLon() + target.getLon()) / 2;
+            double radiusMeters = edge.getDistanceMeters() / 2;
+
+            Set<RoadNode> exclude = Set.of(source, target);
+            List<RoadNode> violators = graph.findInRadius(midLat, midLon, radiusMeters, exclude);
+
+            if (!violators.isEmpty()) {
+                toRemove.add(edge);
+            }
+        }
+
+        for (RoadEdge edge : toRemove) {
+            RoadNode source = graph.getNode(edge.getSourceId());
+            RoadNode target = graph.getNode(edge.getTargetId());
+            if (source != null && target != null) {
+                graph.getJGraphTGraph().removeEdge(source, target);
+            }
+        }
     }
 
     // =========================================================================
@@ -631,14 +624,16 @@ public class GraphServiceImpl implements GraphService {
         // Obohať hrany grafu o metadáta
         enrichEdgeMetadata(graph);
 
-        // Zlúč nody, ktoré boli snapnuté na rovnaký GraphHopper edge
-        mergeNodesOnSameEdge(graph, edgeIdToNodes);
+        // Zlúč nody, ktoré boli snapnuté na rovnaký GraphHopper edge (len ak sú blízke)
+        mergeNodesOnSameEdge(graph, edgeIdToNodes, config.getMergeThresholdM());
 
         // Prepočítaj edge weights na reálne vzdialenosti (po snap korekcii)
         recalculateEdgeWeights(graph);
 
         // Voliteľne: odstráň off-road nody
-        removeOffRoadNodes(graph);
+        if (config.isRemoveOffRoadNodes()) {
+            removeOffRoadNodes(graph);
+        }
     }
 
     /**
@@ -661,53 +656,69 @@ public class GraphServiceImpl implements GraphService {
     }
 
     /**
-     * Zlúči nody, ktoré boli snapnuté na rovnaký GraphHopper edge.
-     * To znamená, že ležia na rovnakom cestnom segmente.
+     * Zlúči nody, ktoré boli snapnuté na rovnaký GraphHopper edge,
+     * ale len ak sú si blízke (v rámci mergeThreshold).
+     * GH edge môže byť dlhý segment — bez distance check by sa zničila kontinuita.
      */
-    private void mergeNodesOnSameEdge(RoadGraph graph, Map<Integer, List<RoadNode>> edgeIdToNodes) {
+    private void mergeNodesOnSameEdge(RoadGraph graph, Map<Integer, List<RoadNode>> edgeIdToNodes,
+                                       double mergeThreshold) {
         int mergeCount = 0;
 
         for (Map.Entry<Integer, List<RoadNode>> entry : edgeIdToNodes.entrySet()) {
-            List<RoadNode> nodesOnSameEdge = entry.getValue();
+            List<RoadNode> nodesOnSameEdge = new ArrayList<>(entry.getValue());
             if (nodesOnSameEdge.size() < 2) continue;
 
-            // Ponechaj node s najvyšším merge count ako "primary"
+            // Zoraď podľa merge count (najspoľahlivejší prvý)
             nodesOnSameEdge.sort(Comparator.comparingInt(RoadNode::getMergeCount).reversed());
-            RoadNode primary = nodesOnSameEdge.getFirst();
 
-            for (int i = 1; i < nodesOnSameEdge.size(); i++) {
-                RoadNode secondary = nodesOnSameEdge.get(i);
+            // Greedy merge — zlúč len páry bližšie než mergeThreshold
+            Set<RoadNode> removed = new HashSet<>();
+            for (int i = 0; i < nodesOnSameEdge.size(); i++) {
+                RoadNode primary = nodesOnSameEdge.get(i);
+                if (removed.contains(primary)) continue;
 
-                // Zlúč pozíciu + temporálne metadáta
-                primary.mergeWith(secondary.getLat(), secondary.getLon());
-                primary.updateTimestampRange(secondary.getFirstSeen());
-                primary.updateTimestampRange(secondary.getLastSeen());
+                for (int j = i + 1; j < nodesOnSameEdge.size(); j++) {
+                    RoadNode secondary = nodesOnSameEdge.get(j);
+                    if (removed.contains(secondary)) continue;
 
-                // Presuň hrany zo secondary na primary
-                Set<RoadEdge> edges = graph.getEdgesOf(secondary);
-                for (RoadEdge edge : new ArrayList<>(edges)) {
-                    RoadNode other = graph.getNode(
-                            edge.getSourceId().equals(secondary.getId())
-                                    ? edge.getTargetId()
-                                    : edge.getSourceId()
+                    double dist = GeoUtils.equirectangularDistance(
+                            primary.getLat(), primary.getLon(),
+                            secondary.getLat(), secondary.getLon()
                     );
-                    if (other != null && !other.equals(primary)) {
-                        double dist = GeoUtils.haversineDistance(
-                                primary.getLat(), primary.getLon(),
-                                other.getLat(), other.getLon()
-                        );
-                        graph.addEdge(primary, other, dist);
-                    }
-                }
 
-                // Odstráň secondary node
-                graph.removeNode(secondary);
-                mergeCount++;
+                    if (dist > mergeThreshold) continue;
+
+                    // Zlúč pozíciu + temporálne metadáta
+                    primary.mergeWith(secondary.getLat(), secondary.getLon());
+                    primary.updateTimestampRange(secondary.getFirstSeen());
+                    primary.updateTimestampRange(secondary.getLastSeen());
+
+                    // Presuň hrany zo secondary na primary
+                    Set<RoadEdge> edges = graph.getEdgesOf(secondary);
+                    for (RoadEdge edge : new ArrayList<>(edges)) {
+                        RoadNode other = graph.getNode(
+                                edge.getSourceId().equals(secondary.getId())
+                                        ? edge.getTargetId()
+                                        : edge.getSourceId()
+                        );
+                        if (other != null && !other.equals(primary)) {
+                            double d = GeoUtils.haversineDistance(
+                                    primary.getLat(), primary.getLon(),
+                                    other.getLat(), other.getLon()
+                            );
+                            graph.addEdge(primary, other, d);
+                        }
+                    }
+
+                    graph.removeNode(secondary);
+                    removed.add(secondary);
+                    mergeCount++;
+                }
             }
         }
 
         if (mergeCount > 0) {
-            log.debug("  Same-edge merge: {} nodes merged", mergeCount);
+            log.debug("  Same-edge merge: {} nodes merged (threshold {}m)", mergeCount, mergeThreshold);
         }
     }
 
@@ -743,34 +754,6 @@ public class GraphServiceImpl implements GraphService {
 
         if (!offRoadNodes.isEmpty()) {
             log.debug("  Removed {} off-road nodes", offRoadNodes.size());
-        }
-    }
-
-    // =========================================================================
-    // HELPER TRIEDY
-    // =========================================================================
-
-    /**
-         * Wrapper pre Apache Commons Math DBSCAN — obaľuje Position do Clusterable.
-         */
-        private record ClusterablePosition(PositionalData positionalData) implements Clusterable {
-
-        @Override
-            public double[] getPoint() {
-                // DBSCAN bude volať DistanceMeasure.compute() na tieto body
-                return new double[]{positionalData.getLat(), positionalData.getLon()};
-            }
-        }
-
-    /**
-     * Haversine DistanceMeasure pre DBSCAN — eps je potom priamo v metroch.
-     */
-    private static class HaversineDistanceMeasure
-            implements org.apache.commons.math3.ml.distance.DistanceMeasure {
-
-        @Override
-        public double compute(double[] a, double[] b) {
-            return GeoUtils.equirectangularDistance(a[0], a[1], b[0], b[1]);
         }
     }
 

@@ -9,6 +9,10 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
     defer-datasource-initialization: true
     show-sql: true
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
   sql:
     init:
       mode: never
@@ -17,6 +21,3 @@ graphhopper:
     file: data/slovakia-260207.osm.pbf
   graph:
     location: data/gh-cache
-
-# Pipeline konfigurácia je teraz uložená v databáze (tabuľka pipeline_configs).
-# Predvolené hodnoty sa seedujú pri prvom štarte cez PipelineConfigSeeder.

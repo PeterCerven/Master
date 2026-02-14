@@ -3,7 +3,6 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
@@ -19,7 +18,6 @@ import { PipelineConfig } from '@models/pipeline-config.model';
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatCheckboxModule,
     MatIconModule,
     MatProgressSpinnerModule,
     MatSnackBarModule,
@@ -52,26 +50,9 @@ export class Settings implements OnInit {
       maxLat: [49.7, [Validators.required, Validators.min(-90), Validators.max(90)]],
       minLon: [16.8, [Validators.required, Validators.min(-180), Validators.max(180)]],
       maxLon: [22.6, [Validators.required, Validators.min(-180), Validators.max(180)]],
-      nearDuplicateThresholdM: [5, [Validators.required, Validators.min(0.1)]],
-      outlierMinNeighbors: [1, [Validators.required, Validators.min(1)]],
-      outlierRadiusM: [200, [Validators.required, Validators.min(1)]],
       maxSpeedKmh: [200, [Validators.required, Validators.min(1)]],
-      tripGapMinutes: [30, [Validators.required, Validators.min(1)]],
       // H3
-      h3DedupResolution: [12, [Validators.required, Validators.min(0), Validators.max(15)]],
-      h3ClusterResolution: [9, [Validators.required, Validators.min(0), Validators.max(15)]],
-      h3AdaptiveEnabled: [false],
-      h3DedupResolutionUrban: [13, [Validators.required, Validators.min(0), Validators.max(15)]],
-      h3AdaptiveDensityThreshold: [5, [Validators.required, Validators.min(2)]],
-      // DBSCAN + Graph
-      dbscanEpsMeters: [50, [Validators.required, Validators.min(1)]],
-      dbscanMinPts: [2, [Validators.required, Validators.min(1)]],
-      maxEdgeLengthM: [300, [Validators.required, Validators.min(1)]],
-      mergeThresholdM: [10, [Validators.required, Validators.min(0.1)]],
-      knnK: [5, [Validators.required, Validators.min(1)]],
-      maxBearingDiffDeg: [90, [Validators.required, Validators.min(0), Validators.max(180)]],
-      // Matching
-      maxSnapDistanceM: [100, [Validators.required, Validators.min(1)]],
+      h3DedupResolution: [13, [Validators.required, Validators.min(0), Validators.max(15)]],
     });
   }
 

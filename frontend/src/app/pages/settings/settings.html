@@ -45,32 +45,9 @@
                 </mat-form-field>
 
                 <mat-form-field >
-                  <mat-label>{{ t('nearDuplicateThresholdM') }}</mat-label>
-                  <input matInput type="number" formControlName="nearDuplicateThresholdM" step="1" />
-                  <mat-hint>{{ t('metersUnit') }}</mat-hint>
-                </mat-form-field>
-
-                <mat-form-field >
-                  <mat-label>{{ t('outlierMinNeighbors') }}</mat-label>
-                  <input matInput type="number" formControlName="outlierMinNeighbors" step="1" />
-                </mat-form-field>
-
-                <mat-form-field >
-                  <mat-label>{{ t('outlierRadiusM') }}</mat-label>
-                  <input matInput type="number" formControlName="outlierRadiusM" step="1" />
-                  <mat-hint>{{ t('metersUnit') }}</mat-hint>
-                </mat-form-field>
-
-                <mat-form-field >
                   <mat-label>{{ t('maxSpeedKmh') }}</mat-label>
                   <input matInput type="number" formControlName="maxSpeedKmh" step="10" />
                   <mat-hint>km/h</mat-hint>
-                </mat-form-field>
-
-                <mat-form-field >
-                  <mat-label>{{ t('tripGapMinutes') }}</mat-label>
-                  <input matInput type="number" formControlName="tripGapMinutes" step="5" />
-                  <mat-hint>{{ t('minutesUnit') }}</mat-hint>
                 </mat-form-field>
               </div>
             </div>
@@ -81,7 +58,6 @@
         <section class="pipeline-step step-2">
           <div class="step-rail">
             <div class="step-badge">2</div>
-            <div class="step-connector"></div>
           </div>
           <div class="step-card">
             <div class="step-header">
@@ -94,102 +70,6 @@
                   <mat-label>{{ t('h3DedupResolution') }}</mat-label>
                   <input matInput type="number" formControlName="h3DedupResolution" min="0" max="15" step="1" />
                   <mat-hint>{{ t('h3ResolutionHint') }}</mat-hint>
-                </mat-form-field>
-
-                <mat-form-field >
-                  <mat-label>{{ t('h3ClusterResolution') }}</mat-label>
-                  <input matInput type="number" formControlName="h3ClusterResolution" min="0" max="15" step="1" />
-                  <mat-hint>{{ t('h3ResolutionHint') }}</mat-hint>
-                </mat-form-field>
-
-                <div class="checkbox-field">
-                  <mat-checkbox formControlName="h3AdaptiveEnabled">
-                    {{ t('h3AdaptiveEnabled') }}
-                  </mat-checkbox>
-                </div>
-
-                <mat-form-field >
-                  <mat-label>{{ t('h3DedupResolutionUrban') }}</mat-label>
-                  <input matInput type="number" formControlName="h3DedupResolutionUrban" min="0" max="15" step="1" />
-                  <mat-hint>{{ t('h3ResolutionHint') }}</mat-hint>
-                </mat-form-field>
-
-                <mat-form-field >
-                  <mat-label>{{ t('h3AdaptiveDensityThreshold') }}</mat-label>
-                  <input matInput type="number" formControlName="h3AdaptiveDensityThreshold" min="2" step="1" />
-                </mat-form-field>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- Krok 3: DBSCAN + Graf -->
-        <section class="pipeline-step step-3">
-          <div class="step-rail">
-            <div class="step-badge">3</div>
-            <div class="step-connector"></div>
-          </div>
-          <div class="step-card">
-            <div class="step-header">
-              <mat-icon class="step-header-icon">hub</mat-icon>
-              <h2>{{ t('dbscanGraph') }}</h2>
-            </div>
-            <div class="step-body">
-              <div class="form-grid">
-                <mat-form-field >
-                  <mat-label>{{ t('dbscanEpsMeters') }}</mat-label>
-                  <input matInput type="number" formControlName="dbscanEpsMeters" step="1" />
-                  <mat-hint>{{ t('metersUnit') }}</mat-hint>
-                </mat-form-field>
-
-                <mat-form-field >
-                  <mat-label>{{ t('dbscanMinPts') }}</mat-label>
-                  <input matInput type="number" formControlName="dbscanMinPts" step="1" />
-                </mat-form-field>
-
-                <mat-form-field >
-                  <mat-label>{{ t('maxEdgeLengthM') }}</mat-label>
-                  <input matInput type="number" formControlName="maxEdgeLengthM" step="10" />
-                  <mat-hint>{{ t('metersUnit') }}</mat-hint>
-                </mat-form-field>
-
-                <mat-form-field >
-                  <mat-label>{{ t('mergeThresholdM') }}</mat-label>
-                  <input matInput type="number" formControlName="mergeThresholdM" step="1" />
-                  <mat-hint>{{ t('metersUnit') }}</mat-hint>
-                </mat-form-field>
-
-                <mat-form-field >
-                  <mat-label>{{ t('knnK') }}</mat-label>
-                  <input matInput type="number" formControlName="knnK" step="1" />
-                </mat-form-field>
-
-                <mat-form-field >
-                  <mat-label>{{ t('maxBearingDiffDeg') }}</mat-label>
-                  <input matInput type="number" formControlName="maxBearingDiffDeg" min="0" max="180" step="5" />
-                  <mat-hint>0° {{ t('to') }} 180°</mat-hint>
-                </mat-form-field>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- Krok 4: Map Matching -->
-        <section class="pipeline-step step-4">
-          <div class="step-rail">
-            <div class="step-badge">4</div>
-          </div>
-          <div class="step-card">
-            <div class="step-header">
-              <mat-icon class="step-header-icon">route</mat-icon>
-              <h2>{{ t('mapMatching') }}</h2>
-            </div>
-            <div class="step-body">
-              <div class="form-grid">
-                <mat-form-field >
-                  <mat-label>{{ t('maxSnapDistanceM') }}</mat-label>
-                  <input matInput type="number" formControlName="maxSnapDistanceM" step="5" />
-                  <mat-hint>{{ t('metersUnit') }}</mat-hint>
                 </mat-form-field>
               </div>
             </div>

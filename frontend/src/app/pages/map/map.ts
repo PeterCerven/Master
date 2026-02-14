@@ -5,6 +5,7 @@ import {ThemeService} from '@services/theme.service';
 import {GraphResponseDto, GraphNodeDto, GraphEdgeDto} from '@models/my-graph.model';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {MatFabButton} from '@angular/material/button';
+import {environment} from '@env/environment.production';
 
 const DARK_MAP_STYLES: google.maps.MapTypeStyle[] = [
   {elementType: 'geometry', stylers: [{color: '#242f3e'}]},
@@ -72,6 +73,7 @@ export class Map implements AfterViewInit {
   options: google.maps.MapOptions = {
     center: {lat: 48.1478, lng: 17.1072},
     zoom: 13,
+    mapId: environment.googleMapId,
     disableDefaultUI: true,
     zoomControl: false,
     mapTypeControl: false,
@@ -152,7 +154,7 @@ export class Map implements AfterViewInit {
         content: dot,
       });
 
-      marker.addListener('click', () => {
+      marker.addListener('gmp-click', () => {
         const infoWindow = new google.maps.InfoWindow({
           content: `<div style="color: #333;">
                       <h4>Node ${node.id}</h4>
@@ -162,7 +164,7 @@ export class Map implements AfterViewInit {
                       ${node.roadClass ? `<p>Class: ${node.roadClass}</p>` : ''}
                     </div>`
         });
-        infoWindow.open(nativeMap, marker);
+        infoWindow.open({anchor: marker, map: nativeMap});
       });
 
       this.graphMarkers.push(marker);

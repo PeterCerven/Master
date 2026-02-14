@@ -1,6 +1,6 @@
 package sk.master.backend.service;
 
-import sk.master.backend.config.PipelineConfig;
+import sk.master.backend.persistence.model.PipelineConfig;
 import sk.master.backend.persistence.dto.PipelineConfigDto;
 
 public interface PipelineConfigService {

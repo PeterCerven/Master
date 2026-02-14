@@ -21,17 +21,6 @@ public final class GeoUtils {
     }
 
     /**
-     * Equirectangular approximation in meters.
-     * Accurate to ~0.5% for distances < 10 km. ~3x faster than Haversine.
-     * Suitable for high-frequency comparisons (filtering, spatial queries, clustering).
-     */
-    public static double equirectangularDistance(double lat1, double lon1, double lat2, double lon2) {
-        double x = Math.toRadians(lon2 - lon1) * Math.cos(Math.toRadians((lat1 + lat2) / 2));
-        double y = Math.toRadians(lat2 - lat1);
-        return Math.sqrt(x * x + y * y) * EARTH_RADIUS_METERS;
-    }
-
-    /**
      * Počiatočný azimut (bearing) od bodu 1 k bodu 2 v stupňoch [0, 360).
      * Používa forward azimuth vzorec na sfére.
      */
@@ -46,13 +35,5 @@ public final class GeoUtils {
 
         double bearing = Math.toDegrees(Math.atan2(y, x));
         return (bearing + 360) % 360;
-    }
-
-    /**
-     * Najmenší uhol medzi dvoma azimutmi v stupňoch [0, 180].
-     */
-    public static double bearingDifference(double b1, double b2) {
-        double diff = Math.abs(b1 - b2) % 360;
-        return diff > 180 ? 360 - diff : diff;
     }
 }

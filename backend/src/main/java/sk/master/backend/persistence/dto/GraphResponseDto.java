@@ -11,16 +11,13 @@ public record GraphResponseDto(
     public record NodeDto(
             String id,
             double lat,
-            double lon,
-            String roadName,
-            String roadClass
+            double lon
     ) {}
 
     public record EdgeDto(
             String sourceId,
             String targetId,
-            double distanceMeters,
-            String roadName
+            double distanceMeters
     ) {}
 
     public static GraphResponseDto fromRoadGraph(RoadGraph roadGraph) {
@@ -28,18 +25,15 @@ public record GraphResponseDto(
                 .map(node -> new NodeDto(
                         node.getId(),
                         node.getLat(),
-                        node.getLon(),
-                        node.getRoadName(),
-                        node.getRoadClass() != null ? node.getRoadClass().name() : null
+                        node.getLon()
                 ))
                 .toList();
 
         List<EdgeDto> edges = roadGraph.getEdges().stream()
                 .map(edge -> new EdgeDto(
-                        edge.getSourceId(),
-                        edge.getTargetId(),
-                        edge.getDistanceMeters(),
-                        edge.getRoadName()
+                        edge.sourceId(),
+                        edge.targetId(),
+                        edge.distanceMeters()
                 ))
                 .toList();
 

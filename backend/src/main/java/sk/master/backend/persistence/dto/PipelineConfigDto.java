@@ -27,57 +27,9 @@ public class PipelineConfigDto {
     private double maxLon;
 
     @Positive
-    private double nearDuplicateThresholdM;
-
-    @Min(1)
-    private int outlierMinNeighbors;
-
-    @Positive
-    private double outlierRadiusM;
-
-    @Positive
     private double maxSpeedKmh;
 
-    @Min(1)
-    private long tripGapMinutes;
-
-    // H3
     @Min(0) @Max(15)
     private int h3DedupResolution;
 
-    @Min(0) @Max(15)
-    private int h3ClusterResolution;
-
-    private boolean h3AdaptiveEnabled;
-
-    @Min(0) @Max(15)
-    private int h3DedupResolutionUrban;
-
-    @Min(2)
-    private int h3AdaptiveDensityThreshold;
-
-    // DBSCAN + Graf
-    @Positive
-    private double dbscanEpsMeters;
-
-    @Min(1)
-    private int dbscanMinPts;
-
-    @Positive
-    private double maxEdgeLengthM;
-
-    @Positive
-    private double mergeThresholdM;
-
-    @Min(1)
-    private int knnK;
-
-    @DecimalMin("0") @DecimalMax("180")
-    private double maxBearingDiffDeg;
-
-    // Map Matching
-    @Positive
-    private double maxSnapDistanceM;
-
-    private boolean removeOffRoadNodes;
 }

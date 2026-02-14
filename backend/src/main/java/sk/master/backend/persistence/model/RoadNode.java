@@ -1,67 +1,35 @@
 package sk.master.backend.persistence.model;
 
-import com.graphhopper.routing.ev.RoadClass;
 import lombok.*;
 
 import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
 
-@Getter
+
 public class RoadNode {
 
+    @Getter
     private final String id;
-    @Setter
+    @Getter
     private double lat;
-    @Setter
+    @Getter
     private double lon;
-    private int mergeCount; // how many points were merged into this node
 
-    // Metadata from map matching (GraphHopper)
     @Setter
-    private String roadName;
-    @Setter
-    private RoadClass roadClass;
-    @Setter
-    private double maxSpeed;     // km/h
-    @Setter
+    @Getter
     private boolean offRoad;     // true if point was not snapped to a road
 
     // Temporal metadata — when data was first and last observed at this node
-    @Setter
     private Instant firstSeen;
-    @Setter
     private Instant lastSeen;
 
-    // H3 cell index for fast spatial lookups
-    @Setter
-    private long h3CellId;
 
     public RoadNode(double lat, double lon) {
         this.id = UUID.randomUUID().toString();
         this.lat = lat;
         this.lon = lon;
-        this.mergeCount = 1;
         this.offRoad = false;
-    }
-
-    /**
-     * Merges a new point into this node via weighted average.
-     * The more points merged, the less impact a new point has.
-     */
-    public void mergeWith(double newLat, double newLon) {
-        this.lat = (this.lat * mergeCount + newLat) / (mergeCount + 1);
-        this.lon = (this.lon * mergeCount + newLon) / (mergeCount + 1);
-        this.mergeCount++;
-    }
-
-    /**
-     * Merges a new point including timestamp into this node.
-     * Updates the firstSeen/lastSeen range.
-     */
-    public void mergeWith(double newLat, double newLon, Instant timestamp) {
-        mergeWith(newLat, newLon);
-        updateTimestampRange(timestamp);
     }
 
     /**
@@ -92,7 +60,7 @@ public class RoadNode {
 
     @Override
     public String toString() {
-        return String.format("RoadNode[%s, %.6f, %.6f, road=%s, seen=%s..%s]",
-                id, lat, lon, roadName, firstSeen, lastSeen);
+        return String.format("RoadNode[%s, %.6f, %.6f, seen=%s..%s]",
+                id, lat, lon, firstSeen, lastSeen);
     }
 }

@@ -28,8 +28,6 @@ public class PipelineConfigEntity {
     @Column(nullable = false)
     private boolean active;
 
-    // ===== Krok 1: Predspracovanie =====
-
     @Column(name = "min_lat", nullable = false)
     private double minLat;
 
@@ -42,65 +40,11 @@ public class PipelineConfigEntity {
     @Column(name = "max_lon", nullable = false)
     private double maxLon;
 
-    @Column(name = "near_duplicate_threshold_m", nullable = false)
-    private double nearDuplicateThresholdM;
-
-    @Column(name = "outlier_min_neighbors", nullable = false)
-    private int outlierMinNeighbors;
-
-    @Column(name = "outlier_radius_m", nullable = false)
-    private double outlierRadiusM;
-
     @Column(name = "max_speed_kmh", nullable = false)
     private double maxSpeedKmh;
 
-    @Column(name = "trip_gap_minutes", nullable = false)
-    private long tripGapMinutes;
-
-    // ===== Krok 2: H3 Spatial Index =====
-
     @Column(name = "h3_dedup_resolution", nullable = false)
     private int h3DedupResolution;
-
-    @Column(name = "h3_cluster_resolution", nullable = false)
-    private int h3ClusterResolution;
-
-    @Column(name = "h3_adaptive_enabled", columnDefinition = "boolean default false")
-    private boolean h3AdaptiveEnabled;
-
-    @Column(name = "h3_dedup_resolution_urban", columnDefinition = "integer default 13")
-    private int h3DedupResolutionUrban;
-
-    @Column(name = "h3_adaptive_density_threshold", columnDefinition = "integer default 5")
-    private int h3AdaptiveDensityThreshold;
-
-    // ===== Krok 3: DBSCAN + Graf =====
-
-    @Column(name = "dbscan_eps_meters", nullable = false)
-    private double dbscanEpsMeters;
-
-    @Column(name = "dbscan_min_pts", nullable = false)
-    private int dbscanMinPts;
-
-    @Column(name = "max_edge_length_m", nullable = false)
-    private double maxEdgeLengthM;
-
-    @Column(name = "merge_threshold_m", nullable = false)
-    private double mergeThresholdM;
-
-    @Column(name = "knn_k", nullable = false)
-    private int knnK;
-
-    @Column(name = "max_bearing_diff_deg", columnDefinition = "double precision default 90")
-    private double maxBearingDiffDeg;
-
-    // ===== Krok 4: Map Matching =====
-
-    @Column(name = "max_snap_distance_m", nullable = false)
-    private double maxSnapDistanceM;
-
-    @Column(name = "remove_off_road_nodes", nullable = false)
-    private boolean removeOffRoadNodes;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

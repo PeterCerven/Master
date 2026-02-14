@@ -4,7 +4,7 @@ import com.uber.h3core.H3Core;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import sk.master.backend.config.PipelineConfig;
+import sk.master.backend.persistence.model.PipelineConfig;
 import sk.master.backend.persistence.entity.GraphEdgeEntity;
 import sk.master.backend.persistence.entity.GraphEntity;
 import sk.master.backend.persistence.entity.GraphNodeEntity;
@@ -242,7 +242,7 @@ public class GraphServiceImpl implements GraphService {
                 if (edges != null) {
                     for (RoadEdge edge : new ArrayList<>(edges)) {
                         RoadNode otherNode = graph.getNode(
-                                edge.getSourceId().equals(oldNode.getId()) ? edge.getTargetId() : edge.getSourceId()
+                                edge.sourceId().equals(oldNode.getId()) ? edge.targetId() : edge.sourceId()
                         );
 
                         if (otherNode != null && !nodesInCell.contains(otherNode)) {
@@ -297,7 +297,7 @@ public class GraphServiceImpl implements GraphService {
                 .collect(Collectors.toList()));
 
         graphEntity.setEdges(graph.getEdges().stream()
-                .map(edge -> new GraphEdgeEntity(edge.getSourceId(), edge.getTargetId(), edge.getDistanceMeters()))
+                .map(edge -> new GraphEdgeEntity(edge.sourceId(), edge.targetId(), edge.distanceMeters()))
                 .collect(Collectors.toList()));
 
         return graphRepository.save(graphEntity);

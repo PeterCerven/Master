@@ -16,6 +16,9 @@ export interface PipelineConfig {
   // H3
   h3DedupResolution: number;
   h3ClusterResolution: number;
+  h3AdaptiveEnabled: boolean;
+  h3DedupResolutionUrban: number;
+  h3AdaptiveDensityThreshold: number;
 
   // DBSCAN + Graph
   dbscanEpsMeters: number;
@@ -23,6 +26,7 @@ export interface PipelineConfig {
   maxEdgeLengthM: number;
   mergeThresholdM: number;
   knnK: number;
+  maxBearingDiffDeg: number;
 
   // Matching
   maxSnapDistanceM: number;

@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
@@ -18,6 +19,7 @@ import { PipelineConfig } from '@models/pipeline-config.model';
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
+    MatCheckboxModule,
     MatIconModule,
     MatProgressSpinnerModule,
     MatSnackBarModule,
@@ -58,12 +60,16 @@ export class Settings implements OnInit {
       // H3
       h3DedupResolution: [12, [Validators.required, Validators.min(0), Validators.max(15)]],
       h3ClusterResolution: [9, [Validators.required, Validators.min(0), Validators.max(15)]],
+      h3AdaptiveEnabled: [false],
+      h3DedupResolutionUrban: [13, [Validators.required, Validators.min(0), Validators.max(15)]],
+      h3AdaptiveDensityThreshold: [5, [Validators.required, Validators.min(2)]],
       // DBSCAN + Graph
       dbscanEpsMeters: [50, [Validators.required, Validators.min(1)]],
       dbscanMinPts: [2, [Validators.required, Validators.min(1)]],
       maxEdgeLengthM: [300, [Validators.required, Validators.min(1)]],
       mergeThresholdM: [10, [Validators.required, Validators.min(0.1)]],
       knnK: [5, [Validators.required, Validators.min(1)]],
+      maxBearingDiffDeg: [90, [Validators.required, Validators.min(0), Validators.max(180)]],
       // Matching
       maxSnapDistanceM: [100, [Validators.required, Validators.min(1)]],
     });

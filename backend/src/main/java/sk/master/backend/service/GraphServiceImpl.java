@@ -99,9 +99,12 @@ public class GraphServiceImpl implements GraphService {
         ));
         log.debug("  After sorting by timestamp");
 
-        // 1c) Speed-based outlier removal — points with unrealistic speed relative to previous
+        // 1c) Speed-based outlier removal + trip segmentation
         result = removeSpeedOutliers(result, config);
         log.debug("  After speed filter: {}", result.size());
+
+        // 1c2) Výpočet azimutov z konzekutívnych bodov v rámci tripu
+        computeBearings(result);
 
         // 1d) Exact duplicate removal (via HashSet — uses PositionalData.equals/hashCode)
         result = new ArrayList<>(new LinkedHashSet<>(result));
@@ -152,10 +155,12 @@ public class GraphServiceImpl implements GraphService {
         List<PositionalData> result = new ArrayList<>();
         PositionalData prev = null;
         int removed = 0;
+        int currentTripId = 0;
 
         for (PositionalData p : positionalData) {
             if (prev == null || p.getTimestamp() == null || prev.getTimestamp() == null) {
                 // First point or points without timestamp — always keep
+                p.setTripId(currentTripId);
                 result.add(p);
                 if (p.getTimestamp() != null) {
                     prev = p;
@@ -168,6 +173,8 @@ public class GraphServiceImpl implements GraphService {
 
             // If gap is larger than trip gap, it's a new trip — reset
             if (seconds > tripGapMinutes * 60) {
+                currentTripId++;
+                p.setTripId(currentTripId);
                 result.add(p);
                 prev = p;
                 continue;
@@ -175,6 +182,7 @@ public class GraphServiceImpl implements GraphService {
 
             // If time difference is zero or negative, keep the point (same time)
             if (seconds <= 0) {
+                p.setTripId(currentTripId);
                 result.add(p);
                 continue;
             }
@@ -185,6 +193,7 @@ public class GraphServiceImpl implements GraphService {
             double speedMs = dist / seconds;
 
             if (speedMs <= maxSpeedMs) {
+                p.setTripId(currentTripId);
                 result.add(p);
                 prev = p;
             } else {
@@ -200,6 +209,31 @@ public class GraphServiceImpl implements GraphService {
     }
 
     /**
+     * Vypočíta azimut pre každý bod na základe predchádzajúceho bodu v rámci tripu.
+     * Prvý bod v tripe nemá azimut (ostáva -1).
+     */
+    private void computeBearings(List<PositionalData> points) {
+        PositionalData prev = null;
+        int currentTrip = -1;
+
+        for (PositionalData p : points) {
+            if (p.getTripId() != currentTrip) {
+                currentTrip = p.getTripId();
+                prev = p;
+                continue;
+            }
+
+            if (prev != null) {
+                double bearing = GeoUtils.initialBearing(
+                        prev.getLat(), prev.getLon(), p.getLat(), p.getLon()
+                );
+                p.setBearing(bearing);
+            }
+            prev = p;
+        }
+    }
+
+    /**
      * Removes near-duplicate points — points closer than threshold are merged.
      * Uses grid-based spatial hashing for O(n) average complexity.
      */
@@ -212,7 +246,9 @@ public class GraphServiceImpl implements GraphService {
         Map<String, PositionalData> gridMap = new LinkedHashMap<>();
 
         for (PositionalData p : positionalData) {
-            String cellKey = (int) (p.getLat() / cellSize) + ":" + (int) (p.getLon() / cellSize);
+            int cellLat = (int) Math.floor(p.getLat() / cellSize);
+            int cellLon = (int) Math.floor(p.getLon() / cellSize);
+            String cellKey = cellLat + ":" + cellLon;
             if (!gridMap.containsKey(cellKey)) {
                 gridMap.put(cellKey, p);
             }
@@ -293,35 +329,82 @@ public class GraphServiceImpl implements GraphService {
     // =========================================================================
 
     /**
-     * Indexes points into H3 hexagonal cells and deduplicates —
-     * points in the same resolution-11 cell (~29m) are merged to centroid.
-     * Preserves earliest and latest timestamps from points in the cell.
+     * Indexuje body do H3 hexagonálnych buniek a deduplikuje —
+     * body v rovnakej bunke sú zlúčené na centroid.
+     * Deduplikácia prebieha v rámci každého tripu samostatne (zachováva trajektóriu).
+     * Podporuje adaptívnu H3 rozlíšenie pre husté oblasti.
      */
     private List<PositionalData> spatialIndexAndDedup(List<PositionalData> positionalData, PipelineConfig config) {
-        int resolution = config.getH3DedupResolution();
+        int baseResolution = config.getH3DedupResolution();
 
-        // Group points by H3 cell ID
-        Map<Long, List<PositionalData>> cellMap = new HashMap<>();
+        // Fáza 1: Zoskupi podľa tripId + h3CellId na základnej rozlíšení
+        Map<String, List<PositionalData>> cellMap = new LinkedHashMap<>();
         for (PositionalData p : positionalData) {
-            long cellId = h3.latLngToCell(p.getLat(), p.getLon(), resolution);
-            cellMap.computeIfAbsent(cellId, _ -> new ArrayList<>()).add(p);
+            long cellId = h3.latLngToCell(p.getLat(), p.getLon(), baseResolution);
+            String key = p.getTripId() + ":" + cellId;
+            cellMap.computeIfAbsent(key, _ -> new ArrayList<>()).add(p);
         }
 
-        // For each cell, return centroid of all points in the cell with earliest timestamp
+        // Fáza 2: Adaptívna rozlíšenie — husté bunky sa re-indexujú na jemnejšej rozlíšení
+        if (config.isH3AdaptiveEnabled()) {
+            int urbanResolution = config.getH3DedupResolutionUrban();
+            int densityThreshold = config.getH3AdaptiveDensityThreshold();
+
+            Map<String, List<PositionalData>> refinedMap = new LinkedHashMap<>();
+            for (Map.Entry<String, List<PositionalData>> entry : cellMap.entrySet()) {
+                if (entry.getValue().size() >= densityThreshold) {
+                    // Hustá bunka — rozdeľ na jemnejšiu rozlíšenie
+                    for (PositionalData p : entry.getValue()) {
+                        long fineCellId = h3.latLngToCell(p.getLat(), p.getLon(), urbanResolution);
+                        String fineKey = p.getTripId() + ":fine:" + fineCellId;
+                        refinedMap.computeIfAbsent(fineKey, _ -> new ArrayList<>()).add(p);
+                    }
+                } else {
+                    refinedMap.put(entry.getKey(), entry.getValue());
+                }
+            }
+            cellMap = refinedMap;
+        }
+
+        // Fáza 3: Deduplikácia — centroid + timestamp + kruhový priemer azimutov
         List<PositionalData> deduplicated = new ArrayList<>();
-        for (Map.Entry<Long, List<PositionalData>> entry : cellMap.entrySet()) {
+        for (Map.Entry<String, List<PositionalData>> entry : cellMap.entrySet()) {
             List<PositionalData> cellPoints = entry.getValue();
             double avgLat = cellPoints.stream().mapToDouble(PositionalData::getLat).average().orElse(0);
             double avgLon = cellPoints.stream().mapToDouble(PositionalData::getLon).average().orElse(0);
 
-            // Keep earliest timestamp from points in the cell (representative time)
             Instant earliest = cellPoints.stream()
                     .map(PositionalData::getTimestamp)
                     .filter(Objects::nonNull)
                     .min(Comparator.naturalOrder())
                     .orElse(null);
 
-            deduplicated.add(new PositionalData(avgLat, avgLon, earliest));
+            int tripId = cellPoints.getFirst().getTripId();
+
+            // Kruhový priemer azimutov cez sin/cos
+            double sinSum = 0, cosSum = 0;
+            int bearingCount = 0;
+            for (PositionalData cp : cellPoints) {
+                if (cp.getBearing() >= 0) {
+                    sinSum += Math.sin(Math.toRadians(cp.getBearing()));
+                    cosSum += Math.cos(Math.toRadians(cp.getBearing()));
+                    bearingCount++;
+                }
+            }
+            double avgBearing = -1;
+            if (bearingCount > 0) {
+                double sinAvg = sinSum / bearingCount;
+                double cosAvg = cosSum / bearingCount;
+                // Ak sa vektory vyrušia (protichodné azimuty), bearing je neznámy
+                if (Math.abs(sinAvg) > 1e-10 || Math.abs(cosAvg) > 1e-10) {
+                    avgBearing = Math.toDegrees(Math.atan2(sinAvg, cosAvg));
+                    avgBearing = (avgBearing + 360) % 360;
+                }
+            }
+
+            PositionalData deduped = new PositionalData(avgLat, avgLon, earliest, tripId);
+            deduped.setBearing(avgBearing);
+            deduplicated.add(deduped);
         }
 
         return deduplicated;
@@ -347,29 +430,56 @@ public class GraphServiceImpl implements GraphService {
     }
 
     /**
-     * Builds a new graph from scratch using DBSCAN + Delaunay + Gabriel pruning.
+     * Vytvorí nový graf s trajektórnymi hranami + doplnkovými Delaunay hranami.
+     * Trajektórne hrany spájajú konzekutívne body v rámci tripu (skutočné cesty).
+     * Doplnkové hrany spájajú medzitripové prepojenia cez Delaunay + Gabriel pruning.
+     * Bearing filter odstraňuje doplnkové hrany s nekompatibilným azimutom.
      */
     private void buildNewGraph(RoadGraph graph, List<PositionalData> graphPoints, PipelineConfig config) {
-        // 3a) Použijem všetky H3-deduplikované body priamo ako uzly grafu.
-        // DBSCAN centroidy strácajú priestorovú kontinuitu — Delaunay + Gabriel
-        // pruning lepšie zachovajú topológiu cestnej siete.
-        log.debug("  Using all {} dedup points as nodes (DBSCAN bypassed)", graphPoints.size());
+        // 3a) Vytvor nody z bodov, zoskupené podľa tripu
+        Map<Integer, List<RoadNode>> tripNodes = new LinkedHashMap<>();
+        Map<String, Double> nodeBearings = new HashMap<>();
 
-        // 3b) Vytvor nody z bodov (vrátane temporálnych metadát)
-        List<RoadNode> nodes = new ArrayList<>();
         for (PositionalData p : graphPoints) {
             RoadNode node = new RoadNode(p.getLat(), p.getLon());
             node.setH3CellId(h3.latLngToCell(p.getLat(), p.getLon(), config.getH3ClusterResolution()));
             node.updateTimestampRange(p.getTimestamp());
             graph.addNode(node);
-            nodes.add(node);
+            tripNodes.computeIfAbsent(p.getTripId(), _ -> new ArrayList<>()).add(node);
+
+            if (p.getBearing() >= 0) {
+                nodeBearings.put(node.getId(), p.getBearing());
+            }
         }
+        log.debug("  {} trips, {} total nodes", tripNodes.size(), graph.getNodeCount());
 
-        // 3c) Delaunay triangulation → vytvori hrany
-        connectWithDelaunay(graph, nodes);
+        // 3b) Trajektórne hrany — spoj po sebe idúce body v rámci každého tripu
+        Set<RoadEdge> trajectoryEdges = new HashSet<>();
+        int trajectoryEdgeCount = 0;
+        for (List<RoadNode> nodes : tripNodes.values()) {
+            for (int i = 0; i < nodes.size() - 1; i++) {
+                RoadNode a = nodes.get(i);
+                RoadNode b = nodes.get(i + 1);
+                double dist = GeoUtils.haversineDistance(a.getLat(), a.getLon(), b.getLat(), b.getLon());
+                if (dist <= config.getMaxEdgeLengthM()) {
+                    graph.addEdge(a, b, dist);
+                    RoadEdge edge = graph.getJGraphTGraph().getEdge(a, b);
+                    if (edge != null) {
+                        trajectoryEdges.add(edge);
+                        trajectoryEdgeCount++;
+                    }
+                }
+            }
+        }
+        log.debug("  Trajectory edges: {}", trajectoryEdgeCount);
 
-        // 3d) Gabriel graph pruning — odstráni spurious cross-connections
+        // 3c) Doplnkové hrany — Delaunay + Gabriel pre medzitripové prepojenia
+        List<RoadNode> allNodes = new ArrayList<>(graph.getNodes());
+        connectWithDelaunay(graph, allNodes);
         pruneToGabrielGraph(graph);
+
+        // 3d) Bearing filter — odstráni doplnkové hrany s nekompatibilným azimutom
+        pruneByBearing(graph, nodeBearings, trajectoryEdges, config.getMaxBearingDiffDeg());
 
         // 3e) Odstráni hrany dlhšie než maxEdgeLength
         pruneByMaxLength(graph, config);
@@ -484,6 +594,40 @@ public class GraphServiceImpl implements GraphService {
             }
         }
         log.debug("  Max-length pruning: removed {} edges (>{} m)", toRemove.size(), maxLen);
+    }
+
+    /**
+     * Odstráni doplnkové hrany kde azimut oboch koncových bodov je známy
+     * a ich rozdiel presahuje maximálny povolený.
+     * Trajektórne hrany (z konzekutívnych bodov v rámci tripu) sú chránené.
+     */
+    private void pruneByBearing(RoadGraph graph, Map<String, Double> nodeBearings,
+                                 Set<RoadEdge> trajectoryEdges, double maxDiffDeg) {
+        if (maxDiffDeg >= 180) return; // Vypnuté
+
+        List<RoadEdge> toRemove = new ArrayList<>();
+        for (RoadEdge edge : graph.getEdges()) {
+            if (trajectoryEdges.contains(edge)) continue; // Chrán trajektórne hrany
+
+            Double b1 = nodeBearings.get(edge.getSourceId());
+            Double b2 = nodeBearings.get(edge.getTargetId());
+
+            if (b1 == null || b2 == null) continue; // Neznámy azimut — ponechaj
+
+            double diff = GeoUtils.bearingDifference(b1, b2);
+            if (diff > maxDiffDeg) {
+                toRemove.add(edge);
+            }
+        }
+
+        for (RoadEdge edge : toRemove) {
+            RoadNode source = graph.getNode(edge.getSourceId());
+            RoadNode target = graph.getNode(edge.getTargetId());
+            if (source != null && target != null) {
+                graph.getJGraphTGraph().removeEdge(source, target);
+            }
+        }
+        log.debug("  Bearing pruning: removed {} edges (max diff {}°)", toRemove.size(), maxDiffDeg);
     }
 
     /**

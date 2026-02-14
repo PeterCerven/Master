@@ -173,6 +173,12 @@ $step-colors: (
   gap: 12px 16px;
 }
 
+.checkbox-field {
+  display: flex;
+  align-items: center;
+  min-height: 56px;
+}
+
 // ─── Sticky action bar ───
 .action-bar {
   position: fixed;

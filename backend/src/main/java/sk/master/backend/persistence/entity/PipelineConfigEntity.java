@@ -65,6 +65,15 @@ public class PipelineConfigEntity {
     @Column(name = "h3_cluster_resolution", nullable = false)
     private int h3ClusterResolution;
 
+    @Column(name = "h3_adaptive_enabled", columnDefinition = "boolean default false")
+    private boolean h3AdaptiveEnabled;
+
+    @Column(name = "h3_dedup_resolution_urban", columnDefinition = "integer default 13")
+    private int h3DedupResolutionUrban;
+
+    @Column(name = "h3_adaptive_density_threshold", columnDefinition = "integer default 5")
+    private int h3AdaptiveDensityThreshold;
+
     // ===== Krok 3: DBSCAN + Graf =====
 
     @Column(name = "dbscan_eps_meters", nullable = false)
@@ -81,6 +90,9 @@ public class PipelineConfigEntity {
 
     @Column(name = "knn_k", nullable = false)
     private int knnK;
+
+    @Column(name = "max_bearing_diff_deg", columnDefinition = "double precision default 90")
+    private double maxBearingDiffDeg;
 
     // ===== Krok 4: Map Matching =====
 

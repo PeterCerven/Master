@@ -25,6 +25,9 @@ public class PipelineConfig {
 
     private int h3DedupResolution;
     private int h3ClusterResolution;
+    private boolean h3AdaptiveEnabled;
+    private int h3DedupResolutionUrban;
+    private int h3AdaptiveDensityThreshold;
 
     // ===== Krok 3: DBSCAN + Graf =====
 
@@ -33,6 +36,7 @@ public class PipelineConfig {
     private double maxEdgeLengthM;
     private double mergeThresholdM;
     private int knnK;
+    private double maxBearingDiffDeg;
 
     // ===== Krok 4: Map Matching =====
 

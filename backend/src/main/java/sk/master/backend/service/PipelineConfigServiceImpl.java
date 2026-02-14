@@ -67,8 +67,10 @@ public class PipelineConfigServiceImpl implements PipelineConfigService {
                 e.getNearDuplicateThresholdM(), e.getOutlierMinNeighbors(),
                 e.getOutlierRadiusM(), e.getMaxSpeedKmh(), e.getTripGapMinutes(),
                 e.getH3DedupResolution(), e.getH3ClusterResolution(),
+                e.isH3AdaptiveEnabled(), e.getH3DedupResolutionUrban(), e.getH3AdaptiveDensityThreshold(),
                 e.getDbscanEpsMeters(), e.getDbscanMinPts(),
                 e.getMaxEdgeLengthM(), e.getMergeThresholdM(), e.getKnnK(),
+                e.getMaxBearingDiffDeg(),
                 e.getMaxSnapDistanceM(),
                 e.isRemoveOffRoadNodes()
         );
@@ -87,11 +89,15 @@ public class PipelineConfigServiceImpl implements PipelineConfigService {
         e.setTripGapMinutes(d.getTripGapMinutes());
         e.setH3DedupResolution(d.getH3DedupResolution());
         e.setH3ClusterResolution(d.getH3ClusterResolution());
+        e.setH3AdaptiveEnabled(d.isH3AdaptiveEnabled());
+        e.setH3DedupResolutionUrban(d.getH3DedupResolutionUrban());
+        e.setH3AdaptiveDensityThreshold(d.getH3AdaptiveDensityThreshold());
         e.setDbscanEpsMeters(d.getDbscanEpsMeters());
         e.setDbscanMinPts(d.getDbscanMinPts());
         e.setMaxEdgeLengthM(d.getMaxEdgeLengthM());
         e.setMergeThresholdM(d.getMergeThresholdM());
         e.setKnnK(d.getKnnK());
+        e.setMaxBearingDiffDeg(d.getMaxBearingDiffDeg());
         e.setMaxSnapDistanceM(d.getMaxSnapDistanceM());
         e.setRemoveOffRoadNodes(d.isRemoveOffRoadNodes());
     }
@@ -102,8 +108,10 @@ public class PipelineConfigServiceImpl implements PipelineConfigService {
                 e.getNearDuplicateThresholdM(), e.getOutlierMinNeighbors(),
                 e.getOutlierRadiusM(), e.getMaxSpeedKmh(), e.getTripGapMinutes(),
                 e.getH3DedupResolution(), e.getH3ClusterResolution(),
+                e.isH3AdaptiveEnabled(), e.getH3DedupResolutionUrban(), e.getH3AdaptiveDensityThreshold(),
                 e.getDbscanEpsMeters(), e.getDbscanMinPts(),
                 e.getMaxEdgeLengthM(), e.getMergeThresholdM(), e.getKnnK(),
+                e.getMaxBearingDiffDeg(),
                 e.getMaxSnapDistanceM(),
                 e.isRemoveOffRoadNodes()
         );
@@ -127,12 +135,16 @@ public class PipelineConfigServiceImpl implements PipelineConfigService {
         // H3
         e.setH3DedupResolution(12);
         e.setH3ClusterResolution(9);
+        e.setH3AdaptiveEnabled(false);
+        e.setH3DedupResolutionUrban(13);
+        e.setH3AdaptiveDensityThreshold(5);
         // DBSCAN + Graf
         e.setDbscanEpsMeters(35);
         e.setDbscanMinPts(2);
         e.setMaxEdgeLengthM(200);
         e.setMergeThresholdM(10);
         e.setKnnK(2);
+        e.setMaxBearingDiffDeg(90);
         // Map Matching
         e.setMaxSnapDistanceM(100);
         e.setRemoveOffRoadNodes(false);

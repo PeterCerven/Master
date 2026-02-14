@@ -133,8 +133,8 @@ public class PipelineConfigServiceImpl implements PipelineConfigService {
         e.setMaxSpeedKmh(200);
         e.setTripGapMinutes(30);
         // H3
-        e.setH3DedupResolution(12);
-        e.setH3ClusterResolution(9);
+        e.setH3DedupResolution(13);
+        e.setH3ClusterResolution(13);
         e.setH3AdaptiveEnabled(false);
         e.setH3DedupResolutionUrban(13);
         e.setH3AdaptiveDensityThreshold(5);

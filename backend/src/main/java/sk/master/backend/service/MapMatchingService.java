@@ -1,7 +1,9 @@
 package sk.master.backend.service;
 
-import sk.master.backend.persistence.model.SnappedPoint;
+import sk.master.backend.persistence.model.PositionalData;
+
+import java.util.List;
 
 public interface MapMatchingService {
-    SnappedPoint snapToRoad(double lat, double lon);
+    List<PositionalData> matchTrajectory(List<PositionalData> trip);
 }

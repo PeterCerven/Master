@@ -2,8 +2,6 @@ package sk.master.backend.service;
 
 import io.jenetics.jpx.GPX;
 import io.jenetics.jpx.Metadata;
-import io.jenetics.jpx.Track;
-import io.jenetics.jpx.TrackSegment;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -40,16 +38,25 @@ public class FileServiceImpl implements FileService {
                     .flatMap(Metadata::getTime)
                     .orElse(null);
 
+            List<PositionalData> result = new ArrayList<>();
+            // Use an array to allow mutation inside the lambda expressions
+            int[] tripCounter = {1};
+
             if (gpx.tracks() != null) {
-                return gpx.tracks()
-                        .flatMap(Track::segments)
-                        .flatMap(TrackSegment::points)
-                        .map(point -> new PositionalData(
-                                point.getLatitude().doubleValue(),
-                                point.getLongitude().doubleValue(),
-                                point.getTime().orElse(metadataTime)
-                                ))
-                        .toList();
+                gpx.tracks().forEach(track -> track.segments().forEach(segment -> {
+                    int currentTripId = tripCounter[0];
+
+                    segment.points().forEach(point -> result.add(new PositionalData(
+                            point.getLatitude().doubleValue(),
+                            point.getLongitude().doubleValue(),
+                            point.getTime().orElse(metadataTime),
+                            currentTripId // Assign the tripId right here!
+                    )));
+
+                    // Increment trip ID for the next segment (a new continuous drive)
+                    tripCounter[0]++;
+                }));
+                return result;
             }
             throw new Exception("No GPS points");
         } catch (Exception e) {
@@ -62,6 +69,7 @@ public class FileServiceImpl implements FileService {
         JsonNode root = mapper.readTree(file.getBytes());
 
         List<PositionalData> result = new ArrayList<>();
+        int defaultTripId = 1;
 
         for (JsonNode feature : root.get("features")) {
             JsonNode coords = feature.get("geometry").get("coordinates");
@@ -71,7 +79,11 @@ public class FileServiceImpl implements FileService {
             double lat = coords.get(1).asDouble();
             Instant timestamp = Instant.parse(props.get("timestamp").asString());
 
-            result.add(new PositionalData(lat, lon, timestamp));
+            // Check if the GeoJSON properties contain a trip identifier
+            int tripId = props.has("trip_id") ? props.get("trip_id").asInt() : defaultTripId;
+
+            // Use the constructor with tripId
+            result.add(new PositionalData(lat, lon, timestamp, tripId));
         }
 
         return result;

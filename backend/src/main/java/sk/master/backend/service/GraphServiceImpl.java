@@ -1,9 +1,11 @@
 package sk.master.backend.service;
 
 import com.uber.h3core.H3Core;
+import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import sk.master.backend.persistence.dto.GraphDto;
 import sk.master.backend.persistence.model.PipelineConfig;
 import sk.master.backend.persistence.entity.GraphEdgeEntity;
 import sk.master.backend.persistence.entity.GraphEntity;
@@ -28,6 +30,8 @@ public class GraphServiceImpl implements GraphService {
     private final MapMatchingService mapMatchingService;
     private final H3Core h3;
     private final GraphRepository graphRepository;
+    @Getter
+    private RoadGraph roadGraph;
 
     public GraphServiceImpl(GraphRepository graphRepository, PipelineConfigService configService, MapMatchingService mapMatchingService) {
         this.graphRepository = graphRepository;
@@ -41,16 +45,17 @@ public class GraphServiceImpl implements GraphService {
     }
 
     @Override
-    public RoadGraph generateRoadNetwork(RoadGraph existingGraph, List<PositionalData> positionalData) {
+    public RoadGraph generateRoadNetwork(GraphDto existingGraph, List<PositionalData> positionalData) {
+        // TODO implement incremental graph updates: If existingGraph is provided, only process new points and merge with existing graph instead of rebuilding from scratch.
         if (positionalData == null || positionalData.isEmpty()) {
             log.warn("Empty position list — returning existing graph or new empty one.");
-            return existingGraph != null ? existingGraph : new RoadGraph();
+            return new RoadGraph();
         }
 
         PipelineConfig config = configService.getActivePipelineConfig();
         log.info("=== Pipeline start: {} input points ===", positionalData.size());
 
-        RoadGraph graph = existingGraph != null ? existingGraph : new RoadGraph();
+        roadGraph = new RoadGraph();
 
         // Step 1: Preprocessing & Split into Trips
         // Utilizes the tripId from FileServiceImpl
@@ -77,20 +82,20 @@ public class GraphServiceImpl implements GraphService {
             }
 
             // Insert strictly chronologically: P1 -> P2 -> P3
-            insertTrajectoryIntoGraph(graph, trajectoryToInsert, isOffRoad);
+            insertTrajectoryIntoGraph(trajectoryToInsert, isOffRoad);
             processedTrips++;
         }
         log.info("Step 2 & 3 (matching & insertion): Processed {} trips. Graph currently has {} nodes, {} edges",
-                processedTrips, graph.getNodeCount(), graph.getEdgeCount());
+                processedTrips, roadGraph.getNodeCount(), roadGraph.getEdgeCount());
 
         // Step 4: Spatial Merge & Deduplication via H3
         // Collapses overlapping trajectories from different cars into single road segments
-        mergeOverlappingRoadSegments(graph, config);
+        mergeOverlappingRoadSegments(config);
         log.info("Step 4 (merge & dedup): Graph optimized to {} nodes, {} edges",
-                graph.getNodeCount(), graph.getEdgeCount());
+                roadGraph.getNodeCount(), roadGraph.getEdgeCount());
 
         log.info("=== Pipeline completed ===");
-        return graph;
+        return roadGraph;
     }
 
     /**
@@ -179,7 +184,7 @@ public class GraphServiceImpl implements GraphService {
     /**
      * Inserts a sequential list of points (a trajectory) into the graph chronologically.
      */
-    private void insertTrajectoryIntoGraph(RoadGraph graph, List<PositionalData> trajectory, boolean isOffRoad) {
+    private void insertTrajectoryIntoGraph(List<PositionalData> trajectory, boolean isOffRoad) {
         RoadNode prevNode = null;
 
         for (PositionalData p : trajectory) {
@@ -190,14 +195,14 @@ public class GraphServiceImpl implements GraphService {
                 currentNode.updateTimestampRange(p.getTimestamp());
             }
 
-            graph.addNode(currentNode);
+            roadGraph.addNode(currentNode);
 
             if (prevNode != null) {
                 double distance = GeoUtils.haversineDistance(
                         prevNode.getLat(), prevNode.getLon(),
                         currentNode.getLat(), currentNode.getLon()
                 );
-                graph.addEdge(prevNode, currentNode, distance);
+                roadGraph.addEdge(prevNode, currentNode, distance);
             }
 
             prevNode = currentNode;
@@ -208,12 +213,12 @@ public class GraphServiceImpl implements GraphService {
      * Collapses parallel and overlapping trajectories from different trips
      * into a single unified road network using H3 spatial clustering.
      */
-    private void mergeOverlappingRoadSegments(RoadGraph graph, PipelineConfig config) {
+    private void mergeOverlappingRoadSegments(PipelineConfig config) {
         int resolution = config.getH3DedupResolution();
 
         // Group all nodes by their H3 Hexagon ID
         Map<Long, List<RoadNode>> h3Grid = new HashMap<>();
-        for (RoadNode node : graph.getNodes()) {
+        for (RoadNode node : roadGraph.getNodes()) {
             long cellId = h3.latLngToCell(node.getLat(), node.getLon(), resolution);
             h3Grid.computeIfAbsent(cellId, _ -> new ArrayList<>()).add(node);
         }
@@ -233,15 +238,15 @@ public class GraphServiceImpl implements GraphService {
             boolean isOffRoad = nodesInCell.stream().allMatch(RoadNode::isOffRoad);
             masterNode.setOffRoad(isOffRoad);
 
-            graph.addNode(masterNode);
+            roadGraph.addNode(masterNode);
 
             // Rewire all edges touching the old overlapping nodes to the master node
             for (RoadNode oldNode : nodesInCell) {
-                Set<RoadEdge> edges = graph.getEdgesOf(oldNode);
+                Set<RoadEdge> edges = roadGraph.getEdgesOf(oldNode);
 
                 if (edges != null) {
                     for (RoadEdge edge : new ArrayList<>(edges)) {
-                        RoadNode otherNode = graph.getNode(
+                        RoadNode otherNode = roadGraph.getNode(
                                 edge.sourceId().equals(oldNode.getId()) ? edge.targetId() : edge.sourceId()
                         );
 
@@ -250,11 +255,11 @@ public class GraphServiceImpl implements GraphService {
                                     masterNode.getLat(), masterNode.getLon(),
                                     otherNode.getLat(), otherNode.getLon()
                             );
-                            graph.addEdge(masterNode, otherNode, newDist);
+                            roadGraph.addEdge(masterNode, otherNode, newDist);
                         }
                     }
                 }
-                graph.removeNode(oldNode);
+                roadGraph.removeNode(oldNode);
             }
             mergedNodeCount += (nodesInCell.size() - 1);
         }
@@ -288,15 +293,15 @@ public class GraphServiceImpl implements GraphService {
     }
 
     @Override
-    public GraphEntity saveGraphToDatabase(RoadGraph graph, String name) {
+    public GraphEntity saveGraphToDatabase(GraphDto graph, String name) {
         GraphEntity graphEntity = new GraphEntity();
         graphEntity.setName(name);
 
-        graphEntity.setNodes(graph.getNodes().stream()
-                .map(node -> new GraphNodeEntity(node.getId(), node.getLat(), node.getLon()))
+        graphEntity.setNodes(graph.nodes().stream()
+                .map(node -> new GraphNodeEntity(node.id(), node.lat(), node.lon()))
                 .collect(Collectors.toList()));
 
-        graphEntity.setEdges(graph.getEdges().stream()
+        graphEntity.setEdges(graph.edges().stream()
                 .map(edge -> new GraphEdgeEntity(edge.sourceId(), edge.targetId(), edge.distanceMeters()))
                 .collect(Collectors.toList()));
 
@@ -304,8 +309,8 @@ public class GraphServiceImpl implements GraphService {
     }
 
     @Override
-    public RoadGraph importGraphFromDatabase(Long graphId) {
-        // TODO: Implement loading graph
-        return null;
+    public GraphDto importGraphFromDatabase(Long graphId) {
+        GraphEntity graphEntity = graphRepository.findGraphEntityById(graphId);
+        return GraphDto.fromGraphEntity(graphEntity);
     }
 }

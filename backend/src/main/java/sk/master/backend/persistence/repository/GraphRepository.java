@@ -6,4 +6,5 @@ import sk.master.backend.persistence.entity.GraphEntity;
 
 @Repository
 public interface GraphRepository extends JpaRepository<GraphEntity, Long> {
+    GraphEntity findGraphEntityById(Long id);
 }

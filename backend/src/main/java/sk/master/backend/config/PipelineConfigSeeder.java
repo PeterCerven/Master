@@ -7,7 +7,7 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 import sk.master.backend.persistence.entity.PipelineConfigEntity;
 import sk.master.backend.persistence.repository.PipelineConfigRepository;
-import sk.master.backend.service.PipelineConfigServiceImpl;
+import sk.master.backend.service.util.PipelineConfigServiceImpl;
 
 @Component
 public class PipelineConfigSeeder implements ApplicationRunner {

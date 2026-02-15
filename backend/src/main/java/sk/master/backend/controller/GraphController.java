@@ -5,14 +5,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import sk.master.backend.persistence.dto.AddPointsRequest;
+import sk.master.backend.persistence.dto.AddPointsDto;
 import sk.master.backend.persistence.dto.GraphDto;
-import sk.master.backend.persistence.dto.SaveGraphRequest;
+import sk.master.backend.persistence.dto.SaveGraphDto;
 import sk.master.backend.persistence.entity.GraphEntity;
 import sk.master.backend.persistence.model.PositionalData;
 import sk.master.backend.persistence.model.RoadGraph;
-import sk.master.backend.service.FileService;
-import sk.master.backend.service.GraphConstructionService;
+import sk.master.backend.service.util.FileService;
+import sk.master.backend.service.construct.GraphConstructionService;
 
 import java.util.List;
 
@@ -44,13 +44,13 @@ public class GraphController {
     }
 
     @PostMapping("/save")
-    public ResponseEntity<GraphEntity> saveGraph(@RequestBody SaveGraphRequest request) {
+    public ResponseEntity<GraphEntity> saveGraph(@RequestBody SaveGraphDto request) {
         GraphEntity graphEntity = graphConstructionService.saveGraphToDatabase(request.getGraph(), request.getName());
         return ResponseEntity.ok(graphEntity);
     }
 
     @PostMapping("/add-points")
-    public ResponseEntity<GraphDto> updateGraphWithPoints(@RequestBody AddPointsRequest request) {
+    public ResponseEntity<GraphDto> updateGraphWithPoints(@RequestBody AddPointsDto request) {
         log.info(String.valueOf(request));
         RoadGraph graph = graphConstructionService.generateRoadNetwork(request.getGraph(), request.getPositionalData());
         return ResponseEntity.ok(GraphDto.fromRoadGraph(graph));

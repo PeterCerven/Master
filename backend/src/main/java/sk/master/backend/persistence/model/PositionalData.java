@@ -14,7 +14,6 @@ public class PositionalData {
     private double lon;
     private Instant timestamp;
     private int tripId;
-    private double bearing = -1; // Azimut v stupňoch [0, 360), -1 = neznámy
 
     public PositionalData(double lat, double lon, Instant timestamp) {
         this.lat = lat;

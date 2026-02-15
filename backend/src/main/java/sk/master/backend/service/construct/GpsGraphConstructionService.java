@@ -1,4 +1,4 @@
-package sk.master.backend.service;
+package sk.master.backend.service.construct;
 
 import com.uber.h3core.H3Core;
 import lombok.Getter;
@@ -15,6 +15,7 @@ import sk.master.backend.persistence.model.RoadEdge;
 import sk.master.backend.persistence.model.RoadGraph;
 import sk.master.backend.persistence.model.RoadNode;
 import sk.master.backend.persistence.repository.GraphRepository;
+import sk.master.backend.service.util.PipelineConfigService;
 import sk.master.backend.util.GeoUtils;
 
 import java.io.IOException;
@@ -131,9 +132,6 @@ public class GpsGraphConstructionService implements GraphConstructionService {
 
             // Exact duplicate removal
             trip = new ArrayList<>(new LinkedHashSet<>(trip));
-
-            // Výpočet azimutov z konzekutívnych bodov v rámci tripu
-            computeBearings(trip);
 
             // Ak po vyčistení zostal zmysluplný počet bodov pre trajektóriu
             if (trip.size() >= 2) {
@@ -265,19 +263,6 @@ public class GpsGraphConstructionService implements GraphConstructionService {
         }
 
         log.info("Merged {} overlapping nodes into unified intersections/road segments.", mergedNodeCount);
-    }
-
-    private void computeBearings(List<PositionalData> trip) {
-        PositionalData prev = null;
-        for (PositionalData p : trip) {
-            if (prev != null) {
-                double bearing = GeoUtils.initialBearing(
-                        prev.getLat(), prev.getLon(), p.getLat(), p.getLon()
-                );
-                p.setBearing(bearing);
-            }
-            prev = p;
-        }
     }
 
     private boolean isValidCoordinate(PositionalData p) {

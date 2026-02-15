@@ -19,21 +19,4 @@ public final class GeoUtils {
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return EARTH_RADIUS_METERS * c;
     }
-
-    /**
-     * Počiatočný azimut (bearing) od bodu 1 k bodu 2 v stupňoch [0, 360).
-     * Používa forward azimuth vzorec na sfére.
-     */
-    public static double initialBearing(double lat1, double lon1, double lat2, double lon2) {
-        double phi1 = Math.toRadians(lat1);
-        double phi2 = Math.toRadians(lat2);
-        double dLambda = Math.toRadians(lon2 - lon1);
-
-        double y = Math.sin(dLambda) * Math.cos(phi2);
-        double x = Math.cos(phi1) * Math.sin(phi2)
-                - Math.sin(phi1) * Math.cos(phi2) * Math.cos(dLambda);
-
-        double bearing = Math.toDegrees(Math.atan2(y, x));
-        return (bearing + 360) % 360;
-    }
 }

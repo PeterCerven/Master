@@ -1,4 +1,4 @@
-package sk.master.backend.service;
+package sk.master.backend.service.util;
 
 import org.springframework.web.multipart.MultipartFile;
 import sk.master.backend.persistence.model.PositionalData;

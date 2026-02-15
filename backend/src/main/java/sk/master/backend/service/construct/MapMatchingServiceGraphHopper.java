@@ -1,4 +1,4 @@
-package sk.master.backend.service;
+package sk.master.backend.service.construct;
 
 import com.graphhopper.GraphHopper;
 import com.graphhopper.matching.MapMatching;

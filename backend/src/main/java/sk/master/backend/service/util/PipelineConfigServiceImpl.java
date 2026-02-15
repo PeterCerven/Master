@@ -1,4 +1,4 @@
-package sk.master.backend.service;
+package sk.master.backend.service.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

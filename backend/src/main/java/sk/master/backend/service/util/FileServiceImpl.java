@@ -1,4 +1,4 @@
-package sk.master.backend.service;
+package sk.master.backend.service.util;
 
 import io.jenetics.jpx.GPX;
 import io.jenetics.jpx.Metadata;

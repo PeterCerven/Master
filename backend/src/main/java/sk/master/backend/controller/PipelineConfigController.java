@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sk.master.backend.persistence.dto.PipelineConfigDto;
-import sk.master.backend.service.PipelineConfigService;
+import sk.master.backend.service.util.PipelineConfigService;
 
 @RestController
 @RequestMapping("/api/pipeline-config")

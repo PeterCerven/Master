@@ -1,4 +1,4 @@
-package sk.master.backend.service;
+package sk.master.backend.service.construct;
 
 import sk.master.backend.persistence.model.PositionalData;
 

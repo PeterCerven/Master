@@ -32,8 +32,6 @@ public class GraphHopperConfig {
         hopper.setOSMFile(osmFile);
         hopper.setGraphHopperLocation(graphLocation);
 
-        // Register encoded values we want to read from edges
-        hopper.setEncodedValuesString("car_access, car_average_speed, road_class, road_environment, max_speed, surface");
         hopper.setProfiles(new Profile("car").setCustomModel(GHUtility.loadCustomModelFromJar("car.json")));
 
         hopper.importOrLoad();

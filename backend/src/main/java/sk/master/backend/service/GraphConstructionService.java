@@ -7,7 +7,7 @@ import sk.master.backend.persistence.model.RoadGraph;
 
 import java.util.List;
 
-public interface GraphService {
+public interface GraphConstructionService {
     GraphEntity saveGraphToDatabase(GraphDto graph, String name);
 
     RoadGraph generateRoadNetwork(GraphDto graph, List<PositionalData> positionalData);

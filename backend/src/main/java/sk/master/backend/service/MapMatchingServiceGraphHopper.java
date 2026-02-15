@@ -66,7 +66,7 @@ public class MapMatchingServiceGraphHopper implements MapMatchingService {
         } catch (Exception e) {
             // Matching can fail if the GPS track is completely off-road or too noisy
             log.debug("HMM Map matching failed for trip {}: {}", trip.getFirst().getTripId(), e.getMessage());
-            return null; // Our GraphServiceImpl will gracefully fallback to raw points when this returns null
+            return null; // Our GpsGraphConstructionService will gracefully fallback to raw points when this returns null
         }
     }
 }

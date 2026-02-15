@@ -23,8 +23,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class GraphServiceImpl implements GraphService {
-    private static final Logger log = LoggerFactory.getLogger(GraphServiceImpl.class);
+public class GpsGraphConstructionService implements GraphConstructionService {
+    private static final Logger log = LoggerFactory.getLogger(GpsGraphConstructionService.class);
 
     private final PipelineConfigService configService;
     private final MapMatchingService mapMatchingService;
@@ -33,7 +33,7 @@ public class GraphServiceImpl implements GraphService {
     @Getter
     private RoadGraph roadGraph;
 
-    public GraphServiceImpl(GraphRepository graphRepository, PipelineConfigService configService, MapMatchingService mapMatchingService) {
+    public GpsGraphConstructionService(GraphRepository graphRepository, PipelineConfigService configService, MapMatchingService mapMatchingService) {
         this.graphRepository = graphRepository;
         this.configService = configService;
         this.mapMatchingService = mapMatchingService;

@@ -12,7 +12,7 @@ import sk.master.backend.persistence.entity.GraphEntity;
 import sk.master.backend.persistence.model.PositionalData;
 import sk.master.backend.persistence.model.RoadGraph;
 import sk.master.backend.service.FileService;
-import sk.master.backend.service.GraphService;
+import sk.master.backend.service.GraphConstructionService;
 
 import java.util.List;
 
@@ -22,37 +22,37 @@ public class GraphController {
 
     private static final Logger log = LoggerFactory.getLogger(GraphController.class);
 
-    private final GraphService graphService;
+    private final GraphConstructionService graphConstructionService;
     private final FileService fileService;
 
-    public GraphController(GraphService graphService, FileService fileService) {
+    public GraphController(GraphConstructionService graphConstructionService, FileService fileService) {
         this.fileService = fileService;
-        this.graphService = graphService;
+        this.graphConstructionService = graphConstructionService;
     }
 
     @PostMapping("/file-import")
     public ResponseEntity<GraphDto> generateGraphFromFile(@RequestParam("file") MultipartFile file) throws Exception {
         List<PositionalData> positionalData = fileService.parseFile(file);
-        RoadGraph data = graphService.generateRoadNetwork(null, positionalData);
+        RoadGraph data = graphConstructionService.generateRoadNetwork(null, positionalData);
         return ResponseEntity.ok(GraphDto.fromRoadGraph(data));
     }
 
     @GetMapping("/load")
     public ResponseEntity<GraphDto> loadGraphFromDatabase(@RequestParam("graphId") Long graphId) {
-        GraphDto data = graphService.importGraphFromDatabase(graphId);
+        GraphDto data = graphConstructionService.importGraphFromDatabase(graphId);
         return ResponseEntity.ok(data);
     }
 
     @PostMapping("/save")
     public ResponseEntity<GraphEntity> saveGraph(@RequestBody SaveGraphRequest request) {
-        GraphEntity graphEntity = graphService.saveGraphToDatabase(request.getGraph(), request.getName());
+        GraphEntity graphEntity = graphConstructionService.saveGraphToDatabase(request.getGraph(), request.getName());
         return ResponseEntity.ok(graphEntity);
     }
 
     @PostMapping("/add-points")
     public ResponseEntity<GraphDto> updateGraphWithPoints(@RequestBody AddPointsRequest request) {
         log.info(String.valueOf(request));
-        RoadGraph graph = graphService.generateRoadNetwork(request.getGraph(), request.getPositionalData());
+        RoadGraph graph = graphConstructionService.generateRoadNetwork(request.getGraph(), request.getPositionalData());
         return ResponseEntity.ok(GraphDto.fromRoadGraph(graph));
     }
 }

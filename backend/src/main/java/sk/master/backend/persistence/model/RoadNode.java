@@ -32,6 +32,13 @@ public class RoadNode {
         this.offRoad = false;
     }
 
+    public RoadNode(String id, double lat, double lon) {
+        this.id = id;
+        this.lat = lat;
+        this.lon = lon;
+        this.offRoad = false;
+    }
+
     /**
      * Extends the firstSeen/lastSeen range with the given timestamp.
      */

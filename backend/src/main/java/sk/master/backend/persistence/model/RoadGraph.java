@@ -1,15 +1,19 @@
 package sk.master.backend.persistence.model;
 
+import lombok.Getter;
 import org.jgrapht.Graph;
 import org.jgrapht.graph.SimpleWeightedGraph;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.index.quadtree.Quadtree;
 
+import sk.master.backend.persistence.dto.GraphDto;
+
 import java.util.*;
 
 public class RoadGraph {
 
+    @Getter
     private final Graph<RoadNode, RoadEdge> graph;
     private final Quadtree spatialIndex;
     private final Map<String, RoadNode> nodeMap;
@@ -20,6 +24,27 @@ public class RoadGraph {
         this.nodeMap = new HashMap<>();
     }
 
+
+    public static RoadGraph fromDto(GraphDto dto) {
+        RoadGraph roadGraph = new RoadGraph();
+        Map<String, RoadNode> nodes = new HashMap<>();
+
+        for (GraphDto.NodeDto nodeDto : dto.nodes()) {
+            RoadNode node = new RoadNode(nodeDto.id(), nodeDto.lat(), nodeDto.lon());
+            roadGraph.addNode(node);
+            nodes.put(nodeDto.id(), node);
+        }
+
+        for (GraphDto.EdgeDto edgeDto : dto.edges()) {
+            RoadNode source = nodes.get(edgeDto.sourceId());
+            RoadNode target = nodes.get(edgeDto.targetId());
+            if (source != null && target != null) {
+                roadGraph.addEdge(source, target, edgeDto.distanceMeters());
+            }
+        }
+
+        return roadGraph;
+    }
 
     public void addNode(RoadNode node) {
         if (nodeMap.containsKey(node.getId())) {

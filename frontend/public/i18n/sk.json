@@ -24,6 +24,18 @@
       "metersUnit": "metre",
       "save": "Uložiť konfiguráciu",
       "resetToDefaults": "Obnoviť predvolené"
+    },
+    "login": {
+      "title": "Prihlásenie",
+      "subtitle": "Prihláste sa do svojho účtu",
+      "email": "Email",
+      "password": "Heslo",
+      "submit": "Prihlásiť sa",
+      "emailRequired": "Email je povinný",
+      "emailInvalid": "Zadajte platný email",
+      "passwordRequired": "Heslo je povinné",
+      "errorInvalidCredentials": "Nesprávny email alebo heslo",
+      "errorGeneric": "Prihlásenie zlyhalo. Skúste to znova."
     }
   }
 }

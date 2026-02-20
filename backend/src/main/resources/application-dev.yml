@@ -12,5 +12,7 @@ spring:
       enabled: true
 frontend:
   url: http://localhost:4200
+jwt:
+  secret: ZGV2T25seVNlY3JldEtleVRoYXRJc0xvbmdFbm91Z2hGb3JIZWF2ZW5zU2FrZQ==
 server:
   port: 8080

@@ -1,3 +1,14 @@
 .idea/
 *.iml
 /infrastructure/database/.env
+/CLAUDE.md
+/data/gh-cache/edgekv_keys
+/data/gh-cache/edgekv_vals
+/data/gh-cache/edges
+/data/gh-cache/geometry
+/data/gh-cache/location_index
+/data/gh-cache/nodes
+/data/gh-cache/properties
+/data/gh-cache/properties.txt
+/.claude/settings.local.json
+/data/slovakia-260207.osm.pbf

@@ -1,13 +1,22 @@
 <mat-toolbar>
-  <button mat-icon-button routerLink="/map" routerLinkActive="active-link">
-    <mat-icon>map</mat-icon>
-  </button>
+  @if (authService.isAuthenticated()) {
+    <button mat-icon-button routerLink="/map" routerLinkActive="active-link">
+      <mat-icon>map</mat-icon>
+    </button>
 
-  <button mat-icon-button routerLink="/settings" routerLinkActive="active-link">
-    <mat-icon>settings</mat-icon>
-  </button>
+    <button mat-icon-button routerLink="/settings" routerLinkActive="active-link">
+      <mat-icon>settings</mat-icon>
+    </button>
+  }
 
   <span class="toolbar-spacer"></span>
+
+  @if (authService.isAuthenticated()) {
+    <span class="user-email">{{ authService.currentUser()?.email }}</span>
+    <button mat-icon-button (click)="authService.logout()">
+      <mat-icon>logout</mat-icon>
+    </button>
+  }
   <button
     mat-icon-button
     class="language-toggle"

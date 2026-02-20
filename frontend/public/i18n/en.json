@@ -24,6 +24,18 @@
       "metersUnit": "meters",
       "save": "Save Configuration",
       "resetToDefaults": "Reset to Defaults"
+    },
+    "login": {
+      "title": "Sign In",
+      "subtitle": "Sign in to your account",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Sign In",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Enter a valid email",
+      "passwordRequired": "Password is required",
+      "errorInvalidCredentials": "Invalid email or password",
+      "errorGeneric": "Login failed. Please try again."
     }
   }
 }

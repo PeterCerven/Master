@@ -16,6 +16,10 @@ spring:
   sql:
     init:
       mode: never
+jwt:
+  secret: ${JWT_SECRET:dGhpc0lzQVNlY3JldEtleUZvckRldmVsb3BtZW50T25seURvTm90VXNlSW5Qcm9k}
+  access-token-expiration-ms: 900000
+  refresh-token-expiration-ms: 604800000
 graphhopper:
   osm:
     file: data/slovakia-260207.osm.pbf

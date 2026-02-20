@@ -18,7 +18,6 @@ public class PipelineConfigEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /** Nullable — when null, this is a global configuration. Prepared for future per-user configs. */
     @Column(name = "user_id")
     private Long userId;
 

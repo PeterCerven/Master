@@ -91,7 +91,7 @@ public class KCentreStrategy implements PlacementStrategy {
             }
         }
 
-        log.info("K-centrum dokončené: {} centier, max vzdialenosť = {} m", centres.size(), objectiveValue);
+        log.info("K-center finished, number of centers: {} , max distance = {} m", centres.size(), objectiveValue);
 
         return new PlacementResult(centres, objectiveValue, nodeDistances);
     }

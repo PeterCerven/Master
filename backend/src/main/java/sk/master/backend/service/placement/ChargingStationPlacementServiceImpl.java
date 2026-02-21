@@ -34,13 +34,13 @@ public class ChargingStationPlacementServiceImpl implements ChargingStationPlace
                 .maxRadiusMeters(request.getMaxRadiusMeters())
                 .build();
 
-        log.info("Spustenie algoritmu '{}' s k={} na grafe s {} uzlami a {} hranami",
+        log.info("Launch algorithm '{}' with k={} na graph with {} nodes and {} edges",
                 request.getAlgorithm(), request.getK(),
                 graph.getNodeCount(), graph.getEdgeCount());
 
         PlacementResult result = strategy.computePlacement(graph, params);
 
-        log.info("Algoritmus '{}' dokončený: vybraných {} staníc, objektívna hodnota = {}",
+        log.info("Algorithm '{}' finished: selected {} charging stations, value = {}",
                 request.getAlgorithm(), result.getSelectedNodes().size(), result.getObjectiveValue());
 
         return PlacementResponseDto.fromResult(result);

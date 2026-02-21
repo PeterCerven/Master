@@ -35,7 +35,7 @@ public class KDominatingSetStrategy implements PlacementStrategy {
             return new PlacementResult(List.of(), 0, Map.of());
         }
 
-        log.info("Výpočet k-dominujúcej množiny: k={}, uzlov={}, hrán={}",
+        log.info("Calculation of the k-dominant set: k={}, nodes={}, edges={}",
                 k, allNodes.size(), graph.edgeSet().size());
 
         // 1. Náhodný výber z nepokrytých uzlov
@@ -52,14 +52,14 @@ public class KDominatingSetStrategy implements PlacementStrategy {
             uncoveredSet.removeAll(neighborhood);
             uncovered.removeAll(neighborhood);
 
-            log.debug("Vybraný uzol {}: okolie={}, zostáva nepokrytých={}",
+            log.debug("Selected node {}: surroundings ={}, remains uncovered={}",
                     selected.getId(), neighborhood.size(), uncoveredSet.size());
         }
 
         // 3. Vypočítať vzdialenosti od každého uzla k najbližšej stanici (počet skokov)
         Map<String, Double> nodeDistances = computeMinHopDistances(graph, allNodes, dominatingSet, k);
 
-        log.info("K-dominujúca množina dokončená: vybraných {} staníc", dominatingSet.size());
+        log.info("K-dominated set completed: selected {} charging station", dominatingSet.size());
 
         return new PlacementResult(dominatingSet, dominatingSet.size(), nodeDistances);
     }

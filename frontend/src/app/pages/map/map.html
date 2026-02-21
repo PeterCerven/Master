@@ -26,13 +26,13 @@
       {{ loading ? 'Loading Graph...' : 'Load Graph from Database' }}
     </button>
 
-    <button
-      matFab extended
-      class="control-btn process-graph-btn"
-      [disabled]="processing || pendingPoints().length === 0"
-      (click)="processGraph()">
-      {{ processing ? 'Processing...' : 'Process Graph (' + pendingPoints().length + ' points)' }}
-    </button>
+<!--    <button-->
+<!--      matFab extended-->
+<!--      class="control-btn process-graph-btn"-->
+<!--      [disabled]="processing || pendingPoints().length === 0"-->
+<!--      (click)="processGraph()">-->
+<!--      {{ processing ? 'Processing...' : 'Process Graph (' + pendingPoints().length + ' points)' }}-->
+<!--    </button>-->
 
     <button
       matFab extended

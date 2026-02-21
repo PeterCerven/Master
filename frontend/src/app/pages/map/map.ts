@@ -1,9 +1,10 @@
 import {GoogleMap, GoogleMapsModule} from '@angular/google-maps';
-import {AfterViewInit, Component, DestroyRef, computed, inject, signal, viewChild} from '@angular/core';
+import {Component, computed, DestroyRef, effect, inject, signal, viewChild} from '@angular/core';
 import {GraphService} from '@services/graph.service';
 import {ThemeService} from '@services/theme.service';
 import {GraphEdgeDto, GraphNodeDto, GraphResponseDto} from '@models/my-graph.model';
-import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {takeUntilDestroyed, toObservable} from '@angular/core/rxjs-interop';
+import {skip} from 'rxjs';
 import {MatFabButton} from '@angular/material/button';
 import {environment} from '@env/environment.production';
 
@@ -13,9 +14,9 @@ import {environment} from '@env/environment.production';
   templateUrl: './map.html',
   styleUrl: './map.scss'
 })
-export class Map implements AfterViewInit {
+export class Map {
   protected readonly google = google;
-  map = viewChild.required<GoogleMap>('googleMap');
+  map = viewChild<GoogleMap>('googleMap');
   private readonly graphService = inject(GraphService);
   private readonly themeService = inject(ThemeService);
   private destroyRef = inject(DestroyRef);
@@ -25,10 +26,12 @@ export class Map implements AfterViewInit {
   processing = false;
   graphData: GraphResponseDto | null = null;
   pendingPoints = signal<Array<{ lat: number, lon: number }>>([]);
+  mapVisible = signal(true);
   private graphMarkers: google.maps.marker.AdvancedMarkerElement[] = [];
   private graphPolylines: google.maps.Polyline[] = [];
   private pendingMarkers: google.maps.marker.AdvancedMarkerElement[] = [];
   private rightClickListenerSetup = false;
+
   options = computed<google.maps.MapOptions>(() => ({
     center: {lat: 48.1478, lng: 17.1072},
     zoom: 13,
@@ -41,24 +44,48 @@ export class Map implements AfterViewInit {
     fullscreenControl: false,
   }));
 
-  ngAfterViewInit(): void {
-    const mapInstance = this.map();
+  constructor() {
+    // colorScheme is init-only — destroy and recreate the map component on theme change
+    toObservable(this.themeService.isDarkMode)
+      .pipe(skip(1), takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.mapVisible.set(false);
+        setTimeout(() => this.mapVisible.set(true));
+      });
 
-    const subscription = mapInstance.tilesloaded.subscribe(async () => {
-      if (mapInstance.googleMap && !this.rightClickListenerSetup) {
-        const {AdvancedMarkerElement: _AdvancedMarkerElement} = await google.maps.importLibrary("marker") as google.maps.MarkerLibrary;
-        if (!_AdvancedMarkerElement) {
-          console.error('AdvancedMarkerElement not available in the Google Maps library');
+    // Setup map each time it becomes available (initial load and after recreation)
+    effect((onCleanup) => {
+      const mapEl = this.map();
+      if (!mapEl) return;
+
+      this.rightClickListenerSetup = false;
+
+      const subscription = mapEl.tilesloaded.subscribe(async () => {
+        if (mapEl.googleMap && !this.rightClickListenerSetup) {
+          const {AdvancedMarkerElement: _AdvancedMarkerElement} = await google.maps.importLibrary('marker') as google.maps.MarkerLibrary;
+          if (!_AdvancedMarkerElement) {
+            console.error('AdvancedMarkerElement not available in the Google Maps library');
+            subscription.unsubscribe();
+            return;
+          }
+          this.setupRightClickListener(mapEl.googleMap);
+          this.rightClickListenerSetup = true;
           subscription.unsubscribe();
-          return;
+
+          // After recreation, drop orphaned references and re-render onto new map instance
+          this.graphMarkers = [];
+          this.graphPolylines = [];
+          this.pendingMarkers = [];
+          if (this.graphData) {
+            this.displayGraphOnMap(this.graphData);
+          }
+          this.pendingPoints().forEach(p => this.addPendingMarkerToMap(mapEl.googleMap!, p.lat, p.lon));
         }
-        this.setupRightClickListener(mapInstance.googleMap);
-        this.rightClickListenerSetup = true;
-        subscription.unsubscribe();
-      }
+      });
+
+      onCleanup(() => subscription.unsubscribe());
     });
   }
-
 
   importGraphFromFile(event: Event): void {
     this.loading = true;
@@ -80,26 +107,19 @@ export class Map implements AfterViewInit {
   }
 
   private displayGraphOnMap(graph: GraphResponseDto): void {
-    const mapInstance = this.map().googleMap;
+    const mapInstance = this.map()?.googleMap;
     if (!mapInstance) {
       console.error('Map instance not available');
       return;
     }
 
-    // Clear existing graph visualization
     this.clearGraph();
 
-    // Create a lookup object for quick node access
     const nodeMap: Record<string, GraphNodeDto> = {};
     graph.nodes.forEach(node => nodeMap[node.id] = node);
 
-    // Display nodes as markers
     this.displayGraphNodes(mapInstance, graph.nodes);
-
-    // Display edges as polylines
     this.displayGraphEdges(mapInstance, graph.edges, nodeMap);
-
-    // Adjust map bounds to fit the graph
     this.fitGraphBounds(mapInstance, graph.nodes);
   }
 
@@ -165,7 +185,6 @@ export class Map implements AfterViewInit {
         map: nativeMap
       });
 
-      // Add click listener to show edge info
       polyline.addListener('click', () => {
         const infoWindow = new google.maps.InfoWindow({
           content: `<div style="color: #333;">
@@ -192,8 +211,6 @@ export class Map implements AfterViewInit {
       bounds.extend({lat: node.lat, lng: node.lon});
     });
 
-    nativeMap.fitBounds(bounds);
-    // Add some padding
     const padding = {top: 50, right: 50, bottom: 50, left: 50};
     nativeMap.fitBounds(bounds, padding);
   }
@@ -249,16 +266,7 @@ export class Map implements AfterViewInit {
     });
   }
 
-  private addPendingPoint(lat: number, lon: number): void {
-    const mapInstance = this.map().googleMap;
-    if (!mapInstance) {
-      console.error('Map instance not available');
-      return;
-    }
-
-    this.pendingPoints.update(points => [...points, {lat, lon}]);
-
-    // Pending yellow marker
+  private addPendingMarkerToMap(nativeMap: google.maps.Map, lat: number, lon: number): void {
     const {AdvancedMarkerElement} = google.maps.marker;
 
     const dot = document.createElement('div');
@@ -270,13 +278,24 @@ export class Map implements AfterViewInit {
     dot.style.boxShadow = '0 0 3px rgba(0,0,0,0.6)';
 
     const marker = new AdvancedMarkerElement({
-      map: mapInstance,
+      map: nativeMap,
       position: {lat, lng: lon},
       title: 'Pending Point',
       content: dot,
     });
 
     this.pendingMarkers.push(marker);
+  }
+
+  private addPendingPoint(lat: number, lon: number): void {
+    const mapInstance = this.map()?.googleMap;
+    if (!mapInstance) {
+      console.error('Map instance not available');
+      return;
+    }
+
+    this.pendingPoints.update(points => [...points, {lat, lon}]);
+    this.addPendingMarkerToMap(mapInstance, lat, lon);
     console.log(`Added pending point at (${lat.toFixed(5)}, ${lon.toFixed(5)}). Total: ${this.pendingPoints().length}`);
   }
 
@@ -342,5 +361,4 @@ export class Map implements AfterViewInit {
     this.clearPendingPoints();
     console.log('All graph data and pending points cleared');
   }
-
 }

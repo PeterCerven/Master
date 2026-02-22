@@ -11,15 +11,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.List;
-
 @Configuration
 public class GraphHopperConfig {
 
     private static final Logger log = LoggerFactory.getLogger(GraphHopperConfig.class);
 
-    @Value("${graphhopper.osm.files}")
-    private List<String> osmFiles;
+    @Value("${graphhopper.osm.file:data/slovakia-260207.osm.pbf}")
+    private String osmFile;
 
     @Value("${graphhopper.graph.location:data/gh-cache}")
     private String graphLocation;
@@ -28,11 +26,14 @@ public class GraphHopperConfig {
 
     @PostConstruct
     public void init() {
-        log.info("Initializing GraphHopper with OSM files: {}", osmFiles);
+        log.info("Initializing GraphHopper with OSM file: {}", osmFile);
 
         hopper = new GraphHopper();
-        hopper.setOSMFile(String.join(",", osmFiles));
-        hopper.setGraphHopperLocation(graphLocation);
+        hopper.init(new com.graphhopper.GraphHopperConfig()
+                .putObject("graph.encoded_values", "car_access,car_average_speed")
+                .putObject("graph.location", graphLocation)
+                .putObject("import.osm.ignored_highways", "footway,construction,cycleway,path,steps"));
+        hopper.setOSMFile(osmFile);
 
         hopper.setProfiles(new Profile("car").setCustomModel(GHUtility.loadCustomModelFromJar("car.json")));
 

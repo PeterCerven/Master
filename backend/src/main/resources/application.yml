@@ -4,9 +4,6 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
     defer-datasource-initialization: true
     show-sql: true
   servlet:
@@ -22,9 +19,6 @@ jwt:
   refresh-token-expiration-ms: 604800000
 graphhopper:
   osm:
-    files:
-      - data/slovakia-260207.osm.pbf
-      - data/czech-republic-260221.osm.pbf
-      - data/slovenia-260221.osm.pbf
+    file: data/merged_sk_cz_au.osm.pbf
   graph:
     location: data/gh-cache

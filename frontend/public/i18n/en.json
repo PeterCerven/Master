@@ -13,11 +13,6 @@
     "settings": {
       "preprocessing": "1. Preprocessing",
       "h3SpatialIndex": "2. H3 Spatial Index",
-      "minLat": "Min Latitude",
-      "maxLat": "Max Latitude",
-      "minLon": "Min Longitude",
-      "maxLon": "Max Longitude",
-      "to": "to",
       "maxSpeedKmh": "Max Speed",
       "h3DedupResolution": "Dedup Resolution",
       "h3ResolutionHint": "0-15 (higher = finer)",

@@ -22,6 +22,9 @@ jwt:
   refresh-token-expiration-ms: 604800000
 graphhopper:
   osm:
-    file: data/slovakia-260207.osm.pbf
+    files:
+      - data/slovakia-260207.osm.pbf
+      - data/czech-republic-260221.osm.pbf
+      - data/slovenia-260221.osm.pbf
   graph:
     location: data/gh-cache

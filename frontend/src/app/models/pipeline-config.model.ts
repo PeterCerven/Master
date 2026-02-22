@@ -3,10 +3,6 @@ export interface PipelineConfig {
   name: string;
 
   // Preprocessing
-  minLat: number;
-  maxLat: number;
-  minLon: number;
-  maxLon: number;
   maxSpeedKmh: number;
 
   // H3

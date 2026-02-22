@@ -27,18 +27,6 @@ public class PipelineConfigEntity {
     @Column(nullable = false)
     private boolean active;
 
-    @Column(name = "min_lat", nullable = false)
-    private double minLat;
-
-    @Column(name = "max_lat", nullable = false)
-    private double maxLat;
-
-    @Column(name = "min_lon", nullable = false)
-    private double minLon;
-
-    @Column(name = "max_lon", nullable = false)
-    private double maxLon;
-
     @Column(name = "max_speed_kmh", nullable = false)
     private double maxSpeedKmh;
 

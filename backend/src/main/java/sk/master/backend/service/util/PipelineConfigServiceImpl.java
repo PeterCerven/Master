@@ -63,7 +63,6 @@ public class PipelineConfigServiceImpl implements PipelineConfigService {
     private PipelineConfigDto toDto(PipelineConfigEntity e) {
         return new PipelineConfigDto(
                 e.getId(), e.getName(),
-                e.getMinLat(), e.getMaxLat(), e.getMinLon(), e.getMaxLon(),
                 e.getMaxSpeedKmh(),
                 e.getH3DedupResolution()
         );
@@ -71,33 +70,24 @@ public class PipelineConfigServiceImpl implements PipelineConfigService {
 
     private void updateEntityFromDto(PipelineConfigEntity e, PipelineConfigDto d) {
         if (d.getName() != null) e.setName(d.getName());
-        e.setMinLat(d.getMinLat());
-        e.setMaxLat(d.getMaxLat());
-        e.setMinLon(d.getMinLon());
-        e.setMaxLon(d.getMaxLon());
         e.setMaxSpeedKmh(d.getMaxSpeedKmh());
         e.setH3DedupResolution(d.getH3DedupResolution());
     }
 
     private PipelineConfig toPipelineConfig(PipelineConfigEntity e) {
         return new PipelineConfig(
-                e.getMinLat(), e.getMaxLat(), e.getMinLon(), e.getMaxLon(),
                 e.getMaxSpeedKmh(),
                 e.getH3DedupResolution()
         );
     }
 
     /**
-     * Default values corresponding to the original application.yml
+     * Default values
      */
     public static void applyDefaults(PipelineConfigEntity e) {
         e.setName("Predvolená konfigurácia");
         e.setActive(true);
         e.setUserId(null);
-        e.setMinLat(47.5);
-        e.setMaxLat(49.7);
-        e.setMinLon(16.8);
-        e.setMaxLon(22.6);
         e.setMaxSpeedKmh(200);
         e.setH3DedupResolution(13);
     }

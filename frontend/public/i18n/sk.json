@@ -13,11 +13,6 @@
     "settings": {
       "preprocessing": "1. Predspracovanie",
       "h3SpatialIndex": "2. H3 priestorový index",
-      "minLat": "Min. zemepisná šírka",
-      "maxLat": "Max. zemepisná šírka",
-      "minLon": "Min. zemepisná dĺžka",
-      "maxLon": "Max. zemepisná dĺžka",
-      "to": "do",
       "maxSpeedKmh": "Max. rýchlosť",
       "h3DedupResolution": "Rozlíšenie pre deduplikáciu",
       "h3ResolutionHint": "0-15 (vyššie = jemnejšie)",

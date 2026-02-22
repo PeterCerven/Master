@@ -46,10 +46,6 @@ export class Settings implements OnInit {
       id: [null],
       name: ['', Validators.required],
       // Preprocessing
-      minLat: [47.5, [Validators.required, Validators.min(-90), Validators.max(90)]],
-      maxLat: [49.7, [Validators.required, Validators.min(-90), Validators.max(90)]],
-      minLon: [16.8, [Validators.required, Validators.min(-180), Validators.max(180)]],
-      maxLon: [22.6, [Validators.required, Validators.min(-180), Validators.max(180)]],
       maxSpeedKmh: [200, [Validators.required, Validators.min(1)]],
       // H3
       h3DedupResolution: [13, [Validators.required, Validators.min(0), Validators.max(15)]],

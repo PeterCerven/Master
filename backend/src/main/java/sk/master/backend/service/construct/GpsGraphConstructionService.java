@@ -103,10 +103,10 @@ public class GpsGraphConstructionService implements GraphConstructionService {
      * Krok 1: Predspracovanie a rozdelenie dát do chronologických trajektórií (jázd).
      */
     private List<List<PositionalData>> preprocessAndSplitIntoTrips(List<PositionalData> positionalData, PipelineConfig config) {
-        // 1a) Globálna filtrácia (Coordinate validation + bounding box)
+        // 1a) Globálna filtrácia (Coordinate validation)
         List<PositionalData> validPoints = new ArrayList<>();
         for (PositionalData p : positionalData) {
-            if (isValidCoordinate(p) && isWithinBoundingBox(p, config)) {
+            if (isValidCoordinate(p)) {
                 validPoints.add(p);
             }
         }
@@ -270,11 +270,6 @@ public class GpsGraphConstructionService implements GraphConstructionService {
             return false;
         }
         return !(Math.abs(p.getLat()) < 0.001 && Math.abs(p.getLon()) < 0.001);
-    }
-
-    private boolean isWithinBoundingBox(PositionalData p, PipelineConfig config) {
-        return p.getLat() >= config.getMinLat() && p.getLat() <= config.getMaxLat()
-                && p.getLon() >= config.getMinLon() && p.getLon() <= config.getMaxLon();
     }
 
     @Override

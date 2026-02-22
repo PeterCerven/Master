@@ -1,6 +1,8 @@
 package sk.master.backend.service.auth;
 
 import org.jspecify.annotations.NonNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -22,6 +24,7 @@ import java.util.List;
 
 @Service
 public class AuthServiceImpl implements AuthService, UserDetailsService {
+    private final static Logger log = LoggerFactory.getLogger(AuthServiceImpl.class);
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -91,6 +94,7 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new UserAlreadyExistsException("User with email: " + request.getEmail() + " already exists");
         }
+        log.info("Creating new user: email={}, role={}", request.getEmail(), request.getRole());
 
         UserEntity user = new UserEntity();
         user.setName(request.getName());

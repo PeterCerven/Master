@@ -1,0 +1,67 @@
+<div *transloco="let t; prefix: 'pages.registerUser'">
+  <h2 mat-dialog-title>{{ t('title') }}</h2>
+
+  <mat-dialog-content>
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" id="registerForm">
+      <mat-form-field class="full-width">
+        <mat-label>{{ t('name') }}</mat-label>
+        <input matInput type="text" formControlName="name" autocomplete="name" />
+        <mat-icon matPrefix>person</mat-icon>
+        @if (registerForm.get('name')?.hasError('required') && registerForm.get('name')?.touched) {
+          <mat-error>{{ t('nameRequired') }}</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field class="full-width">
+        <mat-label>{{ t('email') }}</mat-label>
+        <input matInput type="email" formControlName="email" autocomplete="email" />
+        <mat-icon matPrefix>email</mat-icon>
+        @if (registerForm.get('email')?.hasError('required') && registerForm.get('email')?.touched) {
+          <mat-error>{{ t('emailRequired') }}</mat-error>
+        } @else if (registerForm.get('email')?.hasError('email') && registerForm.get('email')?.touched) {
+          <mat-error>{{ t('emailInvalid') }}</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field class="full-width">
+        <mat-label>{{ t('password') }}</mat-label>
+        <input
+          matInput
+          [type]="hidePassword() ? 'password' : 'text'"
+          formControlName="password"
+          autocomplete="new-password"
+        />
+        <mat-icon matPrefix>lock</mat-icon>
+        <button mat-icon-button matSuffix type="button" (click)="togglePasswordVisibility()">
+          <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+        @if (registerForm.get('password')?.hasError('required') && registerForm.get('password')?.touched) {
+          <mat-error>{{ t('passwordRequired') }}</mat-error>
+        } @else if (registerForm.get('password')?.hasError('minlength') && registerForm.get('password')?.touched) {
+          <mat-error>{{ t('passwordMinLength') }}</mat-error>
+        }
+      </mat-form-field>
+
+      @if (errorMessage()) {
+        <p class="error-message">{{ t(errorMessage()!) }}</p>
+      }
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close>{{ t('cancel') }}</button>
+    <button
+      mat-flat-button
+      type="submit"
+      form="registerForm"
+      [disabled]="loading()"
+    >
+      @if (loading()) {
+        <mat-spinner diameter="20"></mat-spinner>
+      } @else {
+        <mat-icon>person_add</mat-icon>
+      }
+      {{ t('submit') }}
+    </button>
+  </mat-dialog-actions>
+</div>

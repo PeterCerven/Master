@@ -31,6 +31,22 @@
       "passwordRequired": "Password is required",
       "errorInvalidCredentials": "Invalid email or password",
       "errorGeneric": "Login failed. Please try again."
+    },
+    "registerUser": {
+      "title": "Register New User",
+      "name": "Name",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Register",
+      "cancel": "Cancel",
+      "nameRequired": "Name is required",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Enter a valid email",
+      "passwordRequired": "Password is required",
+      "passwordMinLength": "Password must be at least 8 characters",
+      "successMessage": "User registered successfully",
+      "errorEmailExists": "A user with this email already exists",
+      "errorGeneric": "Registration failed. Please try again."
     }
   }
 }

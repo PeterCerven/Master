@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { catchError, Observable, of, shareReplay, tap, throwError } from 'rxjs';
 import { environment } from '@env/environment.production';
-import { LoginRequest, TokenResponse, User } from '@models/auth.model';
+import { CreateUserRequest, LoginRequest, TokenResponse, User } from '@models/auth.model';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -81,6 +81,10 @@ export class AuthService {
         }),
         catchError(() => of(null)),
       );
+  }
+
+  registerUser(request: CreateUserRequest): Observable<User> {
+    return this.http.post<User>(`${this.apiUrl}/register`, request);
   }
 
   private loadCurrentUser(): void {

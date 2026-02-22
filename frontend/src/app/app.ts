@@ -3,9 +3,11 @@ import {RouterLink, RouterLinkActive, RouterOutlet} from '@angular/router';
 import {MatToolbar} from '@angular/material/toolbar';
 import {MatIconButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { TranslocoService } from '@jsverse/transloco';
 import { ThemeService } from '@services/theme.service';
 import { AuthService } from '@services/auth.service';
+import { RegisterUserDialogComponent } from '@components/register-user-dialog/register-user-dialog';
 
 @Component({
   selector: 'app-root',
@@ -14,6 +16,7 @@ import { AuthService } from '@services/auth.service';
     MatToolbar,
     MatIconButton,
     MatIcon,
+    MatDialogModule,
     RouterLink,
     RouterLinkActive,
   ],
@@ -23,6 +26,7 @@ import { AuthService } from '@services/auth.service';
 export class App implements OnInit {
   private translocoService = inject(TranslocoService);
   private themeService = inject(ThemeService);
+  private dialog = inject(MatDialog);
   authService = inject(AuthService);
   isDarkMode = this.themeService.isDarkMode;
   currentLanguage = signal('SK')
@@ -38,5 +42,9 @@ export class App implements OnInit {
   switchLanguage() {
     this.translocoService.setActiveLang(this.currentLanguage() === 'SK' ? 'en' : 'sk');
     this.currentLanguage.set(this.currentLanguage() === 'SK' ? 'EN' : 'SK');
+  }
+
+  openRegisterDialog(): void {
+    this.dialog.open(RegisterUserDialogComponent);
   }
 }

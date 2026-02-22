@@ -31,6 +31,22 @@
       "passwordRequired": "Heslo je povinné",
       "errorInvalidCredentials": "Nesprávny email alebo heslo",
       "errorGeneric": "Prihlásenie zlyhalo. Skúste to znova."
+    },
+    "registerUser": {
+      "title": "Registrovať nového používateľa",
+      "name": "Meno",
+      "email": "Email",
+      "password": "Heslo",
+      "submit": "Registrovať",
+      "cancel": "Zrušiť",
+      "nameRequired": "Meno je povinné",
+      "emailRequired": "Email je povinný",
+      "emailInvalid": "Zadajte platný email",
+      "passwordRequired": "Heslo je povinné",
+      "passwordMinLength": "Heslo musí mať aspoň 8 znakov",
+      "successMessage": "Používateľ bol úspešne zaregistrovaný",
+      "errorEmailExists": "Používateľ s týmto emailom už existuje",
+      "errorGeneric": "Registrácia zlyhala. Skúste to znova."
     }
   }
 }

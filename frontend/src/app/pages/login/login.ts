@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { Component, DestroyRef, effect, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -34,6 +34,14 @@ export class Login {
   private readonly snackBar = inject(MatSnackBar);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+
+  constructor() {
+    effect(() => {
+      if (this.authService.isAuthenticated()) {
+        this.router.navigate(['/map']);
+      }
+    });
+  }
 
   loading = signal(false);
   hidePassword = signal(true);

@@ -19,4 +19,7 @@ public class PipelineConfigDto {
     @Min(0) @Max(15)
     private int h3DedupResolution;
 
+    @Positive
+    private int kDominatingSet;
+
 }

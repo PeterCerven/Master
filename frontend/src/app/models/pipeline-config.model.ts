@@ -7,4 +7,7 @@ export interface PipelineConfig {
 
   // H3
   h3DedupResolution: number;
+
+  // Placement
+  kDominatingSet: number;
 }

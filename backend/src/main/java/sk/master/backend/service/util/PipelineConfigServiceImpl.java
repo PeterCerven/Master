@@ -64,7 +64,8 @@ public class PipelineConfigServiceImpl implements PipelineConfigService {
         return new PipelineConfigDto(
                 e.getId(), e.getName(),
                 e.getMaxSpeedKmh(),
-                e.getH3DedupResolution()
+                e.getH3DedupResolution(),
+                e.getKDominatingSet()
         );
     }
 
@@ -72,6 +73,7 @@ public class PipelineConfigServiceImpl implements PipelineConfigService {
         if (d.getName() != null) e.setName(d.getName());
         e.setMaxSpeedKmh(d.getMaxSpeedKmh());
         e.setH3DedupResolution(d.getH3DedupResolution());
+        e.setKDominatingSet(d.getKDominatingSet());
     }
 
     private PipelineConfig toPipelineConfig(PipelineConfigEntity e) {
@@ -90,5 +92,6 @@ public class PipelineConfigServiceImpl implements PipelineConfigService {
         e.setUserId(null);
         e.setMaxSpeedKmh(200);
         e.setH3DedupResolution(13);
+        e.setKDominatingSet(3);
     }
 }

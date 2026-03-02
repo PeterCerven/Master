@@ -46,6 +46,14 @@
 
     <button
       matFab extended
+      class="control-btn compute-placement-btn"
+      [disabled]="computingPlacement || !graphData"
+      (click)="computePlacement()">
+      {{ computingPlacement ? 'Computing...' : 'Compute Placement' }}
+    </button>
+
+    <button
+      matFab extended
       class="control-btn clear-graph-btn"
       [disabled]="!graphData && pendingPoints().length === 0"
       (click)="clearAll()">

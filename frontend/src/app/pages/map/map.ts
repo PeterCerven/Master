@@ -2,11 +2,13 @@ import {GoogleMap, GoogleMapsModule} from '@angular/google-maps';
 import {Component, computed, DestroyRef, effect, inject, signal, viewChild} from '@angular/core';
 import {GraphService} from '@services/graph.service';
 import {ThemeService} from '@services/theme.service';
-import {GraphEdgeDto, GraphNodeDto, GraphResponseDto} from '@models/my-graph.model';
+import {GraphEdgeDto, GraphNodeDto, GraphResponseDto, PlacementResponseDto, StationNodeDto} from '@models/my-graph.model';
 import {takeUntilDestroyed, toObservable} from '@angular/core/rxjs-interop';
-import {skip} from 'rxjs';
+import {skip, switchMap} from 'rxjs';
 import {MatFabButton} from '@angular/material/button';
 import {environment} from '@env/environment.production';
+import {PlacementService} from '@services/placement.service';
+import {PipelineConfigService} from '@services/pipeline-config.service';
 
 @Component({
   selector: 'app-map',
@@ -19,17 +21,22 @@ export class Map {
   map = viewChild<GoogleMap>('googleMap');
   private readonly graphService = inject(GraphService);
   private readonly themeService = inject(ThemeService);
+  private readonly placementService = inject(PlacementService);
+  private readonly configService = inject(PipelineConfigService);
   private destroyRef = inject(DestroyRef);
 
   loading = false;
   saving = false;
   processing = false;
+  computingPlacement = false;
   graphData: GraphResponseDto | null = null;
+  placementData: PlacementResponseDto | null = null;
   pendingPoints = signal<Array<{ lat: number, lon: number }>>([]);
   mapVisible = signal(true);
   private graphMarkers: google.maps.marker.AdvancedMarkerElement[] = [];
   private graphPolylines: google.maps.Polyline[] = [];
   private pendingMarkers: google.maps.marker.AdvancedMarkerElement[] = [];
+  private stationMarkers: google.maps.marker.AdvancedMarkerElement[] = [];
   private rightClickListenerSetup = false;
 
   options = computed<google.maps.MapOptions>(() => ({
@@ -76,10 +83,14 @@ export class Map {
           this.graphMarkers = [];
           this.graphPolylines = [];
           this.pendingMarkers = [];
+          this.stationMarkers = [];
           if (this.graphData) {
             this.displayGraphOnMap(this.graphData);
           }
           this.pendingPoints().forEach(p => this.addPendingMarkerToMap(mapEl.googleMap!, p.lat, p.lon));
+          if (this.placementData) {
+            this.displayStationsOnMap(this.placementData.stations);
+          }
         }
       });
 
@@ -256,6 +267,78 @@ export class Map {
       });
   }
 
+  computePlacement(): void {
+    if (!this.graphData) return;
+
+    this.computingPlacement = true;
+    this.configService.getActiveConfig()
+      .pipe(
+        switchMap(config => this.placementService.computePlacement(this.graphData!, config.kDominatingSet)),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe({
+        next: (result: PlacementResponseDto) => {
+          this.placementData = result;
+          this.displayStationsOnMap(result.stations);
+          this.computingPlacement = false;
+          console.log('Placement computed:', result);
+        },
+        error: (error) => {
+          console.error('Error computing placement:', error);
+          this.computingPlacement = false;
+          alert('Failed to compute placement. Please check the console for details.');
+        }
+      });
+  }
+
+  private displayStationsOnMap(stations: StationNodeDto[]): void {
+    const mapInstance = this.map()?.googleMap;
+    if (!mapInstance) return;
+
+    this.stationMarkers.forEach(marker => marker.map = null);
+    this.stationMarkers = [];
+
+    const {AdvancedMarkerElement} = google.maps.marker;
+
+    stations.forEach(station => {
+      const square = document.createElement('div');
+      square.style.width = '18px';
+      square.style.height = '18px';
+      square.style.backgroundColor = '#2ecc71';
+      square.style.border = '2px solid #ffffff';
+      square.style.borderRadius = '3px';
+      square.style.boxShadow = '0 0 4px rgba(0,0,0,0.6)';
+      square.style.display = 'flex';
+      square.style.alignItems = 'center';
+      square.style.justifyContent = 'center';
+      square.style.color = '#ffffff';
+      square.style.fontSize = '9px';
+      square.style.fontWeight = '700';
+      square.textContent = String(station.rank);
+
+      const marker = new AdvancedMarkerElement({
+        map: mapInstance,
+        position: {lat: station.lat, lng: station.lon},
+        title: `Station #${station.rank}`,
+        content: square,
+      });
+
+      marker.addListener('gmp-click', () => {
+        const infoWindow = new google.maps.InfoWindow({
+          content: `<div style="color: #333;">
+                      <h4>Charging Station #${station.rank}</h4>
+                      <p>ID: ${station.id}</p>
+                      <p>Lat: ${station.lat.toFixed(5)}</p>
+                      <p>Lon: ${station.lon.toFixed(5)}</p>
+                    </div>`
+        });
+        infoWindow.open({anchor: marker, map: mapInstance});
+      });
+
+      this.stationMarkers.push(marker);
+    });
+  }
+
   private setupRightClickListener(nativeMap: google.maps.Map): void {
     nativeMap.addListener('rightclick', (event: google.maps.MapMouseEvent) => {
       if (event.latLng) {
@@ -357,8 +440,11 @@ export class Map {
 
   clearAll(): void {
     this.graphData = null;
+    this.placementData = null;
     this.clearGraph();
     this.clearPendingPoints();
+    this.stationMarkers.forEach(marker => marker.map = null);
+    this.stationMarkers = [];
     console.log('All graph data and pending points cleared');
   }
 }

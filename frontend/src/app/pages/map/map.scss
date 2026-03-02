@@ -83,6 +83,14 @@
   }
 }
 
+.compute-placement-btn {
+  background-color: #00897b;
+
+  &:hover:not(:disabled) {
+    background-color: #00695c;
+  }
+}
+
 .clear-graph-btn {
   background-color: #e74c3c;
 

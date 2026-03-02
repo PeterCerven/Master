@@ -49,6 +49,8 @@ export class Settings implements OnInit {
       maxSpeedKmh: [200, [Validators.required, Validators.min(1)]],
       // H3
       h3DedupResolution: [13, [Validators.required, Validators.min(0), Validators.max(15)]],
+      // Placement
+      kDominatingSet: [3, [Validators.required, Validators.min(1)]],
     });
   }
 

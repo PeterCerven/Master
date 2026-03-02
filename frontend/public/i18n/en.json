@@ -17,6 +17,9 @@
       "h3DedupResolution": "Dedup Resolution",
       "h3ResolutionHint": "0-15 (higher = finer)",
       "metersUnit": "meters",
+      "placementConfig": "3. Placement Configuration",
+      "kDominatingSet": "K (Dominating Set Hops)",
+      "kDominatingSetHint": "Min. 1, default 3",
       "save": "Save Configuration",
       "resetToDefaults": "Reset to Defaults"
     },

@@ -22,3 +22,27 @@ export interface GraphPoint {
   lat: number;
   lon: number;
 }
+
+export interface PlacementRequestDto {
+  graph: {
+    nodes: { id: string; lat: number; lon: number }[];
+    edges: { sourceId: string; targetId: string; distanceMeters: number }[];
+  };
+  algorithm: 'K_DOMINATING_SET' | 'K_CENTRE';
+  k: number;
+  maxRadiusMeters: number;
+}
+
+export interface StationNodeDto {
+  id: string;
+  lat: number;
+  lon: number;
+  rank: number;
+}
+
+export interface PlacementResponseDto {
+  stations: StationNodeDto[];
+  objectiveValue: number;
+  totalNodes: number;
+  coverageDistances: Record<string, number>;
+}

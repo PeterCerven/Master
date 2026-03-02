@@ -17,6 +17,9 @@
       "h3DedupResolution": "Rozlíšenie pre deduplikáciu",
       "h3ResolutionHint": "0-15 (vyššie = jemnejšie)",
       "metersUnit": "metre",
+      "placementConfig": "3. Konfigurácia umiestnenia",
+      "kDominatingSet": "K (počet skokov)",
+      "kDominatingSetHint": "Min. 1, predvolené 3",
       "save": "Uložiť konfiguráciu",
       "resetToDefaults": "Obnoviť predvolené"
     },

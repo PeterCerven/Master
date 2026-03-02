@@ -34,6 +34,7 @@
         <section class="pipeline-step step-2">
           <div class="step-rail">
             <div class="step-badge">2</div>
+            <div class="step-connector"></div>
           </div>
           <div class="step-card">
             <div class="step-header">
@@ -46,6 +47,28 @@
                   <mat-label>{{ t('h3DedupResolution') }}</mat-label>
                   <input matInput type="number" formControlName="h3DedupResolution" min="0" max="15" step="1" />
                   <mat-hint>{{ t('h3ResolutionHint') }}</mat-hint>
+                </mat-form-field>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Krok 3: Placement Configuration -->
+        <section class="pipeline-step step-3">
+          <div class="step-rail">
+            <div class="step-badge">3</div>
+          </div>
+          <div class="step-card">
+            <div class="step-header">
+              <mat-icon class="step-header-icon">electric_bolt</mat-icon>
+              <h2>{{ t('placementConfig') }}</h2>
+            </div>
+            <div class="step-body">
+              <div class="form-grid">
+                <mat-form-field>
+                  <mat-label>{{ t('kDominatingSet') }}</mat-label>
+                  <input matInput type="number" formControlName="kDominatingSet" min="1" step="1" />
+                  <mat-hint>{{ t('kDominatingSetHint') }}</mat-hint>
                 </mat-form-field>
               </div>
             </div>

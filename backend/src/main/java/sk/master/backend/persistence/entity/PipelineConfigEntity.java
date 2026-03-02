@@ -33,6 +33,9 @@ public class PipelineConfigEntity {
     @Column(name = "h3_dedup_resolution", nullable = false)
     private int h3DedupResolution;
 
+    @Column(name = "k_dominating_set", nullable = false)
+    private int kDominatingSet;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

@@ -16,14 +16,18 @@ public class ChargingStationPlacementServiceImpl implements ChargingStationPlace
 
     private static final Logger log = LoggerFactory.getLogger(ChargingStationPlacementServiceImpl.class);
 
-    private final KDominatingSetStrategy kDominatingSetStrategy;
-    private final KCentreStrategy kCentreStrategy;
+    private final RandomStrategy randomStrategy;
+    private final GreedyStrategy greedyStrategy;
+    private final CustomStrategy customStrategy;
 
     public ChargingStationPlacementServiceImpl(
-            KDominatingSetStrategy kDominatingSetStrategy,
-            KCentreStrategy kCentreStrategy) {
-        this.kDominatingSetStrategy = kDominatingSetStrategy;
-        this.kCentreStrategy = kCentreStrategy;
+            RandomStrategy randomStrategy,
+            GreedyStrategy greedyStrategy,
+            CustomStrategy customStrategy
+    ) {
+        this.randomStrategy = randomStrategy;
+        this.greedyStrategy = greedyStrategy;
+        this.customStrategy = customStrategy;
     }
 
     @Override
@@ -48,8 +52,9 @@ public class ChargingStationPlacementServiceImpl implements ChargingStationPlace
 
     private PlacementStrategy resolveStrategy(PlacementAlgorithm algorithm) {
         return switch (algorithm) {
-            case K_DOMINATING_SET -> kDominatingSetStrategy;
-            case K_CENTRE -> kCentreStrategy;
+            case RANDOM_STRATEGY -> randomStrategy;
+            case GREEDY_STRATEGY -> greedyStrategy;
+            case CUSTOM_STRATEGY -> customStrategy;
         };
     }
 }

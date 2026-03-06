@@ -20,9 +20,9 @@ import java.util.*;
  * 3. Pridá ho do dominujúcej množiny a označí jeho okolie ako pokryté.
  */
 @Component
-public class KDominatingSetStrategy implements PlacementStrategy {
+public class RandomStrategy implements PlacementStrategy {
 
-    private static final Logger log = LoggerFactory.getLogger(KDominatingSetStrategy.class);
+    private static final Logger log = LoggerFactory.getLogger(RandomStrategy.class);
     private final Random random = new Random();
 
     @Override

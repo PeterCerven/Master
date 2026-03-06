@@ -1,4 +1,4 @@
-package sk.master.backend.util;
+package sk.master.backend.service.construct;
 
 public final class GeoUtils {
 

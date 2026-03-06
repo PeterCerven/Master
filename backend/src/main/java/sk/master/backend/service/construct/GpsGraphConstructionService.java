@@ -16,7 +16,6 @@ import sk.master.backend.persistence.model.RoadGraph;
 import sk.master.backend.persistence.model.RoadNode;
 import sk.master.backend.persistence.repository.GraphRepository;
 import sk.master.backend.service.util.PipelineConfigService;
-import sk.master.backend.util.GeoUtils;
 
 import java.io.IOException;
 import java.time.Duration;

@@ -18,7 +18,7 @@ export class PlacementService {
         nodes: graph.nodes.map(n => ({ id: n.id, lat: n.lat, lon: n.lon })),
         edges: graph.edges.map(e => ({ sourceId: e.sourceId, targetId: e.targetId, distanceMeters: e.distanceMeters })),
       },
-      algorithm: 'K_DOMINATING_SET',
+      algorithm: 'RANDOM_STRATEGY',
       k,
       maxRadiusMeters: 50000,
     };

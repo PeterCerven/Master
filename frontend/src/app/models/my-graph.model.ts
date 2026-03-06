@@ -28,7 +28,7 @@ export interface PlacementRequestDto {
     nodes: { id: string; lat: number; lon: number }[];
     edges: { sourceId: string; targetId: string; distanceMeters: number }[];
   };
-  algorithm: 'K_DOMINATING_SET' | 'K_CENTRE';
+  algorithm: 'RANDOM_STRATEGY' | 'CUSTOM_STRATEGY' | 'GREEDY_STRATEGY';
   k: number;
   maxRadiusMeters: number;
 }

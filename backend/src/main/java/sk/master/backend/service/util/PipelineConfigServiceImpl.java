@@ -91,7 +91,7 @@ public class PipelineConfigServiceImpl implements PipelineConfigService {
         e.setActive(true);
         e.setUserId(null);
         e.setMaxSpeedKmh(200);
-        e.setH3DedupResolution(13);
-        e.setKDominatingSet(3);
+        e.setH3DedupResolution(12);
+        e.setKDominatingSet(10);
     }
 }

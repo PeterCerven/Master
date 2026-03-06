@@ -8,17 +8,7 @@ import sk.master.backend.persistence.model.*;
 
 import java.util.*;
 
-/**
- * Náhodný algoritmus pre k-dominujúcu množinu.
- * <p>
- * Nájde množinu S uzlov tak, že každý uzol v grafe
- * je do k skokov od aspoň jedného uzla v S.
- * <p>
- * Algoritmus:
- * 1. Pre každý uzol vypočíta k-skokové okolie cez BFS s limitom hĺbky.
- * 2. Kým existujú nepokryté uzly, náhodne vyberie uzol z nepokrytých.
- * 3. Pridá ho do dominujúcej množiny a označí jeho okolie ako pokryté.
- */
+
 @Component
 public class RandomStrategy implements PlacementStrategy {
 

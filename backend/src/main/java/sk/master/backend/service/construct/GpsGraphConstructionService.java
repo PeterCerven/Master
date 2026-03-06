@@ -46,7 +46,6 @@ public class GpsGraphConstructionService implements GraphConstructionService {
 
     @Override
     public RoadGraph generateRoadNetwork(GraphDto existingGraph, List<PositionalData> positionalData) {
-        // TODO implement incremental graph updates: If existingGraph is provided, only process new points and merge with existing graph instead of rebuilding from scratch.
         if (positionalData == null || positionalData.isEmpty()) {
             log.warn("Empty position list — returning existing graph or new empty one.");
             return new RoadGraph();

@@ -2,12 +2,16 @@ package sk.master.backend.service.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sk.master.backend.persistence.dto.PipelineConfigDto;
 import sk.master.backend.persistence.entity.PipelineConfigEntity;
 import sk.master.backend.persistence.model.PipelineConfig;
 import sk.master.backend.persistence.repository.PipelineConfigRepository;
+import sk.master.backend.persistence.repository.UserRepository;
+
+import java.util.Objects;
 
 @Service
 public class PipelineConfigServiceImpl implements PipelineConfigService {
@@ -15,24 +19,23 @@ public class PipelineConfigServiceImpl implements PipelineConfigService {
     private static final Logger log = LoggerFactory.getLogger(PipelineConfigServiceImpl.class);
 
     private final PipelineConfigRepository repository;
+    private final UserRepository userRepository;
 
-    public PipelineConfigServiceImpl(PipelineConfigRepository repository) {
+    public PipelineConfigServiceImpl(PipelineConfigRepository repository, UserRepository userRepository) {
         this.repository = repository;
+        this.userRepository = userRepository;
     }
 
     @Override
+    @Transactional
     public PipelineConfigDto getActiveConfig() {
-        PipelineConfigEntity entity = repository.findByUserIdIsNullAndActiveTrue()
-                .orElseThrow(() -> new IllegalStateException("No active pipeline configuration found"));
-        return toDto(entity);
+        return toDto(getOrCreateUserConfig(getCurrentUserId()));
     }
 
     @Override
     @Transactional
     public PipelineConfigDto updateConfig(PipelineConfigDto dto) {
-        PipelineConfigEntity entity = repository.findByUserIdIsNullAndActiveTrue()
-                .orElseThrow(() -> new IllegalStateException("No active pipeline configuration found"));
-
+        PipelineConfigEntity entity = getOrCreateUserConfig(getCurrentUserId());
         updateEntityFromDto(entity, dto);
         entity = repository.save(entity);
         log.info("Configuration updated: id={}", entity.getId());
@@ -42,20 +45,48 @@ public class PipelineConfigServiceImpl implements PipelineConfigService {
     @Override
     @Transactional
     public PipelineConfigDto resetToDefaults() {
-        PipelineConfigEntity entity = repository.findByUserIdIsNullAndActiveTrue()
-                .orElseThrow(() -> new IllegalStateException("No active pipeline configuration found"));
-
+        PipelineConfigEntity entity = getOrCreateUserConfig(getCurrentUserId());
         applyDefaults(entity);
+        entity.setUserId(getCurrentUserId());
         entity = repository.save(entity);
         log.info("Configuration reset to defaults: id={}", entity.getId());
         return toDto(entity);
     }
 
     @Override
+    @Transactional
     public PipelineConfig getActivePipelineConfig() {
-        PipelineConfigEntity entity = repository.findByUserIdIsNullAndActiveTrue()
-                .orElseThrow(() -> new IllegalStateException("No active pipeline configuration found"));
-        return toPipelineConfig(entity);
+        return toPipelineConfig(getOrCreateUserConfig(getCurrentUserId()));
+    }
+
+    // ====== Private helpers ======
+
+    private Long getCurrentUserId() {
+        String email = Objects.requireNonNull(SecurityContextHolder.getContext().getAuthentication()).getName();
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalStateException("User not found: " + email))
+                .getId();
+    }
+
+    private PipelineConfigEntity getOrCreateUserConfig(Long userId) {
+        return repository.findByUserIdAndActiveTrue(userId).orElseGet(() -> {
+            PipelineConfigEntity defaultConfig = repository.findByUserIdIsNullAndActiveTrue()
+                    .orElseThrow(() -> new IllegalStateException("No default pipeline configuration found"));
+
+            PipelineConfigEntity userConfig = new PipelineConfigEntity();
+            userConfig.setUserId(userId);
+            userConfig.setName(defaultConfig.getName());
+            userConfig.setActive(true);
+            userConfig.setMaxSpeedKmh(defaultConfig.getMaxSpeedKmh());
+            userConfig.setH3DedupResolution(defaultConfig.getH3DedupResolution());
+            userConfig.setKDominatingSet(defaultConfig.getKDominatingSet());
+            userConfig.setMaxRadiusMeters(defaultConfig.getMaxRadiusMeters());
+            userConfig.setIterations(defaultConfig.getIterations());
+
+            userConfig = repository.save(userConfig);
+            log.info("Created new config for userId={}: id={}", userId, userConfig.getId());
+            return userConfig;
+        });
     }
 
     // ====== Mapping methods ======
@@ -65,7 +96,9 @@ public class PipelineConfigServiceImpl implements PipelineConfigService {
                 e.getId(), e.getName(),
                 e.getMaxSpeedKmh(),
                 e.getH3DedupResolution(),
-                e.getKDominatingSet()
+                e.getKDominatingSet(),
+                e.getMaxRadiusMeters(),
+                e.getIterations()
         );
     }
 
@@ -74,6 +107,8 @@ public class PipelineConfigServiceImpl implements PipelineConfigService {
         e.setMaxSpeedKmh(d.getMaxSpeedKmh());
         e.setH3DedupResolution(d.getH3DedupResolution());
         e.setKDominatingSet(d.getKDominatingSet());
+        e.setMaxRadiusMeters(d.getMaxRadiusMeters());
+        e.setIterations(d.getIterations());
     }
 
     private PipelineConfig toPipelineConfig(PipelineConfigEntity e) {
@@ -87,11 +122,13 @@ public class PipelineConfigServiceImpl implements PipelineConfigService {
      * Default values
      */
     public static void applyDefaults(PipelineConfigEntity e) {
-        e.setName("Predvolená konfigurácia");
+        e.setName("Default Config");
         e.setActive(true);
         e.setUserId(null);
         e.setMaxSpeedKmh(200);
         e.setH3DedupResolution(12);
         e.setKDominatingSet(10);
+        e.setMaxRadiusMeters(5000.0);
+        e.setIterations(10);
     }
 }

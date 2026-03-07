@@ -12,13 +12,13 @@ export class PlacementService {
   private readonly apiUrl = `${environment.apiUrl}/placement`;
   private readonly http = inject(HttpClient);
 
-  computePlacement(graph: GraphResponseDto, k: number, maxRadiusMeters: number, iterations: number): Observable<PlacementResponseDto> {
+  computePlacement(graph: GraphResponseDto, k: number, maxRadiusMeters: number, iterations: number, strategy: PlacementRequestDto['algorithm']): Observable<PlacementResponseDto> {
     const request: PlacementRequestDto = {
       graph: {
         nodes: graph.nodes.map(n => ({ id: n.id, lat: n.lat, lon: n.lon })),
         edges: graph.edges.map(e => ({ sourceId: e.sourceId, targetId: e.targetId, distanceMeters: e.distanceMeters })),
       },
-      algorithm: 'RANDOM_STRATEGY',
+      algorithm: strategy,
       k,
       maxRadiusMeters,
       iterations,

@@ -22,4 +22,10 @@ public class PipelineConfigDto {
     @Positive
     private int kDominatingSet;
 
+    @Positive
+    private double maxRadiusMeters;
+
+    @Min(1)
+    private int iterations;
+
 }

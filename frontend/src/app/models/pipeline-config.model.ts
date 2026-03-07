@@ -10,4 +10,6 @@ export interface PipelineConfig {
 
   // Placement
   kDominatingSet: number;
+  maxRadiusMeters: number;
+  iterations: number;
 }

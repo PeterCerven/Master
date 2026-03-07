@@ -1,0 +1,40 @@
+<h2 mat-dialog-title>Placement Configuration</h2>
+
+<mat-dialog-content>
+  @if (loading()) {
+    <p>Loading...</p>
+  } @else {
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Strategy</mat-label>
+      <mat-select [(ngModel)]="strategy">
+        @for (s of strategies; track s.value) {
+          <mat-option [value]="s.value">{{ s.label }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>K (stations)</mat-label>
+      <input matInput type="number" [(ngModel)]="k" min="1" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Max Radius (m)</mat-label>
+      <input matInput type="number" [(ngModel)]="maxRadiusMeters" min="100" step="100" />
+    </mat-form-field>
+
+    @if (strategy === 'RANDOM_STRATEGY') {
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Iterations</mat-label>
+        <input matInput type="number" [(ngModel)]="iterations" min="1" />
+      </mat-form-field>
+    }
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Cancel</button>
+  <button mat-flat-button color="primary" (click)="onOk()" [disabled]="loading() || saving()">
+    {{ saving() ? 'Saving...' : 'OK' }}
+  </button>
+</mat-dialog-actions>

@@ -1,13 +1,5 @@
 <mat-toolbar>
   @if (authService.isAuthenticated()) {
-    <button mat-icon-button routerLink="/map" routerLinkActive="active-link">
-      <mat-icon>map</mat-icon>
-    </button>
-
-    <button mat-icon-button routerLink="/settings" routerLinkActive="active-link">
-      <mat-icon>settings</mat-icon>
-    </button>
-
     @if (authService.isAdmin()) {
       <button mat-icon-button (click)="openRegisterDialog()">
         <mat-icon>person_add</mat-icon>

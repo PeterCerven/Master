@@ -15,7 +15,7 @@
       matFab extended
       class="control-btn load-graph-file-btn"
       [disabled]="loading"
-      (click)="fileInput.click()">
+      (click)="openGraphConfigDialog()">
       {{ loading ? 'Loading Graph...' : 'Load Graph from File' }}
     </button>
     <input hidden (change)="importGraphFromFile($event); fileInput.value = ''" #fileInput type="file" accept=".gpx,.json,.geojson">
@@ -35,16 +35,6 @@
       (click)="saveCurrentGraph()">
       {{ saving ? 'Saving...' : 'Save Graph' }}
     </button>
-
-    <div class="radius-input-row">
-      <label for="radiusInput">Radius (m)</label>
-      <input id="radiusInput" type="number" [(ngModel)]="maxRadiusMeters" min="100" step="100" />
-    </div>
-
-    <div class="radius-input-row">
-      <label for="iterationsInput">Iterations</label>
-      <input id="iterationsInput" type="number" [(ngModel)]="iterations" min="1" step="1" />
-    </div>
 
     <button
       matFab extended

@@ -1,36 +1,36 @@
 import {GoogleMap, GoogleMapsModule} from '@angular/google-maps';
-import {Component, computed, DestroyRef, effect, inject, signal, viewChild} from '@angular/core';
+import {Component, computed, DestroyRef, effect, inject, signal, viewChild, ElementRef} from '@angular/core';
 import {GraphService} from '@services/graph.service';
 import {ThemeService} from '@services/theme.service';
 import {GraphEdgeDto, GraphNodeDto, GraphResponseDto, PlacementResponseDto, StationNodeDto} from '@models/my-graph.model';
 import {takeUntilDestroyed, toObservable} from '@angular/core/rxjs-interop';
-import {skip, switchMap} from 'rxjs';
+import {filter, skip} from 'rxjs';
 import {MatFabButton} from '@angular/material/button';
 import {environment} from '@env/environment.production';
 import {PlacementService} from '@services/placement.service';
-import {PipelineConfigService} from '@services/pipeline-config.service';
-import {FormsModule} from '@angular/forms';
+import {MatDialog} from '@angular/material/dialog';
+import {GraphConfigDialog} from '@components/graph-config-dialog/graph-config-dialog';
+import {PlacementConfigDialog, PlacementConfigResult} from '@components/placement-config-dialog/placement-config-dialog';
 
 @Component({
   selector: 'app-map',
-  imports: [GoogleMapsModule, GoogleMap, MatFabButton, FormsModule],
+  imports: [GoogleMapsModule, GoogleMap, MatFabButton],
   templateUrl: './map.html',
   styleUrl: './map.scss'
 })
 export class Map {
   protected readonly google = google;
   map = viewChild<GoogleMap>('googleMap');
+  fileInput = viewChild<ElementRef>('fileInput');
   private readonly graphService = inject(GraphService);
   private readonly themeService = inject(ThemeService);
   private readonly placementService = inject(PlacementService);
-  private readonly configService = inject(PipelineConfigService);
+  private readonly dialog = inject(MatDialog);
   private destroyRef = inject(DestroyRef);
 
   loading = false;
   saving = false;
   computingPlacement = false;
-  maxRadiusMeters = 5000;
-  iterations = 10;
   graphData: GraphResponseDto | null = null;
   placementData: PlacementResponseDto | null = null;
   mapVisible = signal(true);
@@ -92,6 +92,14 @@ export class Map {
 
       onCleanup(() => subscription.unsubscribe());
     });
+  }
+
+  openGraphConfigDialog(): void {
+    this.dialog.open(GraphConfigDialog).afterClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(result => {
+        if (result) this.fileInput()!.nativeElement.click();
+      });
   }
 
   importGraphFromFile(event: Event): void {
@@ -266,24 +274,28 @@ export class Map {
   computePlacement(): void {
     if (!this.graphData) return;
 
-    this.computingPlacement = true;
-    this.configService.getActiveConfig()
+    this.dialog.open(PlacementConfigDialog).afterClosed()
       .pipe(
-        switchMap(config => this.placementService.computePlacement(this.graphData!, config.kDominatingSet, this.maxRadiusMeters, this.iterations)),
-        takeUntilDestroyed(this.destroyRef)
+        takeUntilDestroyed(this.destroyRef),
+        filter((result): result is PlacementConfigResult => !!result),
       )
-      .subscribe({
-        next: (result: PlacementResponseDto) => {
-          this.placementData = result;
-          this.displayStationsOnMap(result.stations);
-          this.computingPlacement = false;
-          console.log('Placement computed:', result);
-        },
-        error: (error) => {
-          console.error('Error computing placement:', error);
-          this.computingPlacement = false;
-          alert('Failed to compute placement. Please check the console for details.');
-        }
+      .subscribe(({strategy, k, maxRadiusMeters, iterations}) => {
+        this.computingPlacement = true;
+        this.placementService.computePlacement(this.graphData!, k, maxRadiusMeters, iterations, strategy)
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe({
+            next: (result: PlacementResponseDto) => {
+              this.placementData = result;
+              this.displayStationsOnMap(result.stations);
+              this.computingPlacement = false;
+              console.log('Placement computed:', result);
+            },
+            error: (error) => {
+              console.error('Error computing placement:', error);
+              this.computingPlacement = false;
+              alert('Failed to compute placement. Please check the console for details.');
+            }
+          });
       });
   }
 

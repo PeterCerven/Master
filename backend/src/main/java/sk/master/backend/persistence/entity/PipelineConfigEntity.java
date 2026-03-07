@@ -36,6 +36,12 @@ public class PipelineConfigEntity {
     @Column(name = "k_dominating_set", nullable = false)
     private int kDominatingSet;
 
+    @Column(name = "max_radius_meters", nullable = false)
+    private double maxRadiusMeters;
+
+    @Column(nullable = false)
+    private int iterations;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

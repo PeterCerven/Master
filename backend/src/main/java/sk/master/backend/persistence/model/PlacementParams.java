@@ -8,4 +8,5 @@ import lombok.Getter;
 public class PlacementParams {
     private final int k;
     private final Double maxRadiusMeters;
+    private final int iterations;
 }

@@ -18,6 +18,8 @@ public class RandomStrategy implements PlacementStrategy {
     @Override
     public PlacementResult computePlacement(RoadGraph roadGraph, PlacementParams params) {
         int k = params.getK();
+        double maxRadiusMeters = params.getMaxRadiusMeters();
+        int iterations = params.getIterations();
         Graph<RoadNode, RoadEdge> graph = roadGraph.getGraph();
         Set<RoadNode> allNodes = graph.vertexSet();
 
@@ -25,106 +27,105 @@ public class RandomStrategy implements PlacementStrategy {
             return new PlacementResult(List.of(), 0, Map.of());
         }
 
-        log.info("Calculation of the k-dominant set: k={}, nodes={}, edges={}",
-                k, allNodes.size(), graph.edgeSet().size());
+        log.info("Calculate with params: k={}, maxRadius={}m, iterations={}, nodes={}, edges={}",
+                k, maxRadiusMeters, iterations, allNodes.size(), graph.edgeSet().size());
 
-        // 1. Náhodný výber z nepokrytých uzlov
-        List<RoadNode> uncovered = new ArrayList<>(allNodes);
-        Set<RoadNode> uncoveredSet = new HashSet<>(allNodes);
-        List<RoadNode> dominatingSet = new ArrayList<>();
-
-        while (!uncoveredSet.isEmpty()) {
-            // Náhodne vybrať uzol z nepokrytých
-            RoadNode selected = uncovered.get(random.nextInt(uncovered.size()));
-
-            dominatingSet.add(selected);
-            Set<RoadNode> neighborhood = computeKHopNeighborhood(graph, selected, k);
-            uncoveredSet.removeAll(neighborhood);
-            uncovered.removeAll(neighborhood);
-
-            log.debug("Selected node {}: surroundings ={}, remains uncovered={}",
-                    selected.getId(), neighborhood.size(), uncoveredSet.size());
-        }
-
-        // 3. Vypočítať vzdialenosti od každého uzla k najbližšej stanici (počet skokov)
-        Map<String, Double> nodeDistances = computeMinHopDistances(graph, allNodes, dominatingSet, k);
-
-        log.info("K-dominated set completed: selected {} charging station", dominatingSet.size());
-
-        return new PlacementResult(dominatingSet, dominatingSet.size(), nodeDistances);
-    }
-
-    private Set<RoadNode> computeKHopNeighborhood(Graph<RoadNode, RoadEdge> graph, RoadNode source, int k) {
-        Set<RoadNode> visited = new HashSet<>();
-        Queue<RoadNode> currentLevel = new LinkedList<>();
-        currentLevel.add(source);
-        visited.add(source);
-
-        for (int depth = 0; depth < k; depth++) {
-            Queue<RoadNode> nextLevel = new LinkedList<>();
-            while (!currentLevel.isEmpty()) {
-                RoadNode current = currentLevel.poll();
-                for (RoadEdge edge : graph.edgesOf(current)) {
-                    RoadNode neighbor = getOpposite(graph, current, edge);
-                    if (visited.add(neighbor)) {
-                        nextLevel.add(neighbor);
-                    }
-                }
+        List<RoadNode> bestStations = new ArrayList<>();
+        for (int i = 0; i < iterations; i++) {
+            List<RoadNode> candidate = runOnce(graph, allNodes, k, maxRadiusMeters);
+            if (bestStations.isEmpty()|| candidate.size() < bestStations.size()) {
+                bestStations = candidate;
             }
-            currentLevel = nextLevel;
+            log.debug("Iteration {}/{}: {} stations (best={})", i + 1, iterations, candidate.size(), bestStations.size());
         }
 
-        return visited;
+        Map<String, Double> nodeDistances = computeMinWeightedDistances(graph, allNodes, bestStations, maxRadiusMeters);
+
+        log.info("K-coverage finished: selected {} charging stations (from {} iterations)", bestStations.size(), iterations);
+
+        return new PlacementResult(bestStations, bestStations.size(), nodeDistances);
     }
 
-    private Map<String, Double> computeMinHopDistances(
-            Graph<RoadNode, RoadEdge> graph,
-            Set<RoadNode> allNodes,
-            List<RoadNode> stations,
-            int k) {
-
-        Map<String, Double> distances = new HashMap<>();
+    private List<RoadNode> runOnce(Graph<RoadNode, RoadEdge> graph, Set<RoadNode> allNodes, int k, double maxRadiusMeters) {
+        Map<RoadNode, Integer> coverageCount = new HashMap<>();
         for (RoadNode node : allNodes) {
-            distances.put(node.getId(), (double) (k + 1)); // inicializácia na max
+            coverageCount.put(node, 0);
         }
 
-        for (RoadNode station : stations) {
-            // BFS od každej stanice
-            Map<RoadNode, Integer> hopDist = bfsDistances(graph, station, k);
-            for (Map.Entry<RoadNode, Integer> entry : hopDist.entrySet()) {
-                String nodeId = entry.getKey().getId();
-                double currentMin = distances.get(nodeId);
-                if (entry.getValue() < currentMin) {
-                    distances.put(nodeId, (double) entry.getValue());
+        Set<RoadNode> unsatisfied = new HashSet<>(allNodes);
+        List<RoadNode> stations = new ArrayList<>();
+        Set<RoadNode> stationSet = new HashSet<>();
+
+        while (!unsatisfied.isEmpty()) {
+            // Candidates: nepokryté uzly, ktoré ešte nie sú stanicou
+            List<RoadNode> candidates = unsatisfied.stream()
+                    .filter(n -> !stationSet.contains(n))
+                    .toList();
+            if (candidates.isEmpty()) break;
+
+            RoadNode selected = candidates.get(random.nextInt(candidates.size()));
+            stations.add(selected);
+            stationSet.add(selected);
+
+            Map<RoadNode, Double> reachable = dijkstraDistances(graph, selected, maxRadiusMeters);
+            for (RoadNode node : reachable.keySet()) {
+                int count = coverageCount.merge(node, 1, Integer::sum);
+                if (count >= k) {
+                    unsatisfied.remove(node);
                 }
             }
         }
 
-        return distances;
+        return stations;
     }
 
-    private Map<RoadNode, Integer> bfsDistances(Graph<RoadNode, RoadEdge> graph, RoadNode source, int maxDepth) {
-        Map<RoadNode, Integer> dist = new HashMap<>();
-        Queue<RoadNode> currentLevel = new LinkedList<>();
-        currentLevel.add(source);
-        dist.put(source, 0);
+    private Map<RoadNode, Double> dijkstraDistances(Graph<RoadNode, RoadEdge> graph, RoadNode source, double maxRadius) {
+        Map<RoadNode, Double> dist = new HashMap<>();
+        dist.put(source, 0.0);
+        PriorityQueue<RoadNode> pq = new PriorityQueue<>(Comparator.comparingDouble(dist::get));
+        pq.add(source);
 
-        for (int depth = 0; depth < maxDepth; depth++) {
-            Queue<RoadNode> nextLevel = new LinkedList<>();
-            while (!currentLevel.isEmpty()) {
-                RoadNode current = currentLevel.poll();
-                for (RoadEdge edge : graph.edgesOf(current)) {
-                    RoadNode neighbor = getOpposite(graph, current, edge);
-                    if (!dist.containsKey(neighbor)) {
-                        dist.put(neighbor, depth + 1);
-                        nextLevel.add(neighbor);
-                    }
+        while (!pq.isEmpty()) {
+            RoadNode u = pq.poll();
+            double du = dist.get(u);
+            for (RoadEdge edge : graph.edgesOf(u)) {
+                RoadNode v = getOpposite(graph, u, edge);
+                double dv = du + graph.getEdgeWeight(edge);
+                if (dv <= maxRadius && dv < dist.getOrDefault(v, Double.MAX_VALUE)) {
+                    dist.put(v, dv);
+                    pq.add(v);
                 }
             }
-            currentLevel = nextLevel;
         }
 
         return dist;
+    }
+
+    private Map<String, Double> computeMinWeightedDistances(
+            Graph<RoadNode, RoadEdge> graph,
+            Set<RoadNode> allNodes,
+            List<RoadNode> stations,
+            double maxRadiusMeters) {
+
+        Map<String, Double> distances = new HashMap<>();
+        for (RoadNode node : allNodes) {
+            distances.put(node.getId(), Double.MAX_VALUE);
+        }
+
+        for (RoadNode station : stations) {
+            Map<RoadNode, Double> stationDist = dijkstraDistances(graph, station, maxRadiusMeters);
+            for (Map.Entry<RoadNode, Double> entry : stationDist.entrySet()) {
+                String nodeId = entry.getKey().getId();
+                if (entry.getValue() < distances.get(nodeId)) {
+                    distances.put(nodeId, entry.getValue());
+                }
+            }
+        }
+
+        // Uzly mimo dosahu staníc dostanú -1
+        distances.replaceAll((_, d) -> d == Double.MAX_VALUE ? -1.0 : d);
+
+        return distances;
     }
 
     private RoadNode getOpposite(Graph<RoadNode, RoadEdge> graph, RoadNode node, RoadEdge edge) {

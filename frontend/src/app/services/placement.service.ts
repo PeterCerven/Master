@@ -12,7 +12,7 @@ export class PlacementService {
   private readonly apiUrl = `${environment.apiUrl}/placement`;
   private readonly http = inject(HttpClient);
 
-  computePlacement(graph: GraphResponseDto, k: number): Observable<PlacementResponseDto> {
+  computePlacement(graph: GraphResponseDto, k: number, maxRadiusMeters: number, iterations: number): Observable<PlacementResponseDto> {
     const request: PlacementRequestDto = {
       graph: {
         nodes: graph.nodes.map(n => ({ id: n.id, lat: n.lat, lon: n.lon })),
@@ -20,7 +20,8 @@ export class PlacementService {
       },
       algorithm: 'RANDOM_STRATEGY',
       k,
-      maxRadiusMeters: 50000,
+      maxRadiusMeters,
+      iterations,
     };
 
     return this.http.post<PlacementResponseDto>(`${this.apiUrl}/compute`, request).pipe(

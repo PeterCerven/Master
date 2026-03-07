@@ -1,5 +1,6 @@
 package sk.master.backend.persistence.dto;
 
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
@@ -23,4 +24,7 @@ public class PlacementRequestDto {
 
     @Positive
     private Double maxRadiusMeters;
+
+    @Min(1)
+    private int iterations = 1;
 }

@@ -9,10 +9,11 @@ import {MatFabButton} from '@angular/material/button';
 import {environment} from '@env/environment.production';
 import {PlacementService} from '@services/placement.service';
 import {PipelineConfigService} from '@services/pipeline-config.service';
+import {FormsModule} from '@angular/forms';
 
 @Component({
   selector: 'app-map',
-  imports: [GoogleMapsModule, GoogleMap, MatFabButton],
+  imports: [GoogleMapsModule, GoogleMap, MatFabButton, FormsModule],
   templateUrl: './map.html',
   styleUrl: './map.scss'
 })
@@ -27,15 +28,14 @@ export class Map {
 
   loading = false;
   saving = false;
-  processing = false;
   computingPlacement = false;
+  maxRadiusMeters = 5000;
+  iterations = 10;
   graphData: GraphResponseDto | null = null;
   placementData: PlacementResponseDto | null = null;
-  pendingPoints = signal<Array<{ lat: number, lon: number }>>([]);
   mapVisible = signal(true);
   private graphMarkers: google.maps.marker.AdvancedMarkerElement[] = [];
   private graphPolylines: google.maps.Polyline[] = [];
-  private pendingMarkers: google.maps.marker.AdvancedMarkerElement[] = [];
   private stationMarkers: google.maps.marker.AdvancedMarkerElement[] = [];
   private rightClickListenerSetup = false;
 
@@ -75,19 +75,15 @@ export class Map {
             subscription.unsubscribe();
             return;
           }
-          this.setupRightClickListener(mapEl.googleMap);
-          this.rightClickListenerSetup = true;
           subscription.unsubscribe();
 
           // After recreation, drop orphaned references and re-render onto new map instance
           this.graphMarkers = [];
           this.graphPolylines = [];
-          this.pendingMarkers = [];
           this.stationMarkers = [];
           if (this.graphData) {
             this.displayGraphOnMap(this.graphData);
           }
-          this.pendingPoints().forEach(p => this.addPendingMarkerToMap(mapEl.googleMap!, p.lat, p.lon));
           if (this.placementData) {
             this.displayStationsOnMap(this.placementData.stations);
           }
@@ -273,7 +269,7 @@ export class Map {
     this.computingPlacement = true;
     this.configService.getActiveConfig()
       .pipe(
-        switchMap(config => this.placementService.computePlacement(this.graphData!, config.kDominatingSet)),
+        switchMap(config => this.placementService.computePlacement(this.graphData!, config.kDominatingSet, this.maxRadiusMeters, this.iterations)),
         takeUntilDestroyed(this.destroyRef)
       )
       .subscribe({
@@ -339,86 +335,6 @@ export class Map {
     });
   }
 
-  private setupRightClickListener(nativeMap: google.maps.Map): void {
-    nativeMap.addListener('rightclick', (event: google.maps.MapMouseEvent) => {
-      if (event.latLng) {
-        const lat = event.latLng.lat();
-        const lon = event.latLng.lng();
-        this.addPendingPoint(lat, lon);
-      }
-    });
-  }
-
-  private addPendingMarkerToMap(nativeMap: google.maps.Map, lat: number, lon: number): void {
-    const {AdvancedMarkerElement} = google.maps.marker;
-
-    const dot = document.createElement('div');
-    dot.style.width = '10px';
-    dot.style.height = '10px';
-    dot.style.backgroundColor = '#f39c12';
-    dot.style.border = '2px solid #ffffff';
-    dot.style.borderRadius = '50%';
-    dot.style.boxShadow = '0 0 3px rgba(0,0,0,0.6)';
-
-    const marker = new AdvancedMarkerElement({
-      map: nativeMap,
-      position: {lat, lng: lon},
-      title: 'Pending Point',
-      content: dot,
-    });
-
-    this.pendingMarkers.push(marker);
-  }
-
-  private addPendingPoint(lat: number, lon: number): void {
-    const mapInstance = this.map()?.googleMap;
-    if (!mapInstance) {
-      console.error('Map instance not available');
-      return;
-    }
-
-    this.pendingPoints.update(points => [...points, {lat, lon}]);
-    this.addPendingMarkerToMap(mapInstance, lat, lon);
-    console.log(`Added pending point at (${lat.toFixed(5)}, ${lon.toFixed(5)}). Total: ${this.pendingPoints().length}`);
-  }
-
-  processGraph(): void {
-    if (this.pendingPoints().length === 0) {
-      alert('Please add some points by right-clicking on the map first');
-      return;
-    }
-
-    this.processing = true;
-    const points = this.pendingPoints().map(p => ({lat: p.lat, lon: p.lon}));
-
-    this.graphService.updateGraphWithPoints(this.graphData, points)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (graph: GraphResponseDto) => {
-          this.graphData = graph;
-          this.clearPendingPoints();
-          this.displayGraphOnMap(graph);
-
-          this.processing = false;
-          console.log('Graph processed successfully:', graph);
-          alert(`Graph created with ${graph.nodes.length} nodes and ${graph.edges.length} edges`);
-        },
-        error: (error) => {
-          console.error('Error processing graph:', error);
-          this.processing = false;
-          alert('Failed to process graph. Please check the console for details.');
-        }
-      });
-  }
-
-  private clearPendingPoints(): void {
-    this.pendingMarkers.forEach(marker => {
-      marker.map = null;
-    });
-    this.pendingMarkers = [];
-    this.pendingPoints.set([]);
-  }
-
   importGraphFromDatabase() {
     this.loading = true;
     this.graphService.loadGraphFromDatabase(1)
@@ -442,9 +358,8 @@ export class Map {
     this.graphData = null;
     this.placementData = null;
     this.clearGraph();
-    this.clearPendingPoints();
     this.stationMarkers.forEach(marker => marker.map = null);
     this.stationMarkers = [];
-    console.log('All graph data and pending points cleared');
+    console.log('All graph data cleared');
   }
 }

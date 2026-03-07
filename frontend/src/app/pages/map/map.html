@@ -28,14 +28,6 @@
       {{ loading ? 'Loading Graph...' : 'Load Graph from Database' }}
     </button>
 
-<!--    <button-->
-<!--      matFab extended-->
-<!--      class="control-btn process-graph-btn"-->
-<!--      [disabled]="processing || pendingPoints().length === 0"-->
-<!--      (click)="processGraph()">-->
-<!--      {{ processing ? 'Processing...' : 'Process Graph (' + pendingPoints().length + ' points)' }}-->
-<!--    </button>-->
-
     <button
       matFab extended
       class="control-btn save-graph-btn"
@@ -43,6 +35,16 @@
       (click)="saveCurrentGraph()">
       {{ saving ? 'Saving...' : 'Save Graph' }}
     </button>
+
+    <div class="radius-input-row">
+      <label for="radiusInput">Radius (m)</label>
+      <input id="radiusInput" type="number" [(ngModel)]="maxRadiusMeters" min="100" step="100" />
+    </div>
+
+    <div class="radius-input-row">
+      <label for="iterationsInput">Iterations</label>
+      <input id="iterationsInput" type="number" [(ngModel)]="iterations" min="1" step="1" />
+    </div>
 
     <button
       matFab extended
@@ -55,7 +57,7 @@
     <button
       matFab extended
       class="control-btn clear-graph-btn"
-      [disabled]="!graphData && pendingPoints().length === 0"
+      [disabled]="!graphData"
       (click)="clearAll()">
       Clear All
     </button>

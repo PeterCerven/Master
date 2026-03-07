@@ -18,11 +18,6 @@ export interface GraphEdgeDto {
   roadName: string | null;
 }
 
-export interface GraphPoint {
-  lat: number;
-  lon: number;
-}
-
 export interface PlacementRequestDto {
   graph: {
     nodes: { id: string; lat: number; lon: number }[];
@@ -31,6 +26,7 @@ export interface PlacementRequestDto {
   algorithm: 'RANDOM_STRATEGY' | 'CUSTOM_STRATEGY' | 'GREEDY_STRATEGY';
   k: number;
   maxRadiusMeters: number;
+  iterations: number;
 }
 
 export interface StationNodeDto {

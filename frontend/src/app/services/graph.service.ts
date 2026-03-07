@@ -2,7 +2,7 @@ import {inject, Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {environment} from '@env/environment.production';
 import {catchError, Observable, throwError} from 'rxjs';
-import {GraphPoint, GraphResponseDto} from '@models/my-graph.model';
+import {GraphResponseDto} from '@models/my-graph.model';
 
 @Injectable({
   providedIn: 'root'
@@ -48,16 +48,6 @@ export class GraphService {
   public saveGraph(graph: GraphResponseDto, name: string): Observable<any> {
     const request = { name, graph };
     return this.http.post(`${this.apiUrl}/save`, request).pipe(catchError(this.handleError));
-  }
-
-  public updateGraphWithPoints(graph: GraphResponseDto | null, points: Array<GraphPoint>): Observable<GraphResponseDto> {
-    console.log("df" + graph)
-    console.log("fsd" + points)
-    const request = { positionalData: points, graph };
-    console.log(JSON.stringify(request, null, 2));
-    return this.http.post<GraphResponseDto>(`${this.apiUrl}/add-points`, request).pipe(
-      catchError(this.handleError)
-    );
   }
 
   private handleError(error: any): Observable<never> {

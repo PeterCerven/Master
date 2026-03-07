@@ -36,6 +36,7 @@ public class ChargingStationPlacementServiceImpl implements ChargingStationPlace
         PlacementParams params = PlacementParams.builder()
                 .k(request.getK())
                 .maxRadiusMeters(request.getMaxRadiusMeters())
+                .iterations(request.getIterations())
                 .build();
 
         log.info("Launch algorithm '{}' with k={} na graph with {} nodes and {} edges",

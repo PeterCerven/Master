@@ -11,10 +11,11 @@ import {PlacementService} from '@services/placement.service';
 import {MatDialog} from '@angular/material/dialog';
 import {GraphConfigDialog} from '@components/graph-config-dialog/graph-config-dialog';
 import {PlacementConfigDialog, PlacementConfigResult} from '@components/placement-config-dialog/placement-config-dialog';
+import {TranslocoDirective} from '@jsverse/transloco';
 
 @Component({
   selector: 'app-map',
-  imports: [GoogleMapsModule, GoogleMap, MatFabButton],
+  imports: [GoogleMapsModule, GoogleMap, MatFabButton, TranslocoDirective],
   templateUrl: './map.html',
   styleUrl: './map.scss'
 })

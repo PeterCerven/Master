@@ -1,55 +1,60 @@
 {
-  "pages": {
-    "tables": {
-      "showData": "Ukázať dáta",
-      "importData": "Importovať dáta...",
-      "saveData": "Uložiť dáta",
-      "filter": "filtruj",
-      "latitude": "zemepisná šírka",
-      "longitude": "zemepisná dĺžka",
-      "timestamp": "časová značka",
-      "itemsPerPage": "Počet položiek na stránku"
+  "map": {
+    "createGraphFromFile": "Vytvor graf zo súboru",
+    "loadGraphFromDatabase": "Načítaj graf z databázy",
+    "saveGraph": "Ulož graf do databázy",
+    "computePlacement": "Umiestni stanice",
+    "clearGraph": "Vyčisti graf",
+    "loading": "Načítavanie...",
+    "saving": "Ukladanie...",
+    "placing": "Umiestňovanie..."
+  },
+  "login": {
+    "title": "Prihlásenie",
+    "subtitle": "Prihláste sa do svojho účtu",
+    "email": "Email",
+    "password": "Heslo",
+    "submit": "Prihlásiť sa",
+    "emailRequired": "Email je povinný",
+    "emailInvalid": "Zadajte platný email",
+    "passwordRequired": "Heslo je povinné",
+    "errorInvalidCredentials": "Nesprávny email alebo heslo",
+    "errorGeneric": "Prihlásenie zlyhalo. Skúste to znova."
+  },
+  "registerUser": {
+    "title": "Registrovať nového používateľa",
+    "name": "Meno",
+    "email": "Email",
+    "password": "Heslo",
+    "submit": "Registrovať",
+    "cancel": "Zrušiť",
+    "nameRequired": "Meno je povinné",
+    "emailRequired": "Email je povinný",
+    "emailInvalid": "Zadajte platný email",
+    "passwordRequired": "Heslo je povinné",
+    "passwordMinLength": "Heslo musí mať aspoň 8 znakov",
+    "successMessage": "Používateľ bol úspešne zaregistrovaný",
+    "errorEmailExists": "Používateľ s týmto emailom už existuje",
+    "errorGeneric": "Registrácia zlyhala. Skúste to znova."
+  },
+  "modals": {
+    "create": {
+      "title": "Vytvorenie grafu zo súboru",
+      "h3DedupResolution": "H3 Deduplikácia Rozlíšenia (0–15)",
+      "maxSpeedKmh": "Maximálna rýchlosť (v km/h)"
     },
-    "settings": {
-      "preprocessing": "1. Predspracovanie",
-      "h3SpatialIndex": "2. H3 priestorový index",
-      "maxSpeedKmh": "Max. rýchlosť",
-      "h3DedupResolution": "Rozlíšenie pre deduplikáciu",
-      "h3ResolutionHint": "0-15 (vyššie = jemnejšie)",
-      "metersUnit": "metre",
-      "placementConfig": "3. Konfigurácia umiestnenia",
-      "kDominatingSet": "K (počet skokov)",
-      "kDominatingSetHint": "Min. 1, predvolené 3",
-      "save": "Uložiť konfiguráciu",
-      "resetToDefaults": "Obnoviť predvolené"
+    "load": {
+      "title": "Načítaj graf z databáze"
     },
-    "login": {
-      "title": "Prihlásenie",
-      "subtitle": "Prihláste sa do svojho účtu",
-      "email": "Email",
-      "password": "Heslo",
-      "submit": "Prihlásiť sa",
-      "emailRequired": "Email je povinný",
-      "emailInvalid": "Zadajte platný email",
-      "passwordRequired": "Heslo je povinné",
-      "errorInvalidCredentials": "Nesprávny email alebo heslo",
-      "errorGeneric": "Prihlásenie zlyhalo. Skúste to znova."
+    "place": {
+      "title": "Vypočítaj umiestnenie nabíjacích staníc",
+      "iterations": "Iterácie",
+      "kDominatingSet": "K-Dominujúca Množina",
+      "maxRadiusMeters": "Maximálna vzdialenosť (v metroch)"
     },
-    "registerUser": {
-      "title": "Registrovať nového používateľa",
-      "name": "Meno",
-      "email": "Email",
-      "password": "Heslo",
-      "submit": "Registrovať",
-      "cancel": "Zrušiť",
-      "nameRequired": "Meno je povinné",
-      "emailRequired": "Email je povinný",
-      "emailInvalid": "Zadajte platný email",
-      "passwordRequired": "Heslo je povinné",
-      "passwordMinLength": "Heslo musí mať aspoň 8 znakov",
-      "successMessage": "Používateľ bol úspešne zaregistrovaný",
-      "errorEmailExists": "Používateľ s týmto emailom už existuje",
-      "errorGeneric": "Registrácia zlyhala. Skúste to znova."
-    }
+    "confirm": "Potvrdiť",
+    "cancel": "Zrušiť",
+    "saving": "Ukladanie...",
+    "loading": "Načítavanie..."
   }
 }

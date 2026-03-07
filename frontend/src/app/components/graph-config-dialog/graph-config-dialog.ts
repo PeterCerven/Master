@@ -7,10 +7,11 @@ import { MatInputModule } from '@angular/material/input';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PipelineConfigService } from '@services/pipeline-config.service';
 import { PipelineConfig } from '@models/pipeline-config.model';
+import {TranslocoDirective} from '@jsverse/transloco';
 
 @Component({
   selector: 'app-graph-config-dialog',
-  imports: [FormsModule, MatDialogModule, MatFormFieldModule, MatInputModule, MatButtonModule],
+  imports: [FormsModule, MatDialogModule, MatFormFieldModule, MatInputModule, MatButtonModule, TranslocoDirective],
   templateUrl: './graph-config-dialog.html',
 })
 export class GraphConfigDialog implements OnInit {

@@ -1,4 +1,4 @@
-<div class="map-page-container">
+<div class="map-page-container" *transloco="let t; prefix: 'map'">
   <div class="map-container elevation-level3">
     @if (mapVisible()) {
       <google-map
@@ -16,16 +16,17 @@
       class="control-btn load-graph-file-btn"
       [disabled]="loading"
       (click)="openGraphConfigDialog()">
-      {{ loading ? 'Loading Graph...' : 'Load Graph from File' }}
+      {{ loading ? t('loading') : t('createGraphFromFile') }}
     </button>
-    <input hidden (change)="importGraphFromFile($event); fileInput.value = ''" #fileInput type="file" accept=".gpx,.json,.geojson">
+    <input hidden (change)="importGraphFromFile($event); fileInput.value = ''" #fileInput type="file"
+           accept=".gpx,.json,.geojson">
 
     <button
       matFab extended
       class="control-btn load-graph-database-btn"
       [disabled]="loading"
       (click)="importGraphFromDatabase()">
-      {{ loading ? 'Loading Graph...' : 'Load Graph from Database' }}
+      {{ loading ? t('loading') : t('loadGraphFromDatabase') }}
     </button>
 
     <button
@@ -33,7 +34,7 @@
       class="control-btn save-graph-btn"
       [disabled]="saving || !graphData"
       (click)="saveCurrentGraph()">
-      {{ saving ? 'Saving...' : 'Save Graph' }}
+      {{ saving ? t('saving') : t('saveGraph') }}
     </button>
 
     <button
@@ -41,7 +42,7 @@
       class="control-btn compute-placement-btn"
       [disabled]="computingPlacement || !graphData"
       (click)="computePlacement()">
-      {{ computingPlacement ? 'Computing...' : 'Compute Placement' }}
+      {{ computingPlacement ? t('placing') : t('computePlacement') }}
     </button>
 
     <button
@@ -49,7 +50,7 @@
       class="control-btn clear-graph-btn"
       [disabled]="!graphData"
       (click)="clearAll()">
-      Clear All
+      {{ t('clearGraph') }}
     </button>
   </div>
 </div>

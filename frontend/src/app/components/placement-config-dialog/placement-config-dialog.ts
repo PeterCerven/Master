@@ -9,6 +9,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PipelineConfigService } from '@services/pipeline-config.service';
 import { PipelineConfig } from '@models/pipeline-config.model';
 import { PlacementRequestDto } from '@models/my-graph.model';
+import {TranslocoDirective} from '@jsverse/transloco';
 
 export interface PlacementConfigResult {
   strategy: PlacementRequestDto['algorithm'];
@@ -19,7 +20,7 @@ export interface PlacementConfigResult {
 
 @Component({
   selector: 'app-placement-config-dialog',
-  imports: [FormsModule, MatDialogModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatSelectModule],
+  imports: [FormsModule, MatDialogModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatSelectModule, TranslocoDirective],
   templateUrl: './placement-config-dialog.html',
 })
 export class PlacementConfigDialog implements OnInit {

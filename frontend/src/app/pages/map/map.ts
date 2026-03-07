@@ -2,7 +2,7 @@ import {GoogleMap, GoogleMapsModule} from '@angular/google-maps';
 import {Component, computed, DestroyRef, effect, inject, signal, viewChild, ElementRef} from '@angular/core';
 import {GraphService} from '@services/graph.service';
 import {ThemeService} from '@services/theme.service';
-import {GraphEdgeDto, GraphNodeDto, GraphResponseDto, PlacementResponseDto, StationNodeDto} from '@models/my-graph.model';
+import {GraphEdgeDto, GraphNodeDto, GraphResponseDto, PlacementResponseDto, SavedGraphResponseDto, StationNodeDto} from '@models/my-graph.model';
 import {takeUntilDestroyed, toObservable} from '@angular/core/rxjs-interop';
 import {filter, skip} from 'rxjs';
 import {MatFabButton} from '@angular/material/button';
@@ -11,6 +11,8 @@ import {PlacementService} from '@services/placement.service';
 import {MatDialog} from '@angular/material/dialog';
 import {GraphConfigDialog} from '@components/graph-config-dialog/graph-config-dialog';
 import {PlacementConfigDialog, PlacementConfigResult} from '@components/placement-config-dialog/placement-config-dialog';
+import {SaveGraphDialog} from '@components/save-graph-dialog/save-graph-dialog';
+import {LoadGraphDialog} from '@components/load-graph-dialog/load-graph-dialog';
 import {TranslocoDirective} from '@jsverse/transloco';
 
 @Component({
@@ -243,32 +245,21 @@ export class Map {
     this.graphPolylines = [];
   }
 
-  saveCurrentGraph(): void {
-    if (!this.graphData) {
-      alert('No graph data to save');
-      return;
-    }
-
-    const name = window.prompt('Enter a name for this graph:');
-    if (!name || name.trim() === '') {
-      alert('Graph name is required');
-      return;
-    }
-
-    this.saving = true;
-    this.graphService.saveGraph(this.graphData, name.trim())
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (response) => {
-          this.saving = false;
-          alert(`Graph "${name}" saved successfully!`);
-          console.log('Graph saved:', response);
-        },
-        error: (error) => {
-          console.error('Error saving graph:', error);
-          this.saving = false;
-          alert('Failed to save graph. Please check the console for details.');
-        }
+  openSaveGraphDialog(): void {
+    if (!this.graphData) return;
+    this.dialog.open(SaveGraphDialog, {
+      data: { graphData: this.graphData, placementData: this.placementData }
+    })
+      .afterClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef), filter(r => !!r))
+      .subscribe(({ name }) => {
+        this.saving = true;
+        this.graphService.saveGraph(this.graphData!, name, this.placementData?.stations ?? null)
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe({
+            next: () => { this.saving = false; },
+            error: () => { this.saving = false; }
+          });
       });
   }
 
@@ -348,22 +339,31 @@ export class Map {
     });
   }
 
-  importGraphFromDatabase() {
-    this.loading = true;
-    this.graphService.loadGraphFromDatabase(1)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (graph: GraphResponseDto) => {
-          this.graphData = graph;
-          this.displayGraphOnMap(graph);
-          this.loading = false;
-          console.log('Graph loaded successfully:', graph);
-        },
-        error: (error) => {
-          console.error('Error loading graph from database:', error);
-          this.loading = false;
-          alert('Failed to load graph from database. Please check the console for details.');
-        }
+  openLoadGraphDialog(): void {
+    this.dialog.open(LoadGraphDialog, { width: '620px' })
+      .afterClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef), filter(id => id != null))
+      .subscribe(id => {
+        this.loading = true;
+        this.graphService.loadGraphFromDatabase(id)
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe({
+            next: (saved: SavedGraphResponseDto) => {
+              this.graphData = { nodes: saved.nodes, edges: saved.edges };
+              this.displayGraphOnMap(this.graphData);
+              if (saved.stations.length > 0) {
+                this.placementData = { stations: saved.stations, objectiveValue: 0,
+                  totalNodes: saved.nodes.length, coverageDistances: {} };
+                this.displayStationsOnMap(saved.stations);
+              } else {
+                this.placementData = null;
+                this.stationMarkers.forEach(m => m.map = null);
+                this.stationMarkers = [];
+              }
+              this.loading = false;
+            },
+            error: () => { this.loading = false; }
+          });
       });
   }
 

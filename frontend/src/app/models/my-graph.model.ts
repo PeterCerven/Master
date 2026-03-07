@@ -42,3 +42,21 @@ export interface PlacementResponseDto {
   totalNodes: number;
   coverageDistances: Record<string, number>;
 }
+
+export interface GraphSummaryDto {
+  id: number;
+  name: string;
+  createdAt: string;
+  nodeCount: number;
+  edgeCount: number;
+  stationCount: number;
+}
+
+export interface SavedGraphResponseDto {
+  id: number;
+  name: string;
+  createdAt: string;
+  nodes: GraphNodeDto[];
+  edges: GraphEdgeDto[];
+  stations: StationNodeDto[];
+}

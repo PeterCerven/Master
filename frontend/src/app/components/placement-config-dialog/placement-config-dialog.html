@@ -14,18 +14,18 @@
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>{{ t('kDominatingSet') }}</mat-label>
+        <mat-label>{{ t('place.kDominatingSet') }}</mat-label>
         <input matInput type="number" [(ngModel)]="k" min="1"/>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>{{ t('maxRadiusMeters') }}</mat-label>
+        <mat-label>{{ t('place.maxRadiusMeters') }}</mat-label>
         <input matInput type="number" [(ngModel)]="maxRadiusMeters" min="100" step="100"/>
       </mat-form-field>
 
       @if (strategy === 'RANDOM_STRATEGY') {
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>{{ t('iterations') }}</mat-label>
+          <mat-label>{{ t('place.iterations') }}</mat-label>
           <input matInput type="number" [(ngModel)]="iterations" min="1"/>
         </mat-form-field>
       }

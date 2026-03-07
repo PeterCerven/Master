@@ -5,11 +5,16 @@ import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import sk.master.backend.persistence.dto.GraphDto;
+import sk.master.backend.persistence.dto.GraphSummaryDto;
+import sk.master.backend.persistence.dto.PlacementResponseDto;
+import sk.master.backend.persistence.dto.SavedGraphDto;
 import sk.master.backend.persistence.model.PipelineConfig;
 import sk.master.backend.persistence.entity.GraphEdgeEntity;
 import sk.master.backend.persistence.entity.GraphEntity;
 import sk.master.backend.persistence.entity.GraphNodeEntity;
+import sk.master.backend.persistence.entity.GraphStationEntity;
 import sk.master.backend.persistence.model.PositionalData;
 import sk.master.backend.persistence.model.RoadEdge;
 import sk.master.backend.persistence.model.RoadGraph;
@@ -271,9 +276,11 @@ public class GpsGraphConstructionService implements GraphConstructionService {
     }
 
     @Override
-    public GraphEntity saveGraphToDatabase(GraphDto graph, String name) {
+    @Transactional
+    public GraphSummaryDto saveGraphToDatabase(GraphDto graph, List<PlacementResponseDto.StationNodeDto> stations, String name, Long userId) {
         GraphEntity graphEntity = new GraphEntity();
         graphEntity.setName(name);
+        graphEntity.setUserId(userId);
 
         graphEntity.setNodes(graph.nodes().stream()
                 .map(node -> new GraphNodeEntity(node.id(), node.lat(), node.lon()))
@@ -283,12 +290,27 @@ public class GpsGraphConstructionService implements GraphConstructionService {
                 .map(edge -> new GraphEdgeEntity(edge.sourceId(), edge.targetId(), edge.distanceMeters()))
                 .collect(Collectors.toList()));
 
-        return graphRepository.save(graphEntity);
+        if (stations != null) {
+            graphEntity.setStations(stations.stream()
+                    .map(s -> new GraphStationEntity(s.id(), s.lat(), s.lon(), s.rank()))
+                    .collect(Collectors.toList()));
+        }
+
+        GraphEntity saved = graphRepository.save(graphEntity);
+        return GraphSummaryDto.fromEntity(saved);
     }
 
     @Override
-    public GraphDto importGraphFromDatabase(Long graphId) {
-        GraphEntity graphEntity = graphRepository.findGraphEntityById(graphId);
-        return GraphDto.fromGraphEntity(graphEntity);
+    public SavedGraphDto importGraphFromDatabase(Long graphId, Long userId) {
+        GraphEntity graphEntity = graphRepository.findByIdAndUserId(graphId, userId)
+                .orElseThrow(() -> new IllegalArgumentException("Graph not found: " + graphId));
+        return SavedGraphDto.fromEntity(graphEntity);
+    }
+
+    @Override
+    public List<GraphSummaryDto> listUserGraphs(Long userId) {
+        return graphRepository.findAllByUserId(userId).stream()
+                .map(GraphSummaryDto::fromEntity)
+                .toList();
     }
 }

@@ -43,14 +43,32 @@
       "h3DedupResolution": "H3 Deduplikácia Rozlíšenia (0–15)",
       "maxSpeedKmh": "Maximálna rýchlosť (v km/h)"
     },
+    "save": {
+      "title": "Uložiť graf do databázy",
+      "nameLabel": "Názov grafu",
+      "namePlaceholder": "Zadajte popisný názov...",
+      "nodes": "Uzly: {{count}}",
+      "edges": "Hrany: {{count}}",
+      "stations": "Stanice: {{count}}",
+      "noStations": "Žiadne stanice (rozmiestnenie nebolo vypočítané)"
+    },
     "load": {
-      "title": "Načítaj graf z databáze"
+      "title": "Načítať graf z databázy",
+      "empty": "Žiadne uložené grafy.",
+      "loadButton": "Načítať",
+      "columns": {
+        "name": "Názov",
+        "date": "Dátum",
+        "nodes": "Uzly",
+        "edges": "Hrany",
+        "stations": "Stanice"
+      }
     },
     "place": {
       "title": "Vypočítaj umiestnenie nabíjacích staníc",
       "iterations": "Iterácie",
-      "kDominatingSet": "K-Dominujúca Množina",
-      "maxRadiusMeters": "Maximálna vzdialenosť (v metroch)"
+      "kDominatingSet": "K (počet staníc)",
+      "maxRadiusMeters": "Maximálny dosah (v metroch)"
     },
     "confirm": "Potvrdiť",
     "cancel": "Zrušiť",

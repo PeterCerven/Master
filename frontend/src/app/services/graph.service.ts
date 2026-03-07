@@ -2,7 +2,7 @@ import {inject, Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {environment} from '@env/environment.production';
 import {catchError, Observable, throwError} from 'rxjs';
-import {GraphResponseDto} from '@models/my-graph.model';
+import {GraphResponseDto, GraphSummaryDto, SavedGraphResponseDto, StationNodeDto} from '@models/my-graph.model';
 
 @Injectable({
   providedIn: 'root'
@@ -30,8 +30,12 @@ export class GraphService {
     }
   }
 
-  public loadGraphFromDatabase(id: Number): Observable<GraphResponseDto> {
-    return this.http.get<GraphResponseDto>(`${this.apiUrl}/load`, { params: { graphId: id.toString() } }).pipe(
+  public listGraphs(): Observable<GraphSummaryDto[]> {
+    return this.http.get<GraphSummaryDto[]>(`${this.apiUrl}/list`).pipe(catchError(this.handleError));
+  }
+
+  public loadGraphFromDatabase(id: number): Observable<SavedGraphResponseDto> {
+    return this.http.get<SavedGraphResponseDto>(`${this.apiUrl}/load`, { params: { graphId: id.toString() } }).pipe(
       catchError(this.handleError)
     );
   }
@@ -45,9 +49,9 @@ export class GraphService {
     );
   }
 
-  public saveGraph(graph: GraphResponseDto, name: string): Observable<any> {
-    const request = { name, graph };
-    return this.http.post(`${this.apiUrl}/save`, request).pipe(catchError(this.handleError));
+  public saveGraph(graph: GraphResponseDto, name: string, stations: StationNodeDto[] | null): Observable<GraphSummaryDto> {
+    const request = { name, graph, stations: stations ?? [] };
+    return this.http.post<GraphSummaryDto>(`${this.apiUrl}/save`, request).pipe(catchError(this.handleError));
   }
 
   private handleError(error: any): Observable<never> {

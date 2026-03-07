@@ -43,14 +43,32 @@
       "h3DedupResolution": "H3 Deduplication Resolution",
       "maxSpeedKmh": "Maximum Speed (in km/h)"
     },
+    "save": {
+      "title": "Save Graph to Database",
+      "nameLabel": "Graph Name",
+      "namePlaceholder": "Enter a descriptive name...",
+      "nodes": "Nodes: {{count}}",
+      "edges": "Edges: {{count}}",
+      "stations": "Stations: {{count}}",
+      "noStations": "No stations (placement not computed)"
+    },
     "load": {
-      "title": "Load Graph from Database"
+      "title": "Load Graph from Database",
+      "empty": "No saved graphs found.",
+      "loadButton": "Load",
+      "columns": {
+        "name": "Name",
+        "date": "Date",
+        "nodes": "Nodes",
+        "edges": "Edges",
+        "stations": "Stations"
+      }
     },
     "place": {
       "title": "Compute Placing Charging Stations",
-      "iterations": "Iterácie",
-      "kDominatingSet": "K-Dominujúca Množina",
-      "maxRadiusMeters": "Maximálna vzdialenosť (v metroch)"
+      "iterations": "Iterations",
+      "kDominatingSet": "K (number of stations)",
+      "maxRadiusMeters": "Max Coverage Radius (metres)"
     },
     "confirm": "Confirm",
     "cancel": "Cancel",

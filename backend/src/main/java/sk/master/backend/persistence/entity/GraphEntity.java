@@ -34,6 +34,13 @@ public class GraphEntity {
     @CollectionTable(name = "graph_edges", joinColumns = @JoinColumn(name = "graph_id"))
     private List<GraphEdgeEntity> edges = new ArrayList<>();
 
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "graph_stations", joinColumns = @JoinColumn(name = "graph_id"))
+    private List<GraphStationEntity> stations = new ArrayList<>();
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

@@ -54,6 +54,12 @@ public class GraphController {
         return ResponseEntity.ok(summary);
     }
 
+    @DeleteMapping("/{graphId}")
+    public ResponseEntity<Void> deleteGraph(@PathVariable Long graphId, Authentication authentication) {
+        graphConstructionService.deleteGraph(graphId, resolveUserId(authentication));
+        return ResponseEntity.noContent().build();
+    }
+
     private Long resolveUserId(Authentication authentication) {
         return userRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"))

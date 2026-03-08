@@ -47,6 +47,10 @@ export class GraphService {
     return this.http.post<GraphSummaryDto>(`${this.apiUrl}/save`, request).pipe(catchError(this.handleError));
   }
 
+  public deleteGraph(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(catchError(this.handleError));
+  }
+
   private handleError(error: any): Observable<never> {
     console.error('Graph error:', error);
     return throwError(() => new Error(error.message || 'Server Error'));

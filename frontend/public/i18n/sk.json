@@ -78,6 +78,7 @@
       "title": "Načítať graf z databázy",
       "empty": "Žiadne uložené grafy.",
       "loadButton": "Načítať",
+      "deleteAriaLabel": "Vymazať graf",
       "columns": {
         "name": "Názov",
         "date": "Dátum",

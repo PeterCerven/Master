@@ -313,4 +313,12 @@ public class GpsGraphConstructionService implements GraphConstructionService {
                 .map(GraphSummaryDto::fromEntity)
                 .toList();
     }
+
+    @Override
+    @Transactional
+    public void deleteGraph(Long graphId, Long userId) {
+        GraphEntity entity = graphRepository.findByIdAndUserId(graphId, userId)
+                .orElseThrow(() -> new IllegalArgumentException("Graph not found"));
+        graphRepository.delete(entity);
+    }
 }

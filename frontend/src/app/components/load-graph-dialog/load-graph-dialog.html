@@ -35,6 +35,21 @@
           <td mat-cell *matCellDef="let row">{{ row.stationCount > 0 ? row.stationCount : '—' }}</td>
         </ng-container>
 
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let row" class="actions-cell" (click)="$event.stopPropagation()">
+            @if (deleting() === row.id) {
+              <mat-spinner diameter="20"></mat-spinner>
+            } @else {
+              <button mat-icon-button color="warn"
+                      [attr.aria-label]="t('load.deleteAriaLabel')"
+                      (click)="deleteGraph(row.id, $event)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            }
+          </td>
+        </ng-container>
+
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns;"
             class="clickable-row"

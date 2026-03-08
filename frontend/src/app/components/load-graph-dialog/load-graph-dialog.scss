@@ -35,3 +35,9 @@ mat-dialog-content {
 .selected-row {
   background-color: color-mix(in srgb, var(--mat-sys-primary) 12%, transparent) !important;
 }
+
+.actions-cell {
+  width: 48px;
+  text-align: center;
+  padding: 0;
+}

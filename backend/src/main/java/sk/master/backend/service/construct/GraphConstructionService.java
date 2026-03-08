@@ -17,4 +17,6 @@ public interface GraphConstructionService {
     SavedGraphDto importGraphFromDatabase(Long graphId, Long userId);
 
     List<GraphSummaryDto> listUserGraphs(Long userId);
+
+    void deleteGraph(Long graphId, Long userId);
 }

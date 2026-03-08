@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import sk.master.backend.persistence.dto.PipelineConfigDto;
 import sk.master.backend.persistence.entity.PipelineConfigEntity;
 import sk.master.backend.persistence.model.PipelineConfig;
+import sk.master.backend.persistence.model.PlacementAlgorithm;
 import sk.master.backend.persistence.repository.PipelineConfigRepository;
 import sk.master.backend.persistence.repository.UserRepository;
 
@@ -82,6 +83,7 @@ public class PipelineConfigServiceImpl implements PipelineConfigService {
             userConfig.setKDominatingSet(defaultConfig.getKDominatingSet());
             userConfig.setMaxRadiusMeters(defaultConfig.getMaxRadiusMeters());
             userConfig.setIterations(defaultConfig.getIterations());
+            userConfig.setLastAlgorithm(defaultConfig.getLastAlgorithm());
 
             userConfig = repository.save(userConfig);
             log.info("Created new config for userId={}: id={}", userId, userConfig.getId());
@@ -98,7 +100,8 @@ public class PipelineConfigServiceImpl implements PipelineConfigService {
                 e.getH3DedupResolution(),
                 e.getKDominatingSet(),
                 e.getMaxRadiusMeters(),
-                e.getIterations()
+                e.getIterations(),
+                e.getLastAlgorithm()
         );
     }
 
@@ -109,6 +112,7 @@ public class PipelineConfigServiceImpl implements PipelineConfigService {
         e.setKDominatingSet(d.getKDominatingSet());
         e.setMaxRadiusMeters(d.getMaxRadiusMeters());
         e.setIterations(d.getIterations());
+        if (d.getLastAlgorithm() != null) e.setLastAlgorithm(d.getLastAlgorithm());
     }
 
     private PipelineConfig toPipelineConfig(PipelineConfigEntity e) {
@@ -127,8 +131,9 @@ public class PipelineConfigServiceImpl implements PipelineConfigService {
         e.setUserId(null);
         e.setMaxSpeedKmh(200);
         e.setH3DedupResolution(12);
-        e.setKDominatingSet(10);
-        e.setMaxRadiusMeters(5000.0);
+        e.setKDominatingSet(2);
+        e.setMaxRadiusMeters(1000.0);
         e.setIterations(10);
+        e.setLastAlgorithm(PlacementAlgorithm.RANDOM_STRATEGY);
     }
 }

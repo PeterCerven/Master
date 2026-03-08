@@ -4,6 +4,7 @@ import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import sk.master.backend.persistence.model.PlacementAlgorithm;
 
 @Data
 @NoArgsConstructor
@@ -27,5 +28,8 @@ public class PipelineConfigDto {
 
     @Min(1)
     private int iterations;
+
+    @NotNull
+    private PlacementAlgorithm lastAlgorithm;
 
 }

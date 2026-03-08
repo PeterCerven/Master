@@ -12,4 +12,5 @@ export interface PipelineConfig {
   kDominatingSet: number;
   maxRadiusMeters: number;
   iterations: number;
+  lastAlgorithm: 'RANDOM_STRATEGY' | 'GREEDY_STRATEGY' | 'CUSTOM_STRATEGY';
 }

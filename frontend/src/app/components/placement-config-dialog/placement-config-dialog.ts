@@ -52,6 +52,7 @@ export class PlacementConfigDialog implements OnInit {
           this.k = config.kDominatingSet;
           this.maxRadiusMeters = config.maxRadiusMeters;
           this.iterations = config.iterations;
+          this.strategy = config.lastAlgorithm;
           this.loading.set(false);
         },
         error: () => this.loading.set(false),
@@ -62,7 +63,7 @@ export class PlacementConfigDialog implements OnInit {
     if (!this.loadedConfig) return;
     this.saving.set(true);
     this.configService
-      .updateConfig({ ...this.loadedConfig, kDominatingSet: this.k, maxRadiusMeters: this.maxRadiusMeters, iterations: this.iterations })
+      .updateConfig({ ...this.loadedConfig, kDominatingSet: this.k, maxRadiusMeters: this.maxRadiusMeters, iterations: this.iterations, lastAlgorithm: this.strategy })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {

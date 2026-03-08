@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import sk.master.backend.persistence.model.PlacementAlgorithm;
 
 import java.time.LocalDateTime;
 
@@ -41,6 +42,10 @@ public class PipelineConfigEntity {
 
     @Column(nullable = false)
     private int iterations;
+
+    @Column(name = "last_algorithm", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private PlacementAlgorithm lastAlgorithm;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

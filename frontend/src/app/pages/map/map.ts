@@ -1,5 +1,5 @@
 import {GoogleMap, GoogleMapsModule} from '@angular/google-maps';
-import {Component, computed, DestroyRef, effect, inject, signal, viewChild, ElementRef} from '@angular/core';
+import {Component, computed, DestroyRef, effect, inject, signal, viewChild} from '@angular/core';
 import {GraphService} from '@services/graph.service';
 import {ThemeService} from '@services/theme.service';
 import {GraphEdgeDto, GraphNodeDto, GraphResponseDto, PlacementResponseDto, SavedGraphResponseDto, StationNodeDto} from '@models/my-graph.model';
@@ -24,7 +24,6 @@ import {TranslocoDirective} from '@jsverse/transloco';
 export class Map {
   protected readonly google = google;
   map = viewChild<GoogleMap>('googleMap');
-  fileInput = viewChild<ElementRef>('fileInput');
   private readonly graphService = inject(GraphService);
   private readonly themeService = inject(ThemeService);
   private readonly placementService = inject(PlacementService);
@@ -101,13 +100,13 @@ export class Map {
     this.dialog.open(GraphConfigDialog).afterClosed()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(result => {
-        if (result) this.fileInput()!.nativeElement.click();
+        if (result instanceof File) this.importGraphFromFile(result);
       });
   }
 
-  importGraphFromFile(event: Event): void {
+  importGraphFromFile(file: File): void {
     this.loading = true;
-    this.graphService.generateGraphFromFile(event)
+    this.graphService.generateGraphFromFile(file)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (graph: GraphResponseDto) => {

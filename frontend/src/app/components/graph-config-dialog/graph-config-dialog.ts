@@ -24,6 +24,7 @@ export class GraphConfigDialog implements OnInit {
   h3DedupResolution = 12;
   loading = signal(true);
   saving = signal(false);
+  selectedFile: File | null = null;
 
   ngOnInit(): void {
     this.configService
@@ -40,6 +41,10 @@ export class GraphConfigDialog implements OnInit {
       });
   }
 
+  onFileChange(event: Event): void {
+    this.selectedFile = (event.target as HTMLInputElement).files?.[0] ?? null;
+  }
+
   onOk(): void {
     if (!this.loadedConfig) return;
     this.saving.set(true);
@@ -49,7 +54,7 @@ export class GraphConfigDialog implements OnInit {
       .subscribe({
         next: () => {
           this.saving.set(false);
-          this.dialogRef.close(true);
+          this.dialogRef.close(this.selectedFile);
         },
         error: () => this.saving.set(false),
       });

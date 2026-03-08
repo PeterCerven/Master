@@ -41,7 +41,9 @@
     "create": {
       "title": "Vytvorenie grafu zo súboru",
       "h3DedupResolution": "H3 Deduplikácia Rozlíšenia (0–15)",
-      "maxSpeedKmh": "Maximálna rýchlosť (v km/h)"
+      "maxSpeedKmh": "Maximálna rýchlosť (v km/h)",
+      "chooseFile": "Vybrať súbor",
+      "noFileChosen": "Žiadny súbor nevybraný"
     },
     "save": {
       "title": "Uložiť graf do databázy",

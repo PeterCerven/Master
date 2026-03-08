@@ -18,9 +18,6 @@
       (click)="openGraphConfigDialog()">
       {{ loading ? t('loading') : t('createGraphFromFile') }}
     </button>
-    <input hidden (change)="importGraphFromFile($event); fileInput.value = ''" #fileInput type="file"
-           accept=".gpx,.json,.geojson">
-
     <button
       matFab extended
       class="control-btn load-graph-database-btn"

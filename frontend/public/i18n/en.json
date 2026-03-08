@@ -41,7 +41,9 @@
     "create": {
       "title": "Create Graph from File",
       "h3DedupResolution": "H3 Deduplication Resolution",
-      "maxSpeedKmh": "Maximum Speed (in km/h)"
+      "maxSpeedKmh": "Maximum Speed (in km/h)",
+      "chooseFile": "Choose File",
+      "noFileChosen": "No file chosen"
     },
     "save": {
       "title": "Save Graph to Database",

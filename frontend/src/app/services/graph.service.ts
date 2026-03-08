@@ -11,15 +11,8 @@ export class GraphService {
   private readonly apiUrl = `${environment.apiUrl}/graph`;
   private readonly http = inject(HttpClient);
 
-  public generateGraphFromFile(event: Event): Observable<GraphResponseDto> {
-    const files = (event.target as HTMLInputElement).files;
-    if (!files || files.length === 0 ) {
-      return throwError(() => new Error('No file selected'));
-    }
-
-    const file = files[0];
+  public generateGraphFromFile(file: File): Observable<GraphResponseDto> {
     const fileExtension = file.name.split('.').pop()?.toLowerCase();
-
     switch (fileExtension) {
       case 'gpx':
       case 'json':

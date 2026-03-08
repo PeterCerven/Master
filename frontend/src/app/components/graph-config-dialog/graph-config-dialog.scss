@@ -1,0 +1,28 @@
+mat-dialog-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.file-picker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.file-name {
+  flex: 1;
+  font-size: 0.875rem;
+  color: var(--mat-sys-on-surface-variant);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 6px 10px;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--mat-sys-on-surface) 4%, transparent);
+
+  &.has-file {
+    color: var(--mat-sys-on-surface);
+  }
+}

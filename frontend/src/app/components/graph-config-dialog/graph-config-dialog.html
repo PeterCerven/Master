@@ -15,12 +15,12 @@
         <input matInput type="number" [(ngModel)]="h3DedupResolution" min="0" max="15"/>
       </mat-form-field>
 
-      <div style="display: flex; align-items: center; gap: 12px; margin-top: 8px;">
+      <div class="file-picker">
         <input #hiddenFileInput type="file" accept=".gpx,.json,.geojson" hidden (change)="onFileChange($event)"/>
         <button mat-stroked-button type="button" (click)="hiddenFileInput.click()">
           {{ t('create.chooseFile') }}
         </button>
-        <span style="font-size: 0.875rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+        <span class="file-name" [class.has-file]="selectedFile">
           {{ selectedFile ? selectedFile.name : t('create.noFileChosen') }}
         </span>
       </div>

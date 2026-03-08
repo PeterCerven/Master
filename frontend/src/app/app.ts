@@ -44,10 +44,10 @@ export class App implements OnInit {
   }
 
   openRegisterDialog(): void {
-    this.dialog.open(RegisterUserDialogComponent);
+    this.dialog.open(RegisterUserDialogComponent, {width: 'min(420px, calc(100vw - 32px))'});
   }
 
   openAdminUsersDialog(): void {
-    this.dialog.open(AdminUsersDialog, {width: '720px'});
+    this.dialog.open(AdminUsersDialog, {minWidth: 'min(800px, calc(100vw - 16px))'});
   }
 }

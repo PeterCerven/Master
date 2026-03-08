@@ -1,15 +1,19 @@
-.full-width {
-  width: 100%;
-  margin-bottom: 8px;
+mat-dialog-content {
+  display: flex;
+  flex-direction: column;
 }
 
-mat-dialog-content {
-  min-width: 360px;
-  padding-top: 8px;
+.full-width {
+  width: 100%;
+  margin-bottom: 4px;
 }
 
 .error-message {
+  padding: 10px 14px;
+  background: color-mix(in srgb, var(--mat-sys-error) 8%, transparent);
+  border-left: 3px solid var(--mat-sys-error);
+  border-radius: 0 4px 4px 0;
   color: var(--mat-sys-error);
-  font-size: 14px;
+  font-size: 0.875rem;
   margin-top: 4px;
 }

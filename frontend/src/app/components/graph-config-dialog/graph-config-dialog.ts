@@ -13,6 +13,7 @@ import {TranslocoDirective} from '@jsverse/transloco';
   selector: 'app-graph-config-dialog',
   imports: [FormsModule, MatDialogModule, MatFormFieldModule, MatInputModule, MatButtonModule, TranslocoDirective],
   templateUrl: './graph-config-dialog.html',
+  styleUrl: './graph-config-dialog.scss',
 })
 export class GraphConfigDialog implements OnInit {
   private readonly configService = inject(PipelineConfigService);

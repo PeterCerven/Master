@@ -51,6 +51,28 @@ html:has(body.dark-mode) {
   ));
 }
 
+// Dialogs system
+
+.mat-mdc-dialog-title {
+  font-size: 1.4rem !important;
+  font-weight: 700 !important;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+}
+
+.mat-mdc-dialog-content {
+  padding-top: 20px !important;
+  padding-bottom: 20px !important;
+}
+
+.mat-mdc-dialog-actions {
+  border-top: 1px solid var(--mat-sys-outline-variant) !important;
+  gap: 8px !important;
+}
+
+.full-width {
+  width: 100%;
+}
+
 
 
 

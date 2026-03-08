@@ -3,13 +3,13 @@
 
   <mat-dialog-content>
     @if (loading()) {
-      <div style="display: flex; justify-content: center; padding: 24px;">
+      <div class="loading-container">
         <mat-spinner diameter="40"></mat-spinner>
       </div>
     } @else if (graphs().length === 0) {
-      <p>{{ t('load.empty') }}</p>
+      <p class="empty-state">{{ t('load.empty') }}</p>
     } @else {
-      <table mat-table [dataSource]="graphs()" style="width: 100%;">
+      <table mat-table [dataSource]="graphs()" class="graphs-table">
         <ng-container matColumnDef="name">
           <th mat-header-cell *matHeaderCellDef>{{ t('load.columns.name') }}</th>
           <td mat-cell *matCellDef="let row">{{ row.name }}</td>
@@ -37,9 +37,9 @@
 
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+            class="clickable-row"
             [class.selected-row]="selectedId === row.id"
-            (click)="selectRow(row.id)"
-            style="cursor: pointer;"></tr>
+            (click)="selectRow(row.id)"></tr>
       </table>
     }
   </mat-dialog-content>

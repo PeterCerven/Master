@@ -16,6 +16,7 @@ export interface SaveGraphDialogData {
   selector: 'app-save-graph-dialog',
   imports: [FormsModule, MatDialogModule, MatFormFieldModule, MatInputModule, MatButtonModule, TranslocoDirective],
   templateUrl: './save-graph-dialog.html',
+  styleUrl: './save-graph-dialog.scss',
 })
 export class SaveGraphDialog {
   private readonly dialogRef = inject(MatDialogRef<SaveGraphDialog>);

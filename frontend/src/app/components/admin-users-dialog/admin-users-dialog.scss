@@ -11,20 +11,27 @@
 }
 
 mat-dialog-content {
-  min-width: 600px;
+  width: 100%;
 }
 
 .loading-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
-  padding: 32px;
+  justify-content: center;
+  gap: 14px;
+  padding: 40px 0;
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.875rem;
 }
 
 .error-message {
+  padding: 10px 14px;
+  background: color-mix(in srgb, var(--mat-sys-error) 8%, transparent);
+  border-left: 3px solid var(--mat-sys-error);
+  border-radius: 0 4px 4px 0;
   color: var(--mat-sys-error);
-  padding: 16px;
+  font-size: 0.875rem;
 }
 
 .users-table {
@@ -32,31 +39,42 @@ mat-dialog-content {
 }
 
 .status-chip {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 
   &.enabled {
-    background-color: #d4edda;
-    color: #155724;
+    background-color: color-mix(in srgb, #22c55e 15%, transparent);
+    color: #16a34a;
   }
 
   &.disabled {
-    background-color: #f8d7da;
-    color: #721c24;
+    background-color: color-mix(in srgb, var(--mat-sys-error) 12%, transparent);
+    color: var(--mat-sys-error);
+  }
+}
+
+:host-context(html:has(body.dark-mode)) {
+  .status-chip.enabled {
+    color: #4ade80;
   }
 }
 
 .you-label {
-  font-size: 13px;
+  font-size: 0.8rem;
   color: var(--mat-sys-on-surface-variant);
+  font-style: italic;
   padding: 0 8px;
 }
 
 .confirm-label {
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 0.825rem;
+  font-weight: 600;
+  color: var(--mat-sys-error);
   margin-right: 4px;
 }

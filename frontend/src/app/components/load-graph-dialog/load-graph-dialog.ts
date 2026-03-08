@@ -13,6 +13,7 @@ import { GraphSummaryDto } from '@models/my-graph.model';
   selector: 'app-load-graph-dialog',
   imports: [DatePipe, MatDialogModule, MatTableModule, MatButtonModule, MatProgressSpinnerModule, TranslocoDirective],
   templateUrl: './load-graph-dialog.html',
+  styleUrl: './load-graph-dialog.scss',
 })
 export class LoadGraphDialog implements OnInit {
   private readonly graphService = inject(GraphService);

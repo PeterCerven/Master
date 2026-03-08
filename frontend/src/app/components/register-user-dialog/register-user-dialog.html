@@ -3,7 +3,7 @@
 
   <mat-dialog-content>
     <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" id="registerForm">
-      <mat-form-field class="full-width">
+      <mat-form-field appearance="outline" class="full-width">
         <mat-label>{{ t('name') }}</mat-label>
         <input matInput type="text" formControlName="name" autocomplete="name" />
         <mat-icon matPrefix>person</mat-icon>
@@ -12,7 +12,7 @@
         }
       </mat-form-field>
 
-      <mat-form-field class="full-width">
+      <mat-form-field appearance="outline" class="full-width">
         <mat-label>{{ t('email') }}</mat-label>
         <input matInput type="email" formControlName="email" autocomplete="email" />
         <mat-icon matPrefix>email</mat-icon>
@@ -23,7 +23,7 @@
         }
       </mat-form-field>
 
-      <mat-form-field class="full-width">
+      <mat-form-field appearance="outline" class="full-width">
         <mat-label>{{ t('password') }}</mat-label>
         <input
           matInput

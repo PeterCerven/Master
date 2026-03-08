@@ -7,13 +7,15 @@
       <input matInput [(ngModel)]="graphName" [placeholder]="t('save.namePlaceholder')" />
     </mat-form-field>
 
-    <p>{{ t('save.nodes', { count: data.graphData.nodes.length }) }}</p>
-    <p>{{ t('save.edges', { count: data.graphData.edges.length }) }}</p>
-    @if (data.placementData) {
-      <p>{{ t('save.stations', { count: data.placementData.stations.length }) }}</p>
-    } @else {
-      <p>{{ t('save.noStations') }}</p>
-    }
+    <div class="graph-stats">
+      <p>{{ t('save.nodes', { count: data.graphData.nodes.length }) }}</p>
+      <p>{{ t('save.edges', { count: data.graphData.edges.length }) }}</p>
+      @if (data.placementData) {
+        <p>{{ t('save.stations', { count: data.placementData.stations.length }) }}</p>
+      } @else {
+        <p class="no-stations">{{ t('save.noStations') }}</p>
+      }
+    </div>
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">

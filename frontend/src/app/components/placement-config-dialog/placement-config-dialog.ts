@@ -22,6 +22,7 @@ export interface PlacementConfigResult {
   selector: 'app-placement-config-dialog',
   imports: [FormsModule, MatDialogModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatSelectModule, TranslocoDirective],
   templateUrl: './placement-config-dialog.html',
+  styleUrl: './placement-config-dialog.scss',
 })
 export class PlacementConfigDialog implements OnInit {
   private readonly configService = inject(PipelineConfigService);

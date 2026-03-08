@@ -97,7 +97,7 @@ export class Map {
   }
 
   openGraphConfigDialog(): void {
-    this.dialog.open(GraphConfigDialog).afterClosed()
+    this.dialog.open(GraphConfigDialog, {minWidth: 'min(420px, calc(100vw - 32px))'}).afterClosed()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(result => {
         if (result instanceof File) this.importGraphFromFile(result);
@@ -247,7 +247,8 @@ export class Map {
   openSaveGraphDialog(): void {
     if (!this.graphData) return;
     this.dialog.open(SaveGraphDialog, {
-      data: { graphData: this.graphData, placementData: this.placementData }
+      data: { graphData: this.graphData, placementData: this.placementData },
+      minWidth: 'min(360px, calc(100vw - 32px))'
     })
       .afterClosed()
       .pipe(takeUntilDestroyed(this.destroyRef), filter(r => !!r))
@@ -265,7 +266,7 @@ export class Map {
   computePlacement(): void {
     if (!this.graphData) return;
 
-    this.dialog.open(PlacementConfigDialog).afterClosed()
+    this.dialog.open(PlacementConfigDialog, {minWidth: 'min(380px, calc(100vw - 32px))'}).afterClosed()
       .pipe(
         takeUntilDestroyed(this.destroyRef),
         filter((result): result is PlacementConfigResult => !!result),
@@ -339,7 +340,7 @@ export class Map {
   }
 
   openLoadGraphDialog(): void {
-    this.dialog.open(LoadGraphDialog, { width: '620px' })
+    this.dialog.open(LoadGraphDialog, {minWidth: 'min(620px, calc(100vw - 32px))'})
       .afterClosed()
       .pipe(takeUntilDestroyed(this.destroyRef), filter(id => id != null))
       .subscribe(id => {

@@ -1,14 +1,13 @@
-import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
-import { MatDialogModule, MatDialog } from '@angular/material/dialog';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatTableModule } from '@angular/material/table';
-import { TranslocoDirective } from '@jsverse/transloco';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { AuthService } from '@services/auth.service';
-import { UserSummary } from '@models/auth.model';
-import { RegisterUserDialogComponent } from '@components/register-user-dialog/register-user-dialog';
+import {Component, DestroyRef, inject, OnInit, signal} from '@angular/core';
+import {MatDialogModule} from '@angular/material/dialog';
+import {MatButtonModule} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {MatTableModule} from '@angular/material/table';
+import {TranslocoDirective} from '@jsverse/transloco';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {AuthService} from '@services/auth.service';
+import {UserSummary} from '@models/auth.model';
 
 @Component({
   selector: 'app-admin-users-dialog',
@@ -25,7 +24,6 @@ import { RegisterUserDialogComponent } from '@components/register-user-dialog/re
 })
 export class AdminUsersDialog implements OnInit {
   protected readonly authService = inject(AuthService);
-  private readonly dialog = inject(MatDialog);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly users = signal<UserSummary[]>([]);
@@ -87,16 +85,6 @@ export class AdminUsersDialog implements OnInit {
           this.loadUsers();
         },
         error: () => this.errorMessage.set('error'),
-      });
-  }
-
-  openRegisterDialog(): void {
-    this.dialog
-      .open(RegisterUserDialogComponent)
-      .afterClosed()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((result) => {
-        if (result) this.loadUsers();
       });
   }
 }

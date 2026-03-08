@@ -1,16 +1,16 @@
-import { Component, DestroyRef, effect, inject, signal } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatCardModule } from '@angular/material/card';
-import { TranslocoDirective } from '@jsverse/transloco';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { AuthService } from '@services/auth.service';
+import {Component, DestroyRef, effect, inject, signal} from '@angular/core';
+import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {Router} from '@angular/router';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatInputModule} from '@angular/material/input';
+import {MatButtonModule} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {MatSnackBar, MatSnackBarModule} from '@angular/material/snack-bar';
+import {MatCardModule} from '@angular/material/card';
+import {TranslocoDirective, TranslocoService} from '@jsverse/transloco';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {AuthService} from '@services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -33,6 +33,7 @@ export class Login {
   private readonly fb = inject(FormBuilder);
   private readonly snackBar = inject(MatSnackBar);
   private readonly router = inject(Router);
+  private readonly transloco = inject(TranslocoService);
   private readonly destroyRef = inject(DestroyRef);
 
   constructor() {
@@ -72,7 +73,7 @@ export class Login {
             error.status === 401
               ? 'login.errorInvalidCredentials'
               : 'login.errorGeneric';
-          this.snackBar.open(message, 'OK', { duration: 5000 });
+          this.snackBar.open(this.transloco.translate(message), 'OK', {duration: 5000});
         },
       });
   }

@@ -60,7 +60,7 @@ export class RegisterUserDialogComponent {
       .subscribe({
         next: () => {
           this.loading.set(false);
-          const msg = this.transloco.translate('pages.registerUser.successMessage');
+          const msg = this.transloco.translate('registerUser.successMessage');
           this.snackBar.open(msg, 'OK', { duration: 4000 });
           this.dialogRef.close(true);
         },

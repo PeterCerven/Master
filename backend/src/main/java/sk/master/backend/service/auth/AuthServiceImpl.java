@@ -18,6 +18,9 @@ import sk.master.backend.exception.UserAlreadyExistsException;
 import sk.master.backend.persistence.dto.auth.*;
 import sk.master.backend.persistence.entity.RefreshTokenEntity;
 import sk.master.backend.persistence.entity.UserEntity;
+import sk.master.backend.persistence.repository.GraphRepository;
+import sk.master.backend.persistence.repository.PipelineConfigRepository;
+import sk.master.backend.persistence.repository.RefreshTokenRepository;
 import sk.master.backend.persistence.repository.UserRepository;
 
 import java.util.List;
@@ -31,19 +34,28 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
     private final JwtService jwtService;
     private final RefreshTokenService refreshTokenService;
     private final AuthenticationManager authenticationManager;
+    private final RefreshTokenRepository refreshTokenRepository;
+    private final GraphRepository graphRepository;
+    private final PipelineConfigRepository pipelineConfigRepository;
 
     public AuthServiceImpl(
             UserRepository userRepository,
             PasswordEncoder passwordEncoder,
             JwtService jwtService,
             RefreshTokenService refreshTokenService,
-            @Lazy AuthenticationManager authenticationManager
+            @Lazy AuthenticationManager authenticationManager,
+            RefreshTokenRepository refreshTokenRepository,
+            GraphRepository graphRepository,
+            PipelineConfigRepository pipelineConfigRepository
     ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.refreshTokenService = refreshTokenService;
         this.authenticationManager = authenticationManager;
+        this.refreshTokenRepository = refreshTokenRepository;
+        this.graphRepository = graphRepository;
+        this.pipelineConfigRepository = pipelineConfigRepository;
     }
 
     @Override
@@ -120,5 +132,39 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
         refreshTokenService.revokeAllUserTokens(user.getId());
+    }
+
+    @Override
+    public List<UserResponseDto> listUsers() {
+        return userRepository.findAll().stream()
+                .map(UserResponseDto::fromEntity)
+                .toList();
+    }
+
+    @Override
+    @Transactional
+    public void setUserEnabled(Long targetUserId, Long requestingUserId) {
+        if (targetUserId.equals(requestingUserId)) {
+            throw new IllegalArgumentException("Cannot modify your own account");
+        }
+        UserEntity user = userRepository.findById(targetUserId)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + targetUserId));
+        user.setEnabled(!user.isEnabled());
+        userRepository.save(user);
+        if (!user.isEnabled()) {
+            refreshTokenRepository.revokeAllByUserId(targetUserId);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void deleteUser(Long targetUserId, Long requestingUserId) {
+        if (targetUserId.equals(requestingUserId)) {
+            throw new IllegalArgumentException("Cannot delete your own account");
+        }
+        refreshTokenRepository.deleteAllByUserId(targetUserId);
+        graphRepository.deleteAllByUserId(targetUserId);
+        pipelineConfigRepository.deleteByUserId(targetUserId);
+        userRepository.deleteById(targetUserId);
     }
 }

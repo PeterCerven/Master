@@ -9,6 +9,26 @@
     "saving": "Saving...",
     "placing": "Placing..."
   },
+  "adminUsers": {
+    "title": "User Management",
+    "name": "Name",
+    "email": "Email",
+    "role": "Role",
+    "status": "Status",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "you": "(you)",
+    "enable": "Enable",
+    "disable": "Disable",
+    "delete": "Delete",
+    "confirmDelete": "Are you sure?",
+    "yes": "Yes",
+    "no": "No",
+    "registerUser": "Register User",
+    "loading": "Loading users...",
+    "close": "Close",
+    "errorGeneric": "An error occurred. Please try again."
+  },
   "login": {
     "title": "Sign In",
     "subtitle": "Sign in to your account",

@@ -14,4 +14,5 @@ public interface PipelineConfigRepository extends JpaRepository<PipelineConfigEn
     Optional<PipelineConfigEntity> findByUserIdAndActiveTrue(Long userId);
 
     long countByUserIdIsNull();
+    void deleteByUserId(Long userId);
 }

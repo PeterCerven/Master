@@ -22,3 +22,5 @@ export interface CreateUserRequest {
   password: string;
   role: 'USER' | 'ADMIN';
 }
+
+export type UserSummary = User;

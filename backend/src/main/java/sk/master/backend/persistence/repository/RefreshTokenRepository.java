@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import sk.master.backend.persistence.entity.RefreshTokenEntity;
 
-import java.time.Instant;
 import java.util.Optional;
 
 @Repository
@@ -19,6 +18,6 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshTokenEntity
     void revokeAllByUserId(Long userId);
 
     @Modifying
-    @Query("DELETE FROM RefreshTokenEntity r WHERE r.expiryDate < :now")
-    void deleteExpiredTokens(Instant now);
+    @Query("DELETE FROM RefreshTokenEntity r WHERE r.user.id = :userId")
+    void deleteAllByUserId(Long userId);
 }

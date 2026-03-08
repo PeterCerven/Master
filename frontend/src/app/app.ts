@@ -1,13 +1,14 @@
 import {Component, inject, OnInit, signal} from '@angular/core';
-import {RouterLink, RouterLinkActive, RouterOutlet} from '@angular/router';
+import {RouterOutlet} from '@angular/router';
 import {MatToolbar} from '@angular/material/toolbar';
 import {MatIconButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { TranslocoService } from '@jsverse/transloco';
-import { ThemeService } from '@services/theme.service';
-import { AuthService } from '@services/auth.service';
-import { RegisterUserDialogComponent } from '@components/register-user-dialog/register-user-dialog';
+import {MatDialog, MatDialogModule} from '@angular/material/dialog';
+import {TranslocoService} from '@jsverse/transloco';
+import {ThemeService} from '@services/theme.service';
+import {AuthService} from '@services/auth.service';
+import {RegisterUserDialogComponent} from '@components/register-user-dialog/register-user-dialog';
+import {AdminUsersDialog} from '@components/admin-users-dialog/admin-users-dialog';
 
 @Component({
   selector: 'app-root',
@@ -17,8 +18,6 @@ import { RegisterUserDialogComponent } from '@components/register-user-dialog/re
     MatIconButton,
     MatIcon,
     MatDialogModule,
-    RouterLink,
-    RouterLinkActive,
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss'
@@ -46,5 +45,9 @@ export class App implements OnInit {
 
   openRegisterDialog(): void {
     this.dialog.open(RegisterUserDialogComponent);
+  }
+
+  openAdminUsersDialog(): void {
+    this.dialog.open(AdminUsersDialog, {width: '720px'});
   }
 }

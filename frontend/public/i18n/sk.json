@@ -9,6 +9,26 @@
     "saving": "Ukladanie...",
     "placing": "Umiestňovanie..."
   },
+  "adminUsers": {
+    "title": "Správa používateľov",
+    "name": "Meno",
+    "email": "Email",
+    "role": "Rola",
+    "status": "Stav",
+    "enabled": "Aktívny",
+    "disabled": "Deaktivovaný",
+    "you": "(vy)",
+    "enable": "Aktivovať",
+    "disable": "Deaktivovať",
+    "delete": "Vymazať",
+    "confirmDelete": "Ste si istý?",
+    "yes": "Áno",
+    "no": "Nie",
+    "registerUser": "Registrovať používateľa",
+    "loading": "Načítavanie používateľov...",
+    "close": "Zavrieť",
+    "errorGeneric": "Nastala chyba. Skúste to znova."
+  },
   "login": {
     "title": "Prihlásenie",
     "subtitle": "Prihláste sa do svojho účtu",

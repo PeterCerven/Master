@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.*;
 import sk.master.backend.persistence.dto.auth.*;
 import sk.master.backend.service.auth.AuthService;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -61,6 +63,28 @@ public class AuthController {
         authService.logout(authentication.getName());
         clearRefreshTokenCookie(response);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/users")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<UserResponseDto>> listUsers() {
+        return ResponseEntity.ok(authService.listUsers());
+    }
+
+    @PatchMapping("/users/{id}/enabled")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> setUserEnabled(@PathVariable Long id, Authentication authentication) {
+        UserResponseDto admin = authService.getCurrentUser(authentication.getName());
+        authService.setUserEnabled(id, admin.id());
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/users/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id, Authentication authentication) {
+        UserResponseDto admin = authService.getCurrentUser(authentication.getName());
+        authService.deleteUser(id, admin.id());
+        return ResponseEntity.noContent().build();
     }
 
     private void addRefreshTokenCookie(HttpServletResponse response, String refreshToken) {

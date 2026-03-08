@@ -11,4 +11,5 @@ import java.util.Optional;
 public interface GraphRepository extends JpaRepository<GraphEntity, Long> {
     List<GraphEntity> findAllByUserId(Long userId);
     Optional<GraphEntity> findByIdAndUserId(Long id, Long userId);
+    void deleteAllByUserId(Long userId);
 }

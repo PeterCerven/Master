@@ -1,0 +1,62 @@
+.dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px 0;
+
+  h2 {
+    margin: 0;
+    padding: 0;
+  }
+}
+
+mat-dialog-content {
+  min-width: 600px;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 32px;
+}
+
+.error-message {
+  color: var(--mat-sys-error);
+  padding: 16px;
+}
+
+.users-table {
+  width: 100%;
+}
+
+.status-chip {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+
+  &.enabled {
+    background-color: #d4edda;
+    color: #155724;
+  }
+
+  &.disabled {
+    background-color: #f8d7da;
+    color: #721c24;
+  }
+}
+
+.you-label {
+  font-size: 13px;
+  color: var(--mat-sys-on-surface-variant);
+  padding: 0 8px;
+}
+
+.confirm-label {
+  font-size: 13px;
+  font-weight: 500;
+  margin-right: 4px;
+}

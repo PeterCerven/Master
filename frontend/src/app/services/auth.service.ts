@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { catchError, Observable, of, shareReplay, tap, throwError } from 'rxjs';
 import { environment } from '@env/environment.production';
-import { CreateUserRequest, LoginRequest, TokenResponse, User } from '@models/auth.model';
+import { CreateUserRequest, LoginRequest, TokenResponse, User, UserSummary } from '@models/auth.model';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -85,6 +85,18 @@ export class AuthService {
 
   registerUser(request: CreateUserRequest): Observable<User> {
     return this.http.post<User>(`${this.apiUrl}/register`, request);
+  }
+
+  getUsers(): Observable<UserSummary[]> {
+    return this.http.get<UserSummary[]>(`${this.apiUrl}/users`);
+  }
+
+  setUserEnabled(id: number): Observable<void> {
+    return this.http.patch<void>(`${this.apiUrl}/users/${id}/enabled`, {});
+  }
+
+  deleteUser(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/users/${id}`);
   }
 
   private loadCurrentUser(): void {

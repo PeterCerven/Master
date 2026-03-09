@@ -113,7 +113,6 @@ export class Map {
           this.graphData = graph;
           this.displayGraphOnMap(graph);
           this.loading = false;
-          console.log('Graph loaded successfully:', graph);
         },
         error: (error) => {
           console.error('Error loading graph:', error);
@@ -280,7 +279,6 @@ export class Map {
               this.placementData = result;
               this.displayStationsOnMap(result.stations);
               this.computingPlacement = false;
-              console.log('Placement computed:', result);
             },
             error: (error) => {
               console.error('Error computing placement:', error);

@@ -309,9 +309,7 @@ public class GpsGraphConstructionService implements GraphConstructionService {
 
     @Override
     public List<GraphSummaryDto> listUserGraphs(Long userId) {
-        return graphRepository.findAllByUserId(userId).stream()
-                .map(GraphSummaryDto::fromEntity)
-                .toList();
+        return graphRepository.findSummariesByUserId(userId);
     }
 
     @Override

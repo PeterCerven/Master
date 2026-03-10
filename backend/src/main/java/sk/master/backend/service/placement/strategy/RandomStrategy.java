@@ -7,13 +7,14 @@ import org.springframework.stereotype.Component;
 import sk.master.backend.persistence.model.*;
 
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.IntStream;
 
 
 @Component
 public class RandomStrategy implements PlacementStrategy {
 
     private static final Logger log = LoggerFactory.getLogger(RandomStrategy.class);
-    private final Random random = new Random();
 
     @Override
     public PlacementResult computePlacement(RoadGraph roadGraph, PlacementParams params) {
@@ -30,14 +31,11 @@ public class RandomStrategy implements PlacementStrategy {
         log.info("Calculate with params: k={}, maxRadius={}m, iterations={}, nodes={}, edges={}",
                 k, maxRadiusMeters, iterations, allNodes.size(), graph.edgeSet().size());
 
-        List<RoadNode> bestStations = new ArrayList<>();
-        for (int i = 0; i < iterations; i++) {
-            List<RoadNode> candidate = runOnce(graph, allNodes, k, maxRadiusMeters);
-            if (bestStations.isEmpty()|| candidate.size() < bestStations.size()) {
-                bestStations = candidate;
-            }
-            log.debug("Iteration {}/{}: {} stations (best={})", i + 1, iterations, candidate.size(), bestStations.size());
-        }
+        List<RoadNode> bestStations = IntStream.range(0, iterations)
+                .parallel()
+                .mapToObj(_ -> runOnce(graph, allNodes, k, maxRadiusMeters))
+                .min(Comparator.comparingInt(List::size))
+                .orElse(List.of());
 
         Map<String, Double> nodeDistances = computeMinWeightedDistances(graph, allNodes, bestStations, maxRadiusMeters);
 
@@ -63,7 +61,7 @@ public class RandomStrategy implements PlacementStrategy {
                     .toList();
             if (candidates.isEmpty()) break;
 
-            RoadNode selected = candidates.get(random.nextInt(candidates.size()));
+            RoadNode selected = candidates.get(ThreadLocalRandom.current().nextInt(candidates.size()));
             stations.add(selected);
             stationSet.add(selected);
 

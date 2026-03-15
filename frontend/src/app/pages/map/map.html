@@ -49,6 +49,51 @@
       (click)="clearAll()">
       {{ t('clearGraph') }}
     </button>
+
+    @if (graphMetrics) {
+      <div class="graph-metrics-panel">
+        <h4 class="metrics-title">{{ t('metrics.title') }}</h4>
+        <div class="metric-row">
+          <span class="metric-label">{{ t('metrics.nodeCount') }}</span>
+          <span class="metric-value">{{ graphMetrics.nodeCount }}</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">{{ t('metrics.edgeCount') }}</span>
+          <span class="metric-value">{{ graphMetrics.edgeCount }}</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">{{ t('metrics.avgDegree') }}</span>
+          <span class="metric-value">{{ graphMetrics.avgDegree | number: '1.2-2' }}</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">{{ t('metrics.diameterMeters') }}</span>
+          <span class="metric-value">{{ graphMetrics.diameterMeters | number: '1.1-1' }} m</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">{{ t('metrics.clusteringCoefficient') }}</span>
+          <span class="metric-value">{{ graphMetrics.clusteringCoefficient | number: '1.4-4' }}</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">{{ t('metrics.avgEdgeLengthMeters') }}</span>
+          <span class="metric-value">{{ graphMetrics.avgEdgeLengthMeters | number: '1.1-1' }} m</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">{{ t('metrics.nodeDensityPerKm2') }}</span>
+          <span class="metric-value">{{ graphMetrics.nodeDensityPerKm2 | number: '1.2-2' }} /km²</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">{{ t('metrics.avgShortestPathMeters') }}</span>
+          <span class="metric-value">{{ graphMetrics.avgShortestPathMeters | number: '1.1-1' }} m</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">{{ t('metrics.avgBetweennessCentrality') }}</span>
+          <span class="metric-value">{{ graphMetrics.avgBetweennessCentrality | number: '1.4-4' }}</span>
+        </div>
+        @if (graphMetrics.approximated) {
+          <p class="metrics-note">{{ t('metrics.approximated') }}</p>
+        }
+      </div>
+    }
   </div>
 </div>
 

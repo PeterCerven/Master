@@ -1,8 +1,9 @@
 import {GoogleMap, GoogleMapsModule} from '@angular/google-maps';
+import {DecimalPipe} from '@angular/common';
 import {Component, computed, DestroyRef, effect, inject, signal, viewChild} from '@angular/core';
 import {GraphService} from '@services/graph.service';
 import {ThemeService} from '@services/theme.service';
-import {GraphEdgeDto, GraphNodeDto, GraphResponseDto, PlacementResponseDto, SavedGraphResponseDto, StationNodeDto} from '@models/my-graph.model';
+import {GraphEdgeDto, GraphMetrics, GraphNodeDto, GraphResponseDto, PlacementResponseDto, SavedGraphResponseDto, StationNodeDto} from '@models/my-graph.model';
 import {takeUntilDestroyed, toObservable} from '@angular/core/rxjs-interop';
 import {filter, skip} from 'rxjs';
 import {MatFabButton} from '@angular/material/button';
@@ -17,7 +18,7 @@ import {TranslocoDirective} from '@jsverse/transloco';
 
 @Component({
   selector: 'app-map',
-  imports: [GoogleMapsModule, GoogleMap, MatFabButton, TranslocoDirective],
+  imports: [GoogleMapsModule, GoogleMap, MatFabButton, TranslocoDirective, DecimalPipe],
   templateUrl: './map.html',
   styleUrl: './map.scss'
 })
@@ -35,6 +36,7 @@ export class Map {
   computingPlacement = false;
   graphData: GraphResponseDto | null = null;
   placementData: PlacementResponseDto | null = null;
+  graphMetrics: GraphMetrics | null = null;
   mapVisible = signal(true);
   private graphMarkers: google.maps.marker.AdvancedMarkerElement[] = [];
   private graphPolylines: google.maps.Polyline[] = [];
@@ -111,6 +113,7 @@ export class Map {
       .subscribe({
         next: (graph: GraphResponseDto) => {
           this.graphData = graph;
+          this.graphMetrics = graph.metrics;
           this.displayGraphOnMap(graph);
           this.loading = false;
         },
@@ -347,7 +350,8 @@ export class Map {
           .pipe(takeUntilDestroyed(this.destroyRef))
           .subscribe({
             next: (saved: SavedGraphResponseDto) => {
-              this.graphData = { nodes: saved.nodes, edges: saved.edges };
+              this.graphData = { nodes: saved.nodes, edges: saved.edges, metrics: saved.metrics };
+              this.graphMetrics = saved.metrics ?? null;
               this.displayGraphOnMap(this.graphData);
               if (saved.stations.length > 0) {
                 this.placementData = { stations: saved.stations, objectiveValue: 0,
@@ -368,6 +372,7 @@ export class Map {
   clearAll(): void {
     this.graphData = null;
     this.placementData = null;
+    this.graphMetrics = null;
     this.clearGraph();
     this.stationMarkers.forEach(marker => marker.map = null);
     this.stationMarkers = [];

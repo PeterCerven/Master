@@ -41,6 +41,9 @@ public class GraphEntity {
     @CollectionTable(name = "graph_stations", joinColumns = @JoinColumn(name = "graph_id"))
     private List<GraphStationEntity> stations = new ArrayList<>();
 
+    @Embedded
+    private GraphMetricsEmbeddable metrics;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

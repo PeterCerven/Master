@@ -13,7 +13,8 @@ public record SavedGraphDto(
         LocalDateTime createdAt,
         List<GraphDto.NodeDto> nodes,
         List<GraphDto.EdgeDto> edges,
-        List<StationDto> stations
+        List<StationDto> stations,
+        GraphMetricsDto metrics
 ) {
     public record StationDto(String id, double lat, double lon, int rank) {}
 
@@ -31,13 +32,16 @@ public record SavedGraphDto(
                 .map(s -> new StationDto(s.getStationId(), s.getLat(), s.getLon(), s.getRank()))
                 .toList();
 
+        GraphMetricsDto metrics = entity.getMetrics() != null ? entity.getMetrics().toDto() : null;
+
         return new SavedGraphDto(
                 entity.getId(),
                 entity.getName(),
                 entity.getCreatedAt(),
                 nodes,
                 edges,
-                stations
+                stations,
+                metrics
         );
     }
 }

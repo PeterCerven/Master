@@ -5,6 +5,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import sk.master.backend.persistence.dto.GraphDto;
+import sk.master.backend.persistence.dto.GraphMetricsDto;
 import sk.master.backend.persistence.dto.GraphSummaryDto;
 import sk.master.backend.persistence.dto.SaveGraphDto;
 import sk.master.backend.persistence.dto.SavedGraphDto;
@@ -34,7 +35,8 @@ public class GraphController {
     public ResponseEntity<GraphDto> generateGraphFromFile(@RequestParam("file") MultipartFile file) throws Exception {
         List<PositionalData> positionalData = fileService.parseFile(file);
         RoadGraph data = graphConstructionService.generateRoadNetwork(null, positionalData);
-        return ResponseEntity.ok(GraphDto.fromRoadGraph(data));
+        GraphMetricsDto metrics = graphConstructionService.computeMetrics(data);
+        return ResponseEntity.ok(GraphDto.fromRoadGraph(data, metrics));
     }
 
     @GetMapping("/list")

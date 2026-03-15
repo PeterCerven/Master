@@ -98,3 +98,45 @@
     background-color: #c0392b;
   }
 }
+
+.graph-metrics-panel {
+  background-color: var(--mat-sys-surface);
+  border-radius: 8px;
+  padding: 14px;
+  border: 1px solid var(--mat-sys-outline-variant);
+
+  .metrics-title {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    opacity: 0.7;
+    text-transform: uppercase;
+  }
+
+  .metric-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+    font-size: 13px;
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+
+    &:last-of-type {
+      border-bottom: none;
+    }
+  }
+
+  .metric-label {
+    opacity: 0.75;
+  }
+
+  .metric-value {
+    font-weight: 500;
+  }
+
+  .metrics-note {
+    font-size: 11px;
+    opacity: 0.55;
+    margin-top: 8px;
+    font-style: italic;
+  }
+}

@@ -1,6 +1,20 @@
+export interface GraphMetrics {
+  nodeCount: number;
+  edgeCount: number;
+  avgDegree: number;
+  diameterMeters: number;
+  clusteringCoefficient: number;
+  avgEdgeLengthMeters: number;
+  nodeDensityPerKm2: number;
+  avgShortestPathMeters: number;
+  avgBetweennessCentrality: number;
+  approximated: boolean;
+}
+
 export interface GraphResponseDto {
   nodes: GraphNodeDto[];
   edges: GraphEdgeDto[];
+  metrics: GraphMetrics | null;
 }
 
 export interface GraphNodeDto {
@@ -59,4 +73,5 @@ export interface SavedGraphResponseDto {
   nodes: GraphNodeDto[];
   edges: GraphEdgeDto[];
   stations: StationNodeDto[];
+  metrics: GraphMetrics | null;
 }

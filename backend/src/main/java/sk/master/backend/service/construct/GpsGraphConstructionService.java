@@ -2,17 +2,21 @@ package sk.master.backend.service.construct;
 
 import com.uber.h3core.H3Core;
 import lombok.Getter;
+import org.jgrapht.alg.scoring.BetweennessCentrality;
+import org.jgrapht.alg.scoring.ClusteringCoefficient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sk.master.backend.persistence.dto.GraphDto;
+import sk.master.backend.persistence.dto.GraphMetricsDto;
 import sk.master.backend.persistence.dto.GraphSummaryDto;
 import sk.master.backend.persistence.dto.PlacementResponseDto;
 import sk.master.backend.persistence.dto.SavedGraphDto;
 import sk.master.backend.persistence.model.PipelineConfig;
 import sk.master.backend.persistence.entity.GraphEdgeEntity;
 import sk.master.backend.persistence.entity.GraphEntity;
+import sk.master.backend.persistence.entity.GraphMetricsEmbeddable;
 import sk.master.backend.persistence.entity.GraphNodeEntity;
 import sk.master.backend.persistence.entity.GraphStationEntity;
 import sk.master.backend.persistence.model.PositionalData;
@@ -269,6 +273,107 @@ public class GpsGraphConstructionService implements GraphConstructionService {
         log.info("Merged {} overlapping nodes into unified intersections/road segments.", mergedNodeCount);
     }
 
+    @Override
+    public GraphMetricsDto computeMetrics(RoadGraph roadGraph) {
+        int nodeCount = roadGraph.getNodeCount();
+        int edgeCount = roadGraph.getEdgeCount();
+
+        if (nodeCount == 0) {
+            return new GraphMetricsDto(0, 0, 0, 0, 0, 0, 0, 0, 0, false);
+        }
+
+        double avgDegree = nodeCount > 0 ? 2.0 * edgeCount / nodeCount : 0.0;
+
+        double avgEdgeLengthMeters = roadGraph.getEdges().stream()
+                .mapToDouble(RoadEdge::distanceMeters)
+                .average()
+                .orElse(0.0);
+
+        // Node density: bounding box area
+        double minLat = Double.MAX_VALUE, maxLat = -Double.MAX_VALUE;
+        double minLon = Double.MAX_VALUE, maxLon = -Double.MAX_VALUE;
+        for (var node : roadGraph.getNodes()) {
+            if (node.getLat() < minLat) minLat = node.getLat();
+            if (node.getLat() > maxLat) maxLat = node.getLat();
+            if (node.getLon() < minLon) minLon = node.getLon();
+            if (node.getLon() > maxLon) maxLon = node.getLon();
+        }
+        double centerLat = (minLat + maxLat) / 2.0;
+        double widthKm = haversineDistance(centerLat, minLon, centerLat, maxLon) / 1000.0;
+        double heightKm = haversineDistance(minLat, minLon, maxLat, minLon) / 1000.0;
+        double areaKm2 = widthKm * heightKm;
+        double nodeDensityPerKm2 = areaKm2 > 0 ? nodeCount / areaKm2 : 0.0;
+
+        // Clustering coefficient via JGraphT
+        var cc = new ClusteringCoefficient<>(roadGraph.getGraph());
+        double clusteringCoefficient = cc.getAverageClusteringCoefficient();
+
+        // Diameter & avg shortest path via sampled Dijkstra
+        var graph = roadGraph.getGraph();
+        List<RoadNode> nodeList = new ArrayList<>(roadGraph.getNodes());
+        boolean approximated = nodeCount > 500;
+        List<RoadNode> sources;
+        if (approximated) {
+            Collections.shuffle(nodeList);
+            sources = nodeList.subList(0, 200);
+        } else {
+            sources = nodeList;
+        }
+
+        double diameter = 0.0;
+        double totalDist = 0.0;
+        long pairCount = 0;
+
+        for (RoadNode source : sources) {
+            Map<RoadNode, Double> dist = new HashMap<>();
+            dist.put(source, 0.0);
+            PriorityQueue<RoadNode> pq = new PriorityQueue<>(Comparator.comparingDouble(n -> dist.getOrDefault(n, Double.MAX_VALUE)));
+            pq.add(source);
+
+            while (!pq.isEmpty()) {
+                RoadNode u = pq.poll();
+                double du = dist.get(u);
+                for (RoadEdge edge : graph.edgesOf(u)) {
+                    RoadNode src = graph.getEdgeSource(edge);
+                    RoadNode v = src.equals(u) ? graph.getEdgeTarget(edge) : src;
+                    double dv = du + graph.getEdgeWeight(edge);
+                    if (dv < dist.getOrDefault(v, Double.MAX_VALUE)) {
+                        dist.put(v, dv);
+                        pq.add(v);
+                    }
+                }
+            }
+
+            for (Map.Entry<RoadNode, Double> entry : dist.entrySet()) {
+                if (!entry.getKey().equals(source)) {
+                    double d = entry.getValue();
+                    if (d > diameter) diameter = d;
+                    totalDist += d;
+                    pairCount++;
+                }
+            }
+        }
+
+        double avgShortestPathMeters = pairCount > 0 ? totalDist / pairCount : 0.0;
+
+        var bc = new BetweennessCentrality<>(roadGraph.getGraph(), true);
+        double avgBetweennessCentrality = bc.getScores().values().stream()
+                .mapToDouble(Double::doubleValue).average().orElse(0.0);
+
+        return new GraphMetricsDto(
+                nodeCount,
+                edgeCount,
+                avgDegree,
+                diameter,
+                clusteringCoefficient,
+                avgEdgeLengthMeters,
+                nodeDensityPerKm2,
+                avgShortestPathMeters,
+                avgBetweennessCentrality,
+                approximated
+        );
+    }
+
     private boolean isValidCoordinate(PositionalData p) {
         if (p.getLat() < -90 || p.getLat() > 90 || p.getLon() < -180 || p.getLon() > 180) {
             return false;
@@ -305,6 +410,10 @@ public class GpsGraphConstructionService implements GraphConstructionService {
             graphEntity.setStations(stations.stream()
                     .map(s -> new GraphStationEntity(s.id(), s.lat(), s.lon(), s.rank()))
                     .collect(Collectors.toList()));
+        }
+
+        if (graph.metrics() != null) {
+            graphEntity.setMetrics(GraphMetricsEmbeddable.fromDto(graph.metrics()));
         }
 
         GraphEntity saved = graphRepository.save(graphEntity);

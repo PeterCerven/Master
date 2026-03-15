@@ -1,6 +1,7 @@
 package sk.master.backend.service.construct;
 
 import sk.master.backend.persistence.dto.GraphDto;
+import sk.master.backend.persistence.dto.GraphMetricsDto;
 import sk.master.backend.persistence.dto.GraphSummaryDto;
 import sk.master.backend.persistence.dto.PlacementResponseDto;
 import sk.master.backend.persistence.dto.SavedGraphDto;
@@ -13,6 +14,8 @@ public interface GraphConstructionService {
     GraphSummaryDto saveGraphToDatabase(GraphDto graph, List<PlacementResponseDto.StationNodeDto> stations, String name, Long userId);
 
     RoadGraph generateRoadNetwork(GraphDto graph, List<PositionalData> positionalData);
+
+    GraphMetricsDto computeMetrics(RoadGraph roadGraph);
 
     SavedGraphDto importGraphFromDatabase(Long graphId, Long userId);
 

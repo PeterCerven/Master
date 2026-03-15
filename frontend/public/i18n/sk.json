@@ -7,7 +7,20 @@
     "clearGraph": "Vyčisti graf",
     "loading": "Načítavanie...",
     "saving": "Ukladanie...",
-    "placing": "Umiestňovanie..."
+    "placing": "Umiestňovanie...",
+    "metrics": {
+      "title": "Metriky grafu",
+      "nodeCount": "Uzly",
+      "edgeCount": "Hrany",
+      "avgDegree": "Priem. stupeň uzla",
+      "diameterMeters": "Priemer (diameter)",
+      "clusteringCoefficient": "Klastrovací koeficient",
+      "avgEdgeLengthMeters": "Priem. dĺžka hrany",
+      "nodeDensityPerKm2": "Hustota uzlov",
+      "avgShortestPathMeters": "Priem. najkratšia cesta",
+      "avgBetweennessCentrality": "Priem. centralita medziľahlosti",
+      "approximated": "* Metriky sú aproximované (veľký graf, vzorkované)"
+    }
   },
   "adminUsers": {
     "title": "Správa používateľov",

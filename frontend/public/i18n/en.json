@@ -7,7 +7,20 @@
     "clearGraph": "Clear Graph",
     "loading": "Loading...",
     "saving": "Saving...",
-    "placing": "Placing..."
+    "placing": "Placing...",
+    "metrics": {
+      "title": "Graph Metrics",
+      "nodeCount": "Nodes",
+      "edgeCount": "Edges",
+      "avgDegree": "Avg. Degree",
+      "diameterMeters": "Diameter",
+      "clusteringCoefficient": "Clustering Coeff.",
+      "avgEdgeLengthMeters": "Avg. Edge Length",
+      "nodeDensityPerKm2": "Node Density",
+      "avgShortestPathMeters": "Avg. Shortest Path",
+      "avgBetweennessCentrality": "Avg. Betweenness Centrality",
+      "approximated": "* Metrics approximated (large graph, sampled)"
+    }
   },
   "adminUsers": {
     "title": "User Management",

@@ -7,7 +7,9 @@ import org.springframework.stereotype.Component;
 import sk.master.backend.persistence.model.*;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
 
@@ -31,9 +33,12 @@ public class RandomStrategy implements PlacementStrategy {
         log.info("Calculate with params: k={}, maxRadius={}m, iterations={}, nodes={}, edges={}",
                 k, maxRadiusMeters, iterations, allNodes.size(), graph.edgeSet().size());
 
+        AtomicInteger bestCount = new AtomicInteger(Integer.MAX_VALUE);
+        ConcurrentHashMap<RoadNode, Map<RoadNode, Double>> dijkstraCache = new ConcurrentHashMap<>();
+
         List<RoadNode> bestStations = IntStream.range(0, iterations)
                 .parallel()
-                .mapToObj(_ -> runOnce(graph, allNodes, k, maxRadiusMeters))
+                .mapToObj(_ -> runOnce(graph, allNodes, k, maxRadiusMeters, bestCount, dijkstraCache))
                 .min(Comparator.comparingInt(List::size))
                 .orElse(List.of());
 
@@ -44,7 +49,8 @@ public class RandomStrategy implements PlacementStrategy {
         return new PlacementResult(bestStations, bestStations.size(), nodeDistances);
     }
 
-    private List<RoadNode> runOnce(Graph<RoadNode, RoadEdge> graph, Set<RoadNode> allNodes, int k, double maxRadiusMeters) {
+    private List<RoadNode> runOnce(Graph<RoadNode, RoadEdge> graph, Set<RoadNode> allNodes, int k, double maxRadiusMeters, AtomicInteger bestCount,
+                                   ConcurrentHashMap<RoadNode, Map<RoadNode, Double>> dijkstraCache) {
         Map<RoadNode, Integer> coverageCount = new HashMap<>();
         for (RoadNode node : allNodes) {
             coverageCount.put(node, 0);
@@ -65,7 +71,9 @@ public class RandomStrategy implements PlacementStrategy {
             stations.add(selected);
             stationSet.add(selected);
 
-            Map<RoadNode, Double> reachable = dijkstraDistances(graph, selected, maxRadiusMeters);
+            if (stations.size() > bestCount.get()) return stations; // prune: can't beat best
+
+            Map<RoadNode, Double> reachable = dijkstraCache.computeIfAbsent(selected, n -> dijkstraDistances(graph, n, maxRadiusMeters));
             for (RoadNode node : reachable.keySet()) {
                 int count = coverageCount.merge(node, 1, Integer::sum);
                 if (count >= k) {
@@ -74,6 +82,7 @@ public class RandomStrategy implements PlacementStrategy {
             }
         }
 
+        bestCount.updateAndGet(c -> Math.min(c, stations.size()));
         return stations;
     }
 
@@ -107,25 +116,34 @@ public class RandomStrategy implements PlacementStrategy {
             List<RoadNode> stations,
             double maxRadiusMeters) {
 
-        Map<String, Double> distances = new HashMap<>();
-        for (RoadNode node : allNodes) {
-            distances.put(node.getId(), Double.MAX_VALUE);
+        Map<RoadNode, Double> dist = new HashMap<>();
+        for (RoadNode station : stations) {
+            dist.put(station, 0.0);
         }
 
-        for (RoadNode station : stations) {
-            Map<RoadNode, Double> stationDist = dijkstraDistances(graph, station, maxRadiusMeters);
-            for (Map.Entry<RoadNode, Double> entry : stationDist.entrySet()) {
-                String nodeId = entry.getKey().getId();
-                if (entry.getValue() < distances.get(nodeId)) {
-                    distances.put(nodeId, entry.getValue());
+        PriorityQueue<RoadNode> pq = new PriorityQueue<>(Comparator.comparingDouble(dist::get));
+        pq.addAll(stations);
+        Set<RoadNode> visited = new HashSet<>();
+
+        while (!pq.isEmpty()) {
+            RoadNode u = pq.poll();
+            if (!visited.add(u)) continue;
+            double du = dist.get(u);
+            for (RoadEdge edge : graph.edgesOf(u)) {
+                RoadNode v = getOpposite(graph, u, edge);
+                double dv = du + graph.getEdgeWeight(edge);
+                if (dv <= maxRadiusMeters && dv < dist.getOrDefault(v, Double.MAX_VALUE)) {
+                    dist.put(v, dv);
+                    pq.add(v);
                 }
             }
         }
 
-        // Uzly mimo dosahu staníc dostanú -1
-        distances.replaceAll((_, d) -> d == Double.MAX_VALUE ? -1.0 : d);
-
-        return distances;
+        Map<String, Double> result = new HashMap<>();
+        for (RoadNode node : allNodes) {
+            result.put(node.getId(), dist.getOrDefault(node, -1.0));
+        }
+        return result;
     }
 
     private RoadNode getOpposite(Graph<RoadNode, RoadEdge> graph, RoadNode node, RoadEdge edge) {

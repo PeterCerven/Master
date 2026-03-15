@@ -82,9 +82,11 @@ public class RandomStrategy implements PlacementStrategy {
         dist.put(source, 0.0);
         PriorityQueue<RoadNode> pq = new PriorityQueue<>(Comparator.comparingDouble(dist::get));
         pq.add(source);
+        Set<RoadNode> visited = new HashSet<>();
 
         while (!pq.isEmpty()) {
             RoadNode u = pq.poll();
+            if (!visited.add(u)) continue;
             double du = dist.get(u);
             for (RoadEdge edge : graph.edgesOf(u)) {
                 RoadNode v = getOpposite(graph, u, edge);

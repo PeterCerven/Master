@@ -88,7 +88,7 @@ export class LoadGraphDialog implements OnInit {
       });
   }
 
-  cancelRename(event: MouseEvent): void {
+  cancelRename(event: Event): void {
     event.stopPropagation();
     this.editingId.set(null);
   }

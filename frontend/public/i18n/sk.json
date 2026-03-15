@@ -13,13 +13,15 @@
       "nodeCount": "Uzly",
       "edgeCount": "Hrany",
       "avgDegree": "Priem. stupeň uzla",
-      "diameterMeters": "Priemer (diameter)",
+      "diameterMeters": "Priemer",
+      "radiusMeters": "Polomer",
       "clusteringCoefficient": "Klastrovací koeficient",
       "avgEdgeLengthMeters": "Priem. dĺžka hrany",
       "nodeDensityPerKm2": "Hustota uzlov",
-      "avgShortestPathMeters": "Priem. najkratšia cesta",
-      "avgBetweennessCentrality": "Priem. centralita medziľahlosti",
-      "approximated": "* Metriky sú aproximované (veľký graf, vzorkované)"
+      "connected": "Súvislosť",
+      "yes": "Áno",
+      "no": "Nie",
+      "avgBetweennessCentrality": "Priem. centralita medziľahlosti"
     }
   },
   "adminUsers": {

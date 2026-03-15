@@ -14,12 +14,14 @@
       "edgeCount": "Edges",
       "avgDegree": "Avg. Degree",
       "diameterMeters": "Diameter",
+      "radiusMeters": "Radius",
       "clusteringCoefficient": "Clustering Coeff.",
       "avgEdgeLengthMeters": "Avg. Edge Length",
       "nodeDensityPerKm2": "Node Density",
-      "avgShortestPathMeters": "Avg. Shortest Path",
-      "avgBetweennessCentrality": "Avg. Betweenness Centrality",
-      "approximated": "* Metrics approximated (large graph, sampled)"
+      "connected": "Connected",
+      "yes": "Yes",
+      "no": "No",
+      "avgBetweennessCentrality": "Avg. Betweenness Centrality"
     }
   },
   "adminUsers": {

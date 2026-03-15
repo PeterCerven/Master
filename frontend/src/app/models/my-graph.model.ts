@@ -6,9 +6,9 @@ export interface GraphMetrics {
   clusteringCoefficient: number;
   avgEdgeLengthMeters: number;
   nodeDensityPerKm2: number;
-  avgShortestPathMeters: number;
+  connected: boolean;
+  radiusMeters: number;
   avgBetweennessCentrality: number;
-  approximated: boolean;
 }
 
 export interface GraphResponseDto {

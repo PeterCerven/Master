@@ -2,6 +2,7 @@ package sk.master.backend.service.construct;
 
 import com.uber.h3core.H3Core;
 import lombok.Getter;
+import org.jgrapht.alg.connectivity.ConnectivityInspector;
 import org.jgrapht.alg.scoring.BetweennessCentrality;
 import org.jgrapht.alg.scoring.ClusteringCoefficient;
 import org.slf4j.Logger;
@@ -279,7 +280,7 @@ public class GpsGraphConstructionService implements GraphConstructionService {
         int edgeCount = roadGraph.getEdgeCount();
 
         if (nodeCount == 0) {
-            return new GraphMetricsDto(0, 0, 0, 0, 0, 0, 0, 0, 0, false);
+            return new GraphMetricsDto(0, 0, 0, 0, 0, 0, 0, false, 0, 0);
         }
 
         double avgDegree = nodeCount > 0 ? 2.0 * edgeCount / nodeCount : 0.0;
@@ -308,21 +309,14 @@ public class GpsGraphConstructionService implements GraphConstructionService {
         var cc = new ClusteringCoefficient<>(roadGraph.getGraph());
         double clusteringCoefficient = cc.getAverageClusteringCoefficient();
 
-        // Diameter & avg shortest path via sampled Dijkstra
+        // Diameter & radius via Dijkstra
         var graph = roadGraph.getGraph();
-        List<RoadNode> nodeList = new ArrayList<>(roadGraph.getNodes());
-        boolean approximated = nodeCount > 500;
-        List<RoadNode> sources;
-        if (approximated) {
-            Collections.shuffle(nodeList);
-            sources = nodeList.subList(0, 200);
-        } else {
-            sources = nodeList;
-        }
+        List<RoadNode> sources = new ArrayList<>(roadGraph.getNodes());
+
+        boolean connected = new ConnectivityInspector<>(graph).isConnected();
 
         double diameter = 0.0;
-        double totalDist = 0.0;
-        long pairCount = 0;
+        double radius = Double.MAX_VALUE;
 
         for (RoadNode source : sources) {
             Map<RoadNode, Double> dist = new HashMap<>();
@@ -344,17 +338,18 @@ public class GpsGraphConstructionService implements GraphConstructionService {
                 }
             }
 
+            double eccentricity = 0.0;
             for (Map.Entry<RoadNode, Double> entry : dist.entrySet()) {
                 if (!entry.getKey().equals(source)) {
                     double d = entry.getValue();
                     if (d > diameter) diameter = d;
-                    totalDist += d;
-                    pairCount++;
+                    if (d > eccentricity) eccentricity = d;
                 }
             }
+            if (eccentricity > 0 && eccentricity < radius) radius = eccentricity;
         }
 
-        double avgShortestPathMeters = pairCount > 0 ? totalDist / pairCount : 0.0;
+        double radiusMeters = radius == Double.MAX_VALUE ? 0.0 : radius;
 
         var bc = new BetweennessCentrality<>(roadGraph.getGraph(), true);
         double avgBetweennessCentrality = bc.getScores().values().stream()
@@ -368,9 +363,9 @@ public class GpsGraphConstructionService implements GraphConstructionService {
                 clusteringCoefficient,
                 avgEdgeLengthMeters,
                 nodeDensityPerKm2,
-                avgShortestPathMeters,
-                avgBetweennessCentrality,
-                approximated
+                connected,
+                radiusMeters,
+                avgBetweennessCentrality
         );
     }
 

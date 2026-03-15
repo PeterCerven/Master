@@ -8,7 +8,7 @@ public record GraphMetricsDto(
         double clusteringCoefficient,
         double avgEdgeLengthMeters,
         double nodeDensityPerKm2,
-        double avgShortestPathMeters,
-        double avgBetweennessCentrality,
-        boolean approximated
+        boolean connected,
+        double radiusMeters,
+        double avgBetweennessCentrality
 ) {}

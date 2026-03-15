@@ -70,6 +70,10 @@
           <span class="metric-value">{{ graphMetrics.diameterMeters | number: '1.1-1' }} m</span>
         </div>
         <div class="metric-row">
+          <span class="metric-label">{{ t('metrics.radiusMeters') }}</span>
+          <span class="metric-value">{{ graphMetrics.radiusMeters | number: '1.1-1' }} m</span>
+        </div>
+        <div class="metric-row">
           <span class="metric-label">{{ t('metrics.clusteringCoefficient') }}</span>
           <span class="metric-value">{{ graphMetrics.clusteringCoefficient | number: '1.4-4' }}</span>
         </div>
@@ -82,16 +86,13 @@
           <span class="metric-value">{{ graphMetrics.nodeDensityPerKm2 | number: '1.2-2' }} /km²</span>
         </div>
         <div class="metric-row">
-          <span class="metric-label">{{ t('metrics.avgShortestPathMeters') }}</span>
-          <span class="metric-value">{{ graphMetrics.avgShortestPathMeters | number: '1.1-1' }} m</span>
+          <span class="metric-label">{{ t('metrics.connected') }}</span>
+          <span class="metric-value">{{ graphMetrics.connected ? t('metrics.yes') : t('metrics.no') }}</span>
         </div>
         <div class="metric-row">
           <span class="metric-label">{{ t('metrics.avgBetweennessCentrality') }}</span>
           <span class="metric-value">{{ graphMetrics.avgBetweennessCentrality | number: '1.4-4' }}</span>
         </div>
-        @if (graphMetrics.approximated) {
-          <p class="metrics-note">{{ t('metrics.approximated') }}</p>
-        }
       </div>
     }
   </div>

@@ -18,9 +18,9 @@ public class GraphMetricsEmbeddable {
     private Double clusteringCoefficient;
     private Double avgEdgeLengthMeters;
     private Double nodeDensityPerKm2;
-    private Double avgShortestPathMeters;
+    private Boolean connected;
+    private Double radiusMeters;
     private Double avgBetweennessCentrality;
-    private Boolean approximated;
 
     public static GraphMetricsEmbeddable fromDto(GraphMetricsDto dto) {
         return new GraphMetricsEmbeddable(
@@ -31,9 +31,9 @@ public class GraphMetricsEmbeddable {
                 dto.clusteringCoefficient(),
                 dto.avgEdgeLengthMeters(),
                 dto.nodeDensityPerKm2(),
-                dto.avgShortestPathMeters(),
-                dto.avgBetweennessCentrality(),
-                dto.approximated()
+                dto.connected(),
+                dto.radiusMeters(),
+                dto.avgBetweennessCentrality()
         );
     }
 
@@ -46,9 +46,9 @@ public class GraphMetricsEmbeddable {
                 clusteringCoefficient,
                 avgEdgeLengthMeters,
                 nodeDensityPerKm2,
-                avgShortestPathMeters,
-                avgBetweennessCentrality,
-                approximated
+                connected,
+                radiusMeters,
+                avgBetweennessCentrality
         );
     }
 }

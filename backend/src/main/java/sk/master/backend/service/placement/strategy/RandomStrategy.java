@@ -71,7 +71,7 @@ public class RandomStrategy implements PlacementStrategy {
             stations.add(selected);
             stationSet.add(selected);
 
-            if (stations.size() > bestCount.get()) return stations; // prune: can't beat best
+            if (stations.size() >= bestCount.get()) return stations; // prune: can't beat best
 
             Map<RoadNode, Double> reachable = dijkstraCache.computeIfAbsent(selected, n -> dijkstraDistances(graph, n, maxRadiusMeters));
             for (RoadNode node : reachable.keySet()) {

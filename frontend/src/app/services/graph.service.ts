@@ -51,6 +51,12 @@ export class GraphService {
     return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(catchError(this.handleError));
   }
 
+  public renameGraph(id: number, name: string): Observable<GraphSummaryDto> {
+    return this.http.patch<GraphSummaryDto>(`${this.apiUrl}/${id}/rename`, { name }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
   private handleError(error: any): Observable<never> {
     console.error('Graph error:', error);
     return throwError(() => new Error(error.message || 'Server Error'));

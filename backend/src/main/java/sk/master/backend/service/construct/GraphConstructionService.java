@@ -22,4 +22,6 @@ public interface GraphConstructionService {
     List<GraphSummaryDto> listUserGraphs(Long userId);
 
     void deleteGraph(Long graphId, Long userId);
+
+    GraphSummaryDto renameGraph(Long graphId, String newName, Long userId);
 }

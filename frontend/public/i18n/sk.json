@@ -94,6 +94,9 @@
       "empty": "Žiadne uložené grafy.",
       "loadButton": "Načítať",
       "deleteAriaLabel": "Vymazať graf",
+      "renameAriaLabel": "Premenovať graf",
+      "confirmRenameAriaLabel": "Potvrdiť premenovanie",
+      "cancelRenameAriaLabel": "Zrušiť premenovanie",
       "columns": {
         "name": "Názov",
         "date": "Dátum",

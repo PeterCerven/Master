@@ -94,6 +94,9 @@
       "empty": "No saved graphs found.",
       "loadButton": "Load",
       "deleteAriaLabel": "Delete graph",
+      "renameAriaLabel": "Rename graph",
+      "confirmRenameAriaLabel": "Confirm rename",
+      "cancelRenameAriaLabel": "Cancel rename",
       "columns": {
         "name": "Name",
         "date": "Date",

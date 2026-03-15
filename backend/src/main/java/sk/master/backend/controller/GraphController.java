@@ -7,6 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 import sk.master.backend.persistence.dto.GraphDto;
 import sk.master.backend.persistence.dto.GraphMetricsDto;
 import sk.master.backend.persistence.dto.GraphSummaryDto;
+import sk.master.backend.persistence.dto.RenameGraphDto;
 import sk.master.backend.persistence.dto.SaveGraphDto;
 import sk.master.backend.persistence.dto.SavedGraphDto;
 import sk.master.backend.persistence.model.PositionalData;
@@ -60,6 +61,16 @@ public class GraphController {
     public ResponseEntity<Void> deleteGraph(@PathVariable Long graphId, Authentication authentication) {
         graphConstructionService.deleteGraph(graphId, resolveUserId(authentication));
         return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{graphId}/rename")
+    public ResponseEntity<GraphSummaryDto> renameGraph(
+            @PathVariable Long graphId,
+            @RequestBody RenameGraphDto request,
+            Authentication authentication) {
+        return ResponseEntity.ok(
+            graphConstructionService.renameGraph(graphId, request.name(), resolveUserId(authentication))
+        );
     }
 
     private Long resolveUserId(Authentication authentication) {

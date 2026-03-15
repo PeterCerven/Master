@@ -434,4 +434,13 @@ public class GpsGraphConstructionService implements GraphConstructionService {
                 .orElseThrow(() -> new IllegalArgumentException("Graph not found"));
         graphRepository.delete(entity);
     }
+
+    @Override
+    @Transactional
+    public GraphSummaryDto renameGraph(Long graphId, String newName, Long userId) {
+        GraphEntity entity = graphRepository.findByIdAndUserId(graphId, userId)
+                .orElseThrow(() -> new IllegalArgumentException("Graph not found"));
+        entity.setName(newName);
+        return GraphSummaryDto.fromEntity(graphRepository.save(entity));
+    }
 }

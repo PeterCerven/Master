@@ -134,7 +134,7 @@
       "strategy": "Algoritmus použitý na určenie optimálnych umiestnení nabíjacích staníc",
       "kDominatingSet": "Počet nabíjacích staníc, ktoré sa majú umiestniť pre pokrytie každého bodu",
       "maxRadiusMeters": "Dosah jednej nabíjacej stanice v metroch — uzly v tejto vzdialenosti sú považované za pokryté",
-      "iterations": "Počet náhodných pokusov (iba stratégia Random) — viac iterácií zlepšuje kvalitu na úkor výpočtového času"
+      "iterations": "Počet nezávislých opakovaní — viac iterácií zlepšuje kvalitu riešenia na úkor výpočtového času (stratégie Random a GRASP)"
     }
   }
 }

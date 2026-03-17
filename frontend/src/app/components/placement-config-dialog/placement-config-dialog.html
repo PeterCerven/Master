@@ -29,7 +29,7 @@
         <input matInput type="number" [(ngModel)]="maxRadiusMeters" min="100" step="100"/>
       </mat-form-field>
 
-      @if (strategy === 'RANDOM_STRATEGY') {
+      @if (strategy === 'RANDOM_STRATEGY' || strategy === 'CUSTOM_STRATEGY') {
         <mat-form-field appearance="outline" class="full-width"
           [matTooltip]="t('tooltips.iterations')"
           matTooltipPosition="right">

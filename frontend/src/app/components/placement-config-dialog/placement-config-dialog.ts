@@ -41,7 +41,7 @@ export class PlacementConfigDialog implements OnInit {
   readonly strategies: { value: PlacementRequestDto['algorithm']; label: string }[] = [
     { value: 'RANDOM_STRATEGY', label: 'Random' },
     { value: 'GREEDY_STRATEGY', label: 'Greedy' },
-    { value: 'CUSTOM_STRATEGY', label: 'Custom' },
+    { value: 'CUSTOM_STRATEGY', label: 'GRASP' },
   ];
 
   ngOnInit(): void {

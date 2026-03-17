@@ -134,7 +134,7 @@
       "strategy": "Algorithm used to determine optimal charging station locations",
       "kDominatingSet": "Number of charging stations to cover each point",
       "maxRadiusMeters": "Coverage radius of a single charging station in meters — nodes within this distance are considered covered",
-      "iterations": "Number of random trials (Random strategy only) — more iterations improve quality at the cost of computation time"
+      "iterations": "Number of independent restarts — more iterations improve solution quality at the cost of computation time (Random and GRASP strategies)"
     }
   }
 }

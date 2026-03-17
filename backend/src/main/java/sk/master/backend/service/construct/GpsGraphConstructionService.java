@@ -76,7 +76,6 @@ public class GpsGraphConstructionService implements GraphConstructionService {
         int processedTrips = 0;
         for (List<PositionalData> trip : trips) {
 
-            // NOTE: You need to implement matchTrajectory in your MapMatchingService
             List<PositionalData> matchedTrajectory = mapMatchingService.matchTrajectory(trip);
 
             boolean isOffRoad = false;
@@ -86,7 +85,6 @@ public class GpsGraphConstructionService implements GraphConstructionService {
                 trajectoryToInsert = matchedTrajectory;
             } else {
                 // Fallback: If map matching fails, use the raw GPS points (Off-road / Unmapped area)
-                // Ideally, apply Douglas-Peucker simplification here to reduce raw GPS jitter.
                 isOffRoad = true;
                 trajectoryToInsert = trip;
             }

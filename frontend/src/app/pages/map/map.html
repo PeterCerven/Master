@@ -54,43 +54,43 @@
       <div class="graph-metrics-panel">
         <h4 class="metrics-title">{{ t('metrics.title') }}</h4>
         <div class="metric-row">
-          <span class="metric-label">{{ t('metrics.nodeCount') }}</span>
+          <span class="metric-label" [matTooltip]="t('tooltips.nodeCount')" matTooltipPosition="right">{{ t('metrics.nodeCount') }}</span>
           <span class="metric-value">{{ graphMetrics.nodeCount }}</span>
         </div>
         <div class="metric-row">
-          <span class="metric-label">{{ t('metrics.edgeCount') }}</span>
+          <span class="metric-label" [matTooltip]="t('tooltips.edgeCount')" matTooltipPosition="right">{{ t('metrics.edgeCount') }}</span>
           <span class="metric-value">{{ graphMetrics.edgeCount }}</span>
         </div>
         <div class="metric-row">
-          <span class="metric-label">{{ t('metrics.avgDegree') }}</span>
+          <span class="metric-label" [matTooltip]="t('tooltips.avgDegree')" matTooltipPosition="right">{{ t('metrics.avgDegree') }}</span>
           <span class="metric-value">{{ graphMetrics.avgDegree | number: '1.2-2' }}</span>
         </div>
         <div class="metric-row">
-          <span class="metric-label">{{ t('metrics.diameterMeters') }}</span>
+          <span class="metric-label" [matTooltip]="t('tooltips.diameterMeters')" matTooltipPosition="right">{{ t('metrics.diameterMeters') }}</span>
           <span class="metric-value">{{ graphMetrics.diameterMeters | number: '1.1-1' }} m</span>
         </div>
         <div class="metric-row">
-          <span class="metric-label">{{ t('metrics.radiusMeters') }}</span>
+          <span class="metric-label" [matTooltip]="t('tooltips.radiusMeters')" matTooltipPosition="right">{{ t('metrics.radiusMeters') }}</span>
           <span class="metric-value">{{ graphMetrics.radiusMeters | number: '1.1-1' }} m</span>
         </div>
         <div class="metric-row">
-          <span class="metric-label">{{ t('metrics.clusteringCoefficient') }}</span>
+          <span class="metric-label" [matTooltip]="t('tooltips.clusteringCoefficient')" matTooltipPosition="right">{{ t('metrics.clusteringCoefficient') }}</span>
           <span class="metric-value">{{ graphMetrics.clusteringCoefficient | number: '1.4-4' }}</span>
         </div>
         <div class="metric-row">
-          <span class="metric-label">{{ t('metrics.avgEdgeLengthMeters') }}</span>
+          <span class="metric-label" [matTooltip]="t('tooltips.avgEdgeLengthMeters')" matTooltipPosition="right">{{ t('metrics.avgEdgeLengthMeters') }}</span>
           <span class="metric-value">{{ graphMetrics.avgEdgeLengthMeters | number: '1.1-1' }} m</span>
         </div>
         <div class="metric-row">
-          <span class="metric-label">{{ t('metrics.nodeDensityPerKm2') }}</span>
+          <span class="metric-label" [matTooltip]="t('tooltips.nodeDensityPerKm2')" matTooltipPosition="right">{{ t('metrics.nodeDensityPerKm2') }}</span>
           <span class="metric-value">{{ graphMetrics.nodeDensityPerKm2 | number: '1.2-2' }} /km²</span>
         </div>
         <div class="metric-row">
-          <span class="metric-label">{{ t('metrics.connected') }}</span>
+          <span class="metric-label" [matTooltip]="t('tooltips.connected')" matTooltipPosition="right">{{ t('metrics.connected') }}</span>
           <span class="metric-value">{{ graphMetrics.connected ? t('metrics.yes') : t('metrics.no') }}</span>
         </div>
         <div class="metric-row">
-          <span class="metric-label">{{ t('metrics.avgBetweennessCentrality') }}</span>
+          <span class="metric-label" [matTooltip]="t('tooltips.avgBetweennessCentrality')" matTooltipPosition="right">{{ t('metrics.avgBetweennessCentrality') }}</span>
           <span class="metric-value">{{ graphMetrics.avgBetweennessCentrality | number: '1.4-4' }}</span>
         </div>
       </div>

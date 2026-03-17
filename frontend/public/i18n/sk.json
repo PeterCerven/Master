@@ -22,6 +22,18 @@
       "yes": "Áno",
       "no": "Nie",
       "avgBetweennessCentrality": "Priem. centralita medziľahlosti"
+    },
+    "tooltips": {
+      "nodeCount": "Celkový počet križovatiek a koncových bodov v cestnej sieti",
+      "edgeCount": "Celkový počet úsekov ciest spájajúcich uzly",
+      "avgDegree": "Priemerný počet spojení na uzol",
+      "diameterMeters": "Dĺžka najdlhšej najkratšej cesty medzi ľubovoľnými dvoma uzlami",
+      "radiusMeters": "Minimálna excentricita — vzdialenosť od najcentrálnejšieho uzla ku všetkým ostatným",
+      "clusteringCoefficient": "Miera zhluknutia uzlov (0 = žiadne, 1 = plne zhluknuté)",
+      "avgEdgeLengthMeters": "Priemerná dĺžka úsekov ciest v metroch",
+      "nodeDensityPerKm2": "Počet uzlov na štvorcový kilometer",
+      "connected": "Či sú všetky uzly navzájom dosiahnuteľné",
+      "avgBetweennessCentrality": "Priemerný podiel najkratších ciest prechádzajúcich každým uzlom"
     }
   },
   "adminUsers": {
@@ -108,12 +120,21 @@
     "place": {
       "title": "Vypočítaj umiestnenie nabíjacích staníc",
       "iterations": "Iterácie",
-      "kDominatingSet": "K (počet staníc)",
+      "kDominatingSet": "K (počet staníc pre každý bod)",
       "maxRadiusMeters": "Maximálny dosah (v metroch)"
     },
     "confirm": "Potvrdiť",
     "cancel": "Zrušiť",
     "saving": "Ukladanie...",
-    "loading": "Načítavanie..."
+    "loading": "Načítavanie...",
+    "tooltips": {
+      "maxSpeedKmh": "GPS body s rýchlosťou (poloha/čas) nad touto hranicou sú považované za odľahlé hodnoty a počas predspracovania sa odstránia",
+      "h3DedupResolution": "Rozlíšenie H3 hexagónu pre zlúčenie blízkych uzlov (0 = hrubé, 15 = jemné). Vyššie hodnoty zachovávajú viac detailov ciest.",
+      "chooseFile": "Vyberte súbor GPX, JSON alebo GeoJSON obsahujúci GPS trajektórie",
+      "strategy": "Algoritmus použitý na určenie optimálnych umiestnení nabíjacích staníc",
+      "kDominatingSet": "Počet nabíjacích staníc, ktoré sa majú umiestniť pre pokrytie každého bodu",
+      "maxRadiusMeters": "Dosah jednej nabíjacej stanice v metroch — uzly v tejto vzdialenosti sú považované za pokryté",
+      "iterations": "Počet náhodných pokusov (iba stratégia Random) — viac iterácií zlepšuje kvalitu na úkor výpočtového času"
+    }
   }
 }

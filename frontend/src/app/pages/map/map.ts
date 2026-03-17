@@ -15,10 +15,11 @@ import {PlacementConfigDialog, PlacementConfigResult} from '@components/placemen
 import {SaveGraphDialog} from '@components/save-graph-dialog/save-graph-dialog';
 import {LoadGraphDialog} from '@components/load-graph-dialog/load-graph-dialog';
 import {TranslocoDirective} from '@jsverse/transloco';
+import {MatTooltip} from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-map',
-  imports: [GoogleMapsModule, GoogleMap, MatFabButton, TranslocoDirective, DecimalPipe],
+  imports: [GoogleMapsModule, GoogleMap, MatFabButton, TranslocoDirective, DecimalPipe, MatTooltip],
   templateUrl: './map.html',
   styleUrl: './map.scss'
 })

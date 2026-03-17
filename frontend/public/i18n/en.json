@@ -22,6 +22,18 @@
       "yes": "Yes",
       "no": "No",
       "avgBetweennessCentrality": "Avg. Betweenness Centrality"
+    },
+    "tooltips": {
+      "nodeCount": "Total number of intersections and endpoints in the road network",
+      "edgeCount": "Total number of road segments connecting nodes",
+      "avgDegree": "Average number of connections per node",
+      "diameterMeters": "Length of the longest shortest path between any two nodes",
+      "radiusMeters": "Minimum eccentricity — distance from the most central node to all others",
+      "clusteringCoefficient": "How tightly nodes cluster together (0 = none, 1 = fully clustered)",
+      "avgEdgeLengthMeters": "Average length of road segments in meters",
+      "nodeDensityPerKm2": "Number of nodes per square kilometer",
+      "connected": "Whether all nodes are reachable from each other",
+      "avgBetweennessCentrality": "Average fraction of shortest paths that pass through each node"
     }
   },
   "adminUsers": {
@@ -108,12 +120,21 @@
     "place": {
       "title": "Compute Placing Charging Stations",
       "iterations": "Iterations",
-      "kDominatingSet": "K (number of stations)",
+      "kDominatingSet": "K (number of stations for each coordinate)",
       "maxRadiusMeters": "Max Coverage Radius (metres)"
     },
     "confirm": "Confirm",
     "cancel": "Cancel",
     "saving": "Saving...",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "tooltips": {
+      "maxSpeedKmh": "GPS points with speed (location/time) above this threshold are treated as outliers and removed during preprocessing",
+      "h3DedupResolution": "H3 hexagon resolution for merging nearby nodes (0 = coarse, 15 = fine). Higher values preserve more road detail.",
+      "chooseFile": "Select a GPX, JSON, or GeoJSON file containing GPS trajectory data",
+      "strategy": "Algorithm used to determine optimal charging station locations",
+      "kDominatingSet": "Number of charging stations to cover each point",
+      "maxRadiusMeters": "Coverage radius of a single charging station in meters — nodes within this distance are considered covered",
+      "iterations": "Number of random trials (Random strategy only) — more iterations improve quality at the cost of computation time"
+    }
   }
 }

@@ -10,6 +10,7 @@ import { PipelineConfigService } from '@services/pipeline-config.service';
 import { PipelineConfig } from '@models/pipeline-config.model';
 import { PlacementRequestDto } from '@models/my-graph.model';
 import {TranslocoDirective} from '@jsverse/transloco';
+import {MatTooltip} from '@angular/material/tooltip';
 
 export interface PlacementConfigResult {
   strategy: PlacementRequestDto['algorithm'];
@@ -20,7 +21,7 @@ export interface PlacementConfigResult {
 
 @Component({
   selector: 'app-placement-config-dialog',
-  imports: [FormsModule, MatDialogModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatSelectModule, TranslocoDirective],
+  imports: [FormsModule, MatDialogModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatSelectModule, TranslocoDirective, MatTooltip],
   templateUrl: './placement-config-dialog.html',
   styleUrl: './placement-config-dialog.scss',
 })

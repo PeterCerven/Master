@@ -8,10 +8,11 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PipelineConfigService } from '@services/pipeline-config.service';
 import { PipelineConfig } from '@models/pipeline-config.model';
 import {TranslocoDirective} from '@jsverse/transloco';
+import {MatTooltip} from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-graph-config-dialog',
-  imports: [FormsModule, MatDialogModule, MatFormFieldModule, MatInputModule, MatButtonModule, TranslocoDirective],
+  imports: [FormsModule, MatDialogModule, MatFormFieldModule, MatInputModule, MatButtonModule, TranslocoDirective, MatTooltip],
   templateUrl: './graph-config-dialog.html',
   styleUrl: './graph-config-dialog.scss',
 })

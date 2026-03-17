@@ -5,19 +5,26 @@
     @if (loading()) {
       <p>t('loading')</p>
     } @else {
-      <mat-form-field appearance="outline" class="full-width">
+      <mat-form-field appearance="outline" class="full-width"
+        [matTooltip]="t('tooltips.maxSpeedKmh')"
+        matTooltipPosition="right">
         <mat-label>{{ t('create.maxSpeedKmh') }}</mat-label>
         <input matInput type="number" [(ngModel)]="maxSpeedKmh" min="1"/>
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="full-width">
+      <mat-form-field appearance="outline" class="full-width"
+        [matTooltip]="t('tooltips.h3DedupResolution')"
+        matTooltipPosition="right">
         <mat-label>{{ t('create.h3DedupResolution') }}</mat-label>
         <input matInput type="number" [(ngModel)]="h3DedupResolution" min="0" max="15"/>
       </mat-form-field>
 
       <div class="file-picker">
         <input #hiddenFileInput type="file" accept=".gpx,.json,.geojson" hidden (change)="onFileChange($event)"/>
-        <button mat-stroked-button type="button" (click)="hiddenFileInput.click()">
+        <button mat-stroked-button type="button"
+          [matTooltip]="t('tooltips.chooseFile')"
+          matTooltipPosition="above"
+          (click)="hiddenFileInput.click()">
           {{ t('create.chooseFile') }}
         </button>
         <span class="file-name" [class.has-file]="selectedFile">

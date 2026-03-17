@@ -4,7 +4,9 @@
     @if (loading()) {
       <p>{{ t('loading') }}</p>
     } @else {
-      <mat-form-field appearance="outline" class="full-width">
+      <mat-form-field appearance="outline" class="full-width"
+        [matTooltip]="t('tooltips.strategy')"
+        matTooltipPosition="right">
         <mat-label>Strategy</mat-label>
         <mat-select [(ngModel)]="strategy">
           @for (s of strategies; track s.value) {
@@ -13,18 +15,24 @@
         </mat-select>
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="full-width">
+      <mat-form-field appearance="outline" class="full-width"
+        [matTooltip]="t('tooltips.kDominatingSet')"
+        matTooltipPosition="right">
         <mat-label>{{ t('place.kDominatingSet') }}</mat-label>
         <input matInput type="number" [(ngModel)]="k" min="1"/>
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="full-width">
+      <mat-form-field appearance="outline" class="full-width"
+        [matTooltip]="t('tooltips.maxRadiusMeters')"
+        matTooltipPosition="right">
         <mat-label>{{ t('place.maxRadiusMeters') }}</mat-label>
         <input matInput type="number" [(ngModel)]="maxRadiusMeters" min="100" step="100"/>
       </mat-form-field>
 
       @if (strategy === 'RANDOM_STRATEGY') {
-        <mat-form-field appearance="outline" class="full-width">
+        <mat-form-field appearance="outline" class="full-width"
+          [matTooltip]="t('tooltips.iterations')"
+          matTooltipPosition="right">
           <mat-label>{{ t('place.iterations') }}</mat-label>
           <input matInput type="number" [(ngModel)]="iterations" min="1"/>
         </mat-form-field>

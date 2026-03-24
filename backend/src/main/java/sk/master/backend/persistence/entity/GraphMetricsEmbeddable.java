@@ -21,6 +21,7 @@ public class GraphMetricsEmbeddable {
     private Boolean connected;
     private Double radiusMeters;
     private Double avgBetweennessCentrality;
+    private Integer treewidth;
 
     public static GraphMetricsEmbeddable fromDto(GraphMetricsDto dto) {
         return new GraphMetricsEmbeddable(
@@ -33,7 +34,8 @@ public class GraphMetricsEmbeddable {
                 dto.nodeDensityPerKm2(),
                 dto.connected(),
                 dto.radiusMeters(),
-                dto.avgBetweennessCentrality()
+                dto.avgBetweennessCentrality(),
+                dto.treewidth()
         );
     }
 
@@ -48,7 +50,8 @@ public class GraphMetricsEmbeddable {
                 nodeDensityPerKm2,
                 connected,
                 radiusMeters,
-                avgBetweennessCentrality
+                avgBetweennessCentrality,
+                treewidth != null ? treewidth : 0
         );
     }
 }

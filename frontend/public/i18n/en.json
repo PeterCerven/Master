@@ -21,7 +21,8 @@
       "connected": "Connected",
       "yes": "Yes",
       "no": "No",
-      "avgBetweennessCentrality": "Avg. Betweenness Centrality"
+      "avgBetweennessCentrality": "Avg. Betweenness Centrality",
+      "treewidth": "Treewidth (UB)"
     },
     "tooltips": {
       "nodeCount": "Total number of intersections and endpoints in the road network",
@@ -33,7 +34,8 @@
       "avgEdgeLengthMeters": "Average length of road segments in meters",
       "nodeDensityPerKm2": "Number of nodes per square kilometer",
       "connected": "Whether all nodes are reachable from each other",
-      "avgBetweennessCentrality": "Average fraction of shortest paths that pass through each node"
+      "avgBetweennessCentrality": "Average fraction of shortest paths that pass through each node",
+      "treewidth": "Upper bound on treewidth via min-degree elimination — measures how tree-like the graph is (1 = tree, higher = more complex)"
     }
   },
   "adminUsers": {
@@ -121,7 +123,9 @@
       "title": "Compute Placing Charging Stations",
       "iterations": "Iterations",
       "kDominatingSet": "K (number of stations for each coordinate)",
-      "maxRadiusMeters": "Max Coverage Radius (metres)"
+      "maxRadiusMeters": "Max Coverage Radius (metres)",
+      "graspAlpha": "GRASP Alpha (RCL greediness)",
+      "graspEvalBudget": "GRASP Eval Budget"
     },
     "confirm": "Confirm",
     "cancel": "Cancel",
@@ -134,7 +138,9 @@
       "strategy": "Algorithm used to determine optimal charging station locations",
       "kDominatingSet": "Number of charging stations to cover each point",
       "maxRadiusMeters": "Coverage radius of a single charging station in meters — nodes within this distance are considered covered",
-      "iterations": "Number of independent restarts — more iterations improve solution quality at the cost of computation time (Random and GRASP strategies)"
+      "iterations": "Number of independent restarts — more iterations improve solution quality at the cost of computation time (Random and GRASP strategies)",
+      "graspAlpha": "Controls RCL greediness (0.0 = pure greedy, 1.0 = pure random). Lower values favour high-gain candidates; higher values allow more diversity.",
+      "graspEvalBudget": "Maximum number of candidate nodes evaluated per construction step. Lower values speed up each iteration; higher values improve solution quality."
     }
   }
 }

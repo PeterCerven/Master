@@ -21,7 +21,8 @@
       "connected": "Súvislosť",
       "yes": "Áno",
       "no": "Nie",
-      "avgBetweennessCentrality": "Priem. centralita medziľahlosti"
+      "avgBetweennessCentrality": "Priem. centralita medziľahlosti",
+      "treewidth": "Šírka stromu (UB)"
     },
     "tooltips": {
       "nodeCount": "Celkový počet križovatiek a koncových bodov v cestnej sieti",
@@ -33,7 +34,8 @@
       "avgEdgeLengthMeters": "Priemerná dĺžka úsekov ciest v metroch",
       "nodeDensityPerKm2": "Počet vrcholov na kilometer štvorcový",
       "connected": "Či sú všetky vrcholy navzájom dosiahnuteľné",
-      "avgBetweennessCentrality": "Priemerný podiel najkratších ciest prechádzajúcich každým vrcholom"
+      "avgBetweennessCentrality": "Priemerný podiel najkratších ciest prechádzajúcich každým vrcholom",
+      "treewidth": "Horná hranica šírky stromu heuristikou min. stupňa — meria podobnosť grafu so stromom (1 = strom, vyššie = zložitejší)"
     }
   },
   "adminUsers": {
@@ -121,7 +123,9 @@
       "title": "Vypočítaj umiestnenie nabíjacích staníc",
       "iterations": "Iterácie",
       "kDominatingSet": "K (počet staníc pre každý bod)",
-      "maxRadiusMeters": "Maximálny dosah (v metroch)"
+      "maxRadiusMeters": "Maximálny dosah (v metroch)",
+      "graspAlpha": "GRASP Alfa (chamtivosť RCL)",
+      "graspEvalBudget": "GRASP Eval Budget"
     },
     "confirm": "Potvrdiť",
     "cancel": "Zrušiť",
@@ -134,7 +138,9 @@
       "strategy": "Algoritmus použitý na určenie optimálnych umiestnení nabíjacích staníc",
       "kDominatingSet": "Počet nabíjacích staníc, ktoré sa majú umiestniť pre pokrytie každého bodu",
       "maxRadiusMeters": "Dosah jednej nabíjacej stanice v metroch — vrcholy v tejto vzdialenosti sú považované za pokryté",
-      "iterations": "Počet nezávislých opakovaní — viac iterácií zlepšuje kvalitu riešenia na úkor výpočtového času (stratégie Random a GRASP)"
+      "iterations": "Počet nezávislých opakovaní — viac iterácií zlepšuje kvalitu riešenia na úkor výpočtového času (stratégie Random a GRASP)",
+      "graspAlpha": "Ovláda chamtivosť RCL (0.0 = čisto chamtivý, 1.0 = čisto náhodný). Nižšie hodnoty uprednostňujú kandidátov s vysokým ziskom; vyššie hodnoty umožňujú väčšiu diverzitu.",
+      "graspEvalBudget": "Maximálny počet kandidátnych vrcholov vyhodnotených v každom kroku konštrukcie. Nižšie hodnoty urýchľujú každú iteráciu; vyššie hodnoty zlepšujú kvalitu riešenia."
     }
   }
 }

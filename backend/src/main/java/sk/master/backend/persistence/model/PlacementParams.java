@@ -9,4 +9,6 @@ public class PlacementParams {
     private final int k;
     private final Double maxRadiusMeters;
     private final int iterations;
+    private final double graspAlpha;
+    private final int graspEvalBudget;
 }

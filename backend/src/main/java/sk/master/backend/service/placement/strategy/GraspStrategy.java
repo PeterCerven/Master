@@ -13,11 +13,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
 @Component
-public class CustomStrategy implements PlacementStrategy {
+public class GraspStrategy implements PlacementStrategy {
 
-private static final Logger log = LoggerFactory.getLogger(CustomStrategy.class);
-private static final double ALPHA = 0.3; // TODO pridat ako config
-private static final int EVAL_BUDGET = 500; // TODO pridat ako config
+private static final Logger log = LoggerFactory.getLogger(GraspStrategy.class);
 
 @Override
 public PlacementResult computePlacement(RoadGraph roadGraph, PlacementParams params) {
@@ -31,15 +29,15 @@ public PlacementResult computePlacement(RoadGraph roadGraph, PlacementParams par
         return new PlacementResult(List.of(), 0, Map.of());
     }
 
-    log.info("GRASP: k={}, maxRadius={}m, iterations={}, nodes={}, edges={}",
-            k, maxRadius, iterations, allNodes.size(), graph.edgeSet().size());
+    log.info("GRASP: k={}, maxRadius={}m, iterations={}, alpha={}, evalBudget={}, nodes={}, edges={}",
+            k, maxRadius, iterations, params.getGraspAlpha(), params.getGraspEvalBudget(), allNodes.size(), graph.edgeSet().size());
 
     ConcurrentHashMap<RoadNode, Map<RoadNode, Double>> dijkstraCache = new ConcurrentHashMap<>();
     AtomicInteger bestCount = new AtomicInteger(Integer.MAX_VALUE);
     List<RoadNode> bestSolution = IntStream.range(0, iterations)
             .parallel()
             .mapToObj(_ -> {
-                List<RoadNode> constructed = greedyRandomizedConstruction(graph, allNodes, k, maxRadius, dijkstraCache, bestCount);
+                List<RoadNode> constructed = greedyRandomizedConstruction(graph, allNodes, k, maxRadius, dijkstraCache, bestCount, params.getGraspAlpha(), params.getGraspEvalBudget());
                 List<RoadNode> sol = localSearch(graph, allNodes, constructed, k, maxRadius, dijkstraCache);
                 bestCount.updateAndGet(v -> Math.min(v, sol.size()));
                 return sol;
@@ -57,7 +55,7 @@ public PlacementResult computePlacement(RoadGraph roadGraph, PlacementParams par
 private List<RoadNode> greedyRandomizedConstruction(
         Graph<RoadNode, RoadEdge> graph, List<RoadNode> allNodes,
         int k, double maxRadius, Map<RoadNode, Map<RoadNode, Double>> dijkstraCache,
-        AtomicInteger bestCount) {
+        AtomicInteger bestCount, double graspAlpha, int graspEvalBudget) {
 
     Map<RoadNode, Integer> coverageCount = new HashMap<>();
     for (RoadNode node : allNodes) {
@@ -73,10 +71,10 @@ private List<RoadNode> greedyRandomizedConstruction(
 
         // Subsample candidates for gain evaluation
         List<RoadNode> evalSet;
-        if (candidates.size() > EVAL_BUDGET) {
+        if (candidates.size() > graspEvalBudget) {
             evalSet = new ArrayList<>(candidates);
             Collections.shuffle(evalSet, ThreadLocalRandom.current());
-            evalSet = evalSet.subList(0, EVAL_BUDGET);
+            evalSet = evalSet.subList(0, graspEvalBudget);
         } else {
             evalSet = new ArrayList<>(candidates);
         }
@@ -97,7 +95,7 @@ private List<RoadNode> greedyRandomizedConstruction(
         }
 
         // Build RCL
-        int threshold = (gmax == gmin) ? gmax : (int) Math.ceil(gmax - ALPHA * (gmax - gmin));
+        int threshold = (gmax == gmin) ? gmax : (int) Math.ceil(gmax - graspAlpha * (gmax - gmin));
         List<RoadNode> rcl = new ArrayList<>();
         for (RoadNode c : evalSet) {
             if (gain.get(c) >= threshold) rcl.add(c);

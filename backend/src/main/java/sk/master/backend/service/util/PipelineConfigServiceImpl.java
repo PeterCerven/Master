@@ -83,6 +83,8 @@ public class PipelineConfigServiceImpl implements PipelineConfigService {
             userConfig.setKDominatingSet(defaultConfig.getKDominatingSet());
             userConfig.setMaxRadiusMeters(defaultConfig.getMaxRadiusMeters());
             userConfig.setIterations(defaultConfig.getIterations());
+            userConfig.setGraspAlpha(defaultConfig.getGraspAlpha());
+            userConfig.setGraspEvalBudget(defaultConfig.getGraspEvalBudget());
             userConfig.setLastAlgorithm(defaultConfig.getLastAlgorithm());
 
             userConfig = repository.save(userConfig);
@@ -101,6 +103,8 @@ public class PipelineConfigServiceImpl implements PipelineConfigService {
                 e.getKDominatingSet(),
                 e.getMaxRadiusMeters(),
                 e.getIterations(),
+                e.getGraspAlpha(),
+                e.getGraspEvalBudget(),
                 e.getLastAlgorithm()
         );
     }
@@ -112,6 +116,8 @@ public class PipelineConfigServiceImpl implements PipelineConfigService {
         e.setKDominatingSet(d.getKDominatingSet());
         e.setMaxRadiusMeters(d.getMaxRadiusMeters());
         e.setIterations(d.getIterations());
+        e.setGraspAlpha(d.getGraspAlpha());
+        e.setGraspEvalBudget(d.getGraspEvalBudget());
         if (d.getLastAlgorithm() != null) e.setLastAlgorithm(d.getLastAlgorithm());
     }
 
@@ -134,6 +140,8 @@ public class PipelineConfigServiceImpl implements PipelineConfigService {
         e.setKDominatingSet(2);
         e.setMaxRadiusMeters(1000.0);
         e.setIterations(10);
+        e.setGraspAlpha(0.3);
+        e.setGraspEvalBudget(500);
         e.setLastAlgorithm(PlacementAlgorithm.RANDOM_STRATEGY);
     }
 }

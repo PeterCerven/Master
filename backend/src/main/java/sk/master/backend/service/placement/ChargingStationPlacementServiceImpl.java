@@ -18,16 +18,16 @@ public class ChargingStationPlacementServiceImpl implements ChargingStationPlace
 
     private final RandomStrategy randomStrategy;
     private final GreedyStrategy greedyStrategy;
-    private final CustomStrategy customStrategy;
+    private final GraspStrategy graspStrategy;
 
     public ChargingStationPlacementServiceImpl(
             RandomStrategy randomStrategy,
             GreedyStrategy greedyStrategy,
-            CustomStrategy customStrategy
+            GraspStrategy graspStrategy
     ) {
         this.randomStrategy = randomStrategy;
         this.greedyStrategy = greedyStrategy;
-        this.customStrategy = customStrategy;
+        this.graspStrategy = graspStrategy;
     }
 
     @Override
@@ -37,6 +37,8 @@ public class ChargingStationPlacementServiceImpl implements ChargingStationPlace
                 .k(request.getK())
                 .maxRadiusMeters(request.getMaxRadiusMeters())
                 .iterations(request.getIterations())
+                .graspAlpha(request.getGraspAlpha())
+                .graspEvalBudget(request.getGraspEvalBudget())
                 .build();
 
         log.info("Launch algorithm '{}' with k={} na graph with {} nodes and {} edges",
@@ -55,7 +57,7 @@ public class ChargingStationPlacementServiceImpl implements ChargingStationPlace
         return switch (algorithm) {
             case RANDOM_STRATEGY -> randomStrategy;
             case GREEDY_STRATEGY -> greedyStrategy;
-            case CUSTOM_STRATEGY -> customStrategy;
+            case GRASP_STRATEGY -> graspStrategy;
         };
     }
 }

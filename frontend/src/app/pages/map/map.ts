@@ -274,9 +274,9 @@ export class Map {
         takeUntilDestroyed(this.destroyRef),
         filter((result): result is PlacementConfigResult => !!result),
       )
-      .subscribe(({strategy, k, maxRadiusMeters, iterations}) => {
+      .subscribe(({strategy, k, maxRadiusMeters, iterations, graspAlpha, graspEvalBudget}) => {
         this.computingPlacement = true;
-        this.placementService.computePlacement(this.graphData!, k, maxRadiusMeters, iterations, strategy)
+        this.placementService.computePlacement(this.graphData!, k, maxRadiusMeters, iterations, strategy, graspAlpha, graspEvalBudget)
           .pipe(takeUntilDestroyed(this.destroyRef))
           .subscribe({
             next: (result: PlacementResponseDto) => {

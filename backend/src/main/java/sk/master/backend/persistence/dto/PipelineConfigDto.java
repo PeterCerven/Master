@@ -29,6 +29,12 @@ public class PipelineConfigDto {
     @Min(1)
     private int iterations;
 
+    @DecimalMin("0.0") @DecimalMax("1.0")
+    private double graspAlpha;
+
+    @Min(1)
+    private int graspEvalBudget;
+
     @NotNull
     private PlacementAlgorithm lastAlgorithm;
 

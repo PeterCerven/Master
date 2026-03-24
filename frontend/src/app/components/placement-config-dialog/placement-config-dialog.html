@@ -29,12 +29,28 @@
         <input matInput type="number" [(ngModel)]="maxRadiusMeters" min="100" step="100"/>
       </mat-form-field>
 
-      @if (strategy === 'RANDOM_STRATEGY' || strategy === 'CUSTOM_STRATEGY') {
+      @if (strategy === 'RANDOM_STRATEGY' || strategy === 'GRASP_STRATEGY') {
         <mat-form-field appearance="outline" class="full-width"
           [matTooltip]="t('tooltips.iterations')"
           matTooltipPosition="right">
           <mat-label>{{ t('place.iterations') }}</mat-label>
           <input matInput type="number" [(ngModel)]="iterations" min="1"/>
+        </mat-form-field>
+      }
+
+      @if (strategy === 'GRASP_STRATEGY') {
+        <mat-form-field appearance="outline" class="full-width"
+          [matTooltip]="t('tooltips.graspAlpha')"
+          matTooltipPosition="right">
+          <mat-label>{{ t('place.graspAlpha') }}</mat-label>
+          <input matInput type="number" [(ngModel)]="graspAlpha" min="0" max="1" step="0.01"/>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width"
+          [matTooltip]="t('tooltips.graspEvalBudget')"
+          matTooltipPosition="right">
+          <mat-label>{{ t('place.graspEvalBudget') }}</mat-label>
+          <input matInput type="number" [(ngModel)]="graspEvalBudget" min="1"/>
         </mat-form-field>
       }
     }

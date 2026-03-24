@@ -17,6 +17,8 @@ export interface PlacementConfigResult {
   k: number;
   maxRadiusMeters: number;
   iterations: number;
+  graspAlpha: number;
+  graspEvalBudget: number;
 }
 
 @Component({
@@ -35,13 +37,15 @@ export class PlacementConfigDialog implements OnInit {
   k = 10;
   maxRadiusMeters = 5000;
   iterations = 10;
+  graspAlpha = 0.3;
+  graspEvalBudget = 500;
   loading = signal(true);
   saving = signal(false);
 
   readonly strategies: { value: PlacementRequestDto['algorithm']; label: string }[] = [
     { value: 'RANDOM_STRATEGY', label: 'Random' },
     { value: 'GREEDY_STRATEGY', label: 'Greedy' },
-    { value: 'CUSTOM_STRATEGY', label: 'GRASP' },
+    { value: 'GRASP_STRATEGY', label: 'GRASP' },
   ];
 
   ngOnInit(): void {
@@ -54,6 +58,8 @@ export class PlacementConfigDialog implements OnInit {
           this.k = config.kDominatingSet;
           this.maxRadiusMeters = config.maxRadiusMeters;
           this.iterations = config.iterations;
+          this.graspAlpha = config.graspAlpha;
+          this.graspEvalBudget = config.graspEvalBudget;
           this.strategy = config.lastAlgorithm;
           this.loading.set(false);
         },
@@ -65,12 +71,12 @@ export class PlacementConfigDialog implements OnInit {
     if (!this.loadedConfig) return;
     this.saving.set(true);
     this.configService
-      .updateConfig({ ...this.loadedConfig, kDominatingSet: this.k, maxRadiusMeters: this.maxRadiusMeters, iterations: this.iterations, lastAlgorithm: this.strategy })
+      .updateConfig({ ...this.loadedConfig, kDominatingSet: this.k, maxRadiusMeters: this.maxRadiusMeters, iterations: this.iterations, graspAlpha: this.graspAlpha, graspEvalBudget: this.graspEvalBudget, lastAlgorithm: this.strategy })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
           this.saving.set(false);
-          this.dialogRef.close({ strategy: this.strategy, k: this.k, maxRadiusMeters: this.maxRadiusMeters, iterations: this.iterations } as PlacementConfigResult);
+          this.dialogRef.close({ strategy: this.strategy, k: this.k, maxRadiusMeters: this.maxRadiusMeters, iterations: this.iterations, graspAlpha: this.graspAlpha, graspEvalBudget: this.graspEvalBudget } as PlacementConfigResult);
         },
         error: () => this.saving.set(false),
       });

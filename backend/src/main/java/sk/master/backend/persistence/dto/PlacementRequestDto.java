@@ -1,8 +1,7 @@
 package sk.master.backend.persistence.dto;
 
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.*;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -27,4 +26,10 @@ public class PlacementRequestDto {
 
     @Min(1)
     private int iterations = 1;
+
+    @DecimalMin("0.0") @DecimalMax("1.0")
+    private double graspAlpha = 0.3;
+
+    @Min(1)
+    private int graspEvalBudget = 500;
 }

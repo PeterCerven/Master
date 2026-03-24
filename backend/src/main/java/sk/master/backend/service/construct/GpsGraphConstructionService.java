@@ -278,7 +278,7 @@ public class GpsGraphConstructionService implements GraphConstructionService {
         int edgeCount = roadGraph.getEdgeCount();
 
         if (nodeCount == 0) {
-            return new GraphMetricsDto(0, 0, 0, 0, 0, 0, 0, false, 0, 0);
+            return new GraphMetricsDto(0, 0, 0, 0, 0, 0, 0, false, 0, 0, 0);
         }
 
         double avgDegree = nodeCount > 0 ? 2.0 * edgeCount / nodeCount : 0.0;
@@ -353,6 +353,8 @@ public class GpsGraphConstructionService implements GraphConstructionService {
         double avgBetweennessCentrality = bc.getScores().values().stream()
                 .mapToDouble(Double::doubleValue).average().orElse(0.0);
 
+        int treewidth = computeTreewidth(roadGraph);
+
         return new GraphMetricsDto(
                 nodeCount,
                 edgeCount,
@@ -363,8 +365,52 @@ public class GpsGraphConstructionService implements GraphConstructionService {
                 nodeDensityPerKm2,
                 connected,
                 radiusMeters,
-                avgBetweennessCentrality
+                avgBetweennessCentrality,
+                treewidth
         );
+    }
+
+    @SuppressWarnings("unchecked")
+    private int computeTreewidth(RoadGraph roadGraph) {
+        List<RoadNode> nodes = new ArrayList<>(roadGraph.getNodes());
+        int n = nodes.size();
+        if (n == 0) return 0;
+
+        Map<RoadNode, Integer> idx = new HashMap<>();
+        for (int i = 0; i < n; i++) idx.put(nodes.get(i), i);
+
+        Set<Integer>[] adj = new Set[n];
+        for (int i = 0; i < n; i++) adj[i] = new HashSet<>();
+        var graph = roadGraph.getGraph();
+        for (RoadEdge e : roadGraph.getEdges()) {
+            int u = idx.get(graph.getEdgeSource(e));
+            int v = idx.get(graph.getEdgeTarget(e));
+            if (u != v) { adj[u].add(v); adj[v].add(u); }
+        }
+
+        boolean[] eliminated = new boolean[n];
+        int treewidth = 0;
+        for (int step = 0; step < n; step++) {
+            int minDeg = Integer.MAX_VALUE, minV = -1;
+            for (int i = 0; i < n; i++) {
+                if (!eliminated[i] && adj[i].size() < minDeg) {
+                    minDeg = adj[i].size();
+                    minV = i;
+                }
+            }
+            treewidth = Math.max(treewidth, minDeg);
+            List<Integer> nbrs = new ArrayList<>(adj[minV]);
+            for (int i = 0; i < nbrs.size(); i++) {
+                for (int j = i + 1; j < nbrs.size(); j++) {
+                    adj[nbrs.get(i)].add(nbrs.get(j));
+                    adj[nbrs.get(j)].add(nbrs.get(i));
+                }
+            }
+            for (int nb : nbrs) adj[nb].remove(minV);
+            adj[minV].clear();
+            eliminated[minV] = true;
+        }
+        return treewidth;
     }
 
     private boolean isValidCoordinate(PositionalData p) {

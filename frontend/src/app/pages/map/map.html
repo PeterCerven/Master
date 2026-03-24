@@ -93,6 +93,10 @@
           <span class="metric-label" [matTooltip]="t('tooltips.avgBetweennessCentrality')" matTooltipPosition="right">{{ t('metrics.avgBetweennessCentrality') }}</span>
           <span class="metric-value">{{ graphMetrics.avgBetweennessCentrality | number: '1.4-4' }}</span>
         </div>
+        <div class="metric-row">
+          <span class="metric-label" [matTooltip]="t('tooltips.treewidth')" matTooltipPosition="right">{{ t('metrics.treewidth') }}</span>
+          <span class="metric-value">{{ graphMetrics.treewidth }}</span>
+        </div>
       </div>
     }
   </div>

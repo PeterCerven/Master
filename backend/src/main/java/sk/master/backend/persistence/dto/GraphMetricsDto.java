@@ -10,5 +10,6 @@ public record GraphMetricsDto(
         double nodeDensityPerKm2,
         boolean connected,
         double radiusMeters,
-        double avgBetweennessCentrality
+        double avgBetweennessCentrality,
+        int treewidth
 ) {}

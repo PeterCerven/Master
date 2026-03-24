@@ -9,6 +9,7 @@ export interface GraphMetrics {
   connected: boolean;
   radiusMeters: number;
   avgBetweennessCentrality: number;
+  treewidth: number;
 }
 
 export interface GraphResponseDto {
@@ -37,10 +38,12 @@ export interface PlacementRequestDto {
     nodes: { id: string; lat: number; lon: number }[];
     edges: { sourceId: string; targetId: string; distanceMeters: number }[];
   };
-  algorithm: 'RANDOM_STRATEGY' | 'CUSTOM_STRATEGY' | 'GREEDY_STRATEGY';
+  algorithm: 'RANDOM_STRATEGY' | 'GRASP_STRATEGY' | 'GREEDY_STRATEGY';
   k: number;
   maxRadiusMeters: number;
   iterations: number;
+  graspAlpha: number;
+  graspEvalBudget: number;
 }
 
 export interface StationNodeDto {

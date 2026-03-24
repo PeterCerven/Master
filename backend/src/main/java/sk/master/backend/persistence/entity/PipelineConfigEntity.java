@@ -43,6 +43,12 @@ public class PipelineConfigEntity {
     @Column(nullable = false)
     private int iterations;
 
+    @Column(name = "grasp_alpha", nullable = false)
+    private double graspAlpha;
+
+    @Column(name = "grasp_eval_budget", nullable = false)
+    private int graspEvalBudget;
+
     @Column(name = "last_algorithm", nullable = false)
     @Enumerated(EnumType.STRING)
     private PlacementAlgorithm lastAlgorithm;

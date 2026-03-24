@@ -12,5 +12,7 @@ export interface PipelineConfig {
   kDominatingSet: number;
   maxRadiusMeters: number;
   iterations: number;
-  lastAlgorithm: 'RANDOM_STRATEGY' | 'GREEDY_STRATEGY' | 'CUSTOM_STRATEGY';
+  graspAlpha: number;
+  graspEvalBudget: number;
+  lastAlgorithm: 'RANDOM_STRATEGY' | 'GREEDY_STRATEGY' | 'GRASP_STRATEGY';
 }

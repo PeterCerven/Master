@@ -33,6 +33,11 @@ export class Map {
   private readonly dialog = inject(MatDialog);
   private destroyRef = inject(DestroyRef);
 
+  private static readonly SK_GRAPH = 'map_graphData';
+  private static readonly SK_PLACEMENT = 'map_placementData';
+  private static readonly SK_PLACEMENT_INFO = 'map_placementResultInfo';
+  private static readonly SK_METRICS = 'map_graphMetrics';
+
   loading = false;
   saving = false;
   computingPlacement = false;
@@ -59,6 +64,8 @@ export class Map {
   }));
 
   constructor() {
+    this.restoreFromSession();
+
     // colorScheme is init-only — destroy and recreate the map component on theme change
     toObservable(this.themeService.isDarkMode)
       .pipe(skip(1), takeUntilDestroyed(this.destroyRef))
@@ -119,6 +126,7 @@ export class Map {
           this.graphMetrics = graph.metrics;
           this.displayGraphOnMap(graph);
           this.loading = false;
+          this.saveToSession();
         },
         error: (error) => {
           console.error('Error loading graph:', error);
@@ -295,6 +303,7 @@ export class Map {
               };
               this.displayStationsOnMap(result.stations);
               this.computingPlacement = false;
+              this.saveToSession();
             },
             error: (error) => {
               console.error('Error computing placement:', error);
@@ -376,6 +385,7 @@ export class Map {
                 this.stationMarkers = [];
               }
               this.loading = false;
+              this.saveToSession();
             },
             error: () => { this.loading = false; }
           });
@@ -390,6 +400,38 @@ export class Map {
     this.clearGraph();
     this.stationMarkers.forEach(marker => marker.map = null);
     this.stationMarkers = [];
+    this.clearSession();
     console.log('All graph data cleared');
+  }
+
+  private saveToSession(): void {
+    try {
+      sessionStorage.setItem(Map.SK_GRAPH, JSON.stringify(this.graphData));
+      sessionStorage.setItem(Map.SK_PLACEMENT, JSON.stringify(this.placementData));
+      sessionStorage.setItem(Map.SK_PLACEMENT_INFO, JSON.stringify(this.placementResultInfo));
+      sessionStorage.setItem(Map.SK_METRICS, JSON.stringify(this.graphMetrics));
+    } catch (e) {
+      console.warn('Could not persist state to sessionStorage', e);
+    }
+  }
+
+  private restoreFromSession(): void {
+    try {
+      const graph = sessionStorage.getItem(Map.SK_GRAPH);
+      const placement = sessionStorage.getItem(Map.SK_PLACEMENT);
+      const placementInfo = sessionStorage.getItem(Map.SK_PLACEMENT_INFO);
+      const metrics = sessionStorage.getItem(Map.SK_METRICS);
+      if (graph) this.graphData = JSON.parse(graph);
+      if (placement) this.placementData = JSON.parse(placement);
+      if (placementInfo) this.placementResultInfo = JSON.parse(placementInfo);
+      if (metrics) this.graphMetrics = JSON.parse(metrics);
+    } catch (e) {
+      console.warn('Could not restore state from sessionStorage', e);
+    }
+  }
+
+  private clearSession(): void {
+    [Map.SK_GRAPH, Map.SK_PLACEMENT, Map.SK_PLACEMENT_INFO, Map.SK_METRICS]
+      .forEach(k => sessionStorage.removeItem(k));
   }
 }

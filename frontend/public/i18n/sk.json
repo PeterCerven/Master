@@ -10,14 +10,14 @@
     "placing": "Umiestňovanie...",
     "metrics": {
       "title": "Metriky grafu",
-      "nodeCount": "Uzly",
+      "nodeCount": "Vrcholy",
       "edgeCount": "Hrany",
-      "avgDegree": "Priem. stupeň uzla",
+      "avgDegree": "Priem. stupeň vrchola",
       "diameterMeters": "Priemer",
       "radiusMeters": "Polomer",
-      "clusteringCoefficient": "Klastrovací koeficient",
+      "clusteringCoefficient": "Koeficient klasterizácie",
       "avgEdgeLengthMeters": "Priem. dĺžka hrany",
-      "nodeDensityPerKm2": "Hustota uzlov",
+      "nodeDensityPerKm2": "Hustota vrcholov grafu",
       "connected": "Súvislosť",
       "yes": "Áno",
       "no": "Nie",
@@ -25,15 +25,15 @@
     },
     "tooltips": {
       "nodeCount": "Celkový počet križovatiek a koncových bodov v cestnej sieti",
-      "edgeCount": "Celkový počet úsekov ciest spájajúcich uzly",
-      "avgDegree": "Priemerný počet spojení na uzol",
-      "diameterMeters": "Dĺžka najdlhšej najkratšej cesty medzi ľubovoľnými dvoma uzlami",
-      "radiusMeters": "Minimálna excentricita — vzdialenosť od najcentrálnejšieho uzla ku všetkým ostatným",
-      "clusteringCoefficient": "Miera zhluknutia uzlov (0 = žiadne, 1 = plne zhluknuté)",
+      "edgeCount": "Celkový počet úsekov ciest spájajúcich vrcholy",
+      "avgDegree": "Priemerný počet spojení pre vrchol",
+      "diameterMeters": "Dĺžka najdlhšej najkratšej cesty medzi ľubovoľnými dvoma vrcholmi",
+      "radiusMeters": "Minimálna excentricita — vzdialenosť od najcentrálnejšieho vrchola ku všetkým ostatným",
+      "clusteringCoefficient": "Miera zhlukovania vrcholov (0 = žiadne, 1 = plne zhluknutie vrcholov)",
       "avgEdgeLengthMeters": "Priemerná dĺžka úsekov ciest v metroch",
-      "nodeDensityPerKm2": "Počet uzlov na štvorcový kilometer",
-      "connected": "Či sú všetky uzly navzájom dosiahnuteľné",
-      "avgBetweennessCentrality": "Priemerný podiel najkratších ciest prechádzajúcich každým uzlom"
+      "nodeDensityPerKm2": "Počet vrcholov na kilometer štvorcový",
+      "connected": "Či sú všetky vrcholy navzájom dosiahnuteľné",
+      "avgBetweennessCentrality": "Priemerný podiel najkratších ciest prechádzajúcich každým vrcholom"
     }
   },
   "adminUsers": {
@@ -96,7 +96,7 @@
       "title": "Uložiť graf do databázy",
       "nameLabel": "Názov grafu",
       "namePlaceholder": "Zadajte popisný názov...",
-      "nodes": "Uzly: {{count}}",
+      "nodes": "Vrcholy: {{count}}",
       "edges": "Hrany: {{count}}",
       "stations": "Stanice: {{count}}",
       "noStations": "Žiadne stanice (rozmiestnenie nebolo vypočítané)"
@@ -112,7 +112,7 @@
       "columns": {
         "name": "Názov",
         "date": "Dátum",
-        "nodes": "Uzly",
+        "nodes": "Vrcholy",
         "edges": "Hrany",
         "stations": "Stanice"
       }
@@ -129,11 +129,11 @@
     "loading": "Načítavanie...",
     "tooltips": {
       "maxSpeedKmh": "GPS body s rýchlosťou (poloha/čas) nad touto hranicou sú považované za odľahlé hodnoty a počas predspracovania sa odstránia",
-      "h3DedupResolution": "Rozlíšenie H3 hexagónu pre zlúčenie blízkych uzlov (0 = hrubé, 15 = jemné). Vyššie hodnoty zachovávajú viac detailov ciest.",
+      "h3DedupResolution": "Rozlíšenie H3 hexagónu pre zlúčenie blízkych vrcholov (0 = hrubé, 15 = jemné). Vyššie hodnoty zachovávajú viac detailov ciest.",
       "chooseFile": "Vyberte súbor GPX, JSON alebo GeoJSON obsahujúci GPS trajektórie",
       "strategy": "Algoritmus použitý na určenie optimálnych umiestnení nabíjacích staníc",
       "kDominatingSet": "Počet nabíjacích staníc, ktoré sa majú umiestniť pre pokrytie každého bodu",
-      "maxRadiusMeters": "Dosah jednej nabíjacej stanice v metroch — uzly v tejto vzdialenosti sú považované za pokryté",
+      "maxRadiusMeters": "Dosah jednej nabíjacej stanice v metroch — vrcholy v tejto vzdialenosti sú považované za pokryté",
       "iterations": "Počet nezávislých opakovaní — viac iterácií zlepšuje kvalitu riešenia na úkor výpočtového času (stratégie Random a GRASP)"
     }
   }

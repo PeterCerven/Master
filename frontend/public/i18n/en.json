@@ -24,6 +24,22 @@
       "avgBetweennessCentrality": "Avg. Betweenness Centrality",
       "treewidth": "Treewidth (UB)"
     },
+    "placementResult": {
+      "title": "Placement Result",
+      "strategy": "Strategy",
+      "stationsPlaced": "Stations Placed",
+      "k": "K",
+      "maxRadius": "Max. Radius",
+      "iterations": "Iterations",
+      "graspAlpha": "GRASP Alpha",
+      "graspEvalBudget": "GRASP Eval Budget",
+      "computationTime": "Computation Time",
+      "strategies": {
+        "RANDOM_STRATEGY": "RANDOM",
+        "GREEDY_STRATEGY": "GREEDY",
+        "GRASP_STRATEGY": "GRASP"
+      }
+    },
     "tooltips": {
       "nodeCount": "Total number of intersections and endpoints in the road network",
       "edgeCount": "Total number of road segments connecting nodes",

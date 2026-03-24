@@ -1,0 +1,57 @@
+<mat-card class="result-card" *transloco="let t; prefix: 'map'">
+  <div class="result-header">
+    <span class="result-title">{{ t('placementResult.title') }}</span>
+    <span class="strategy-badge strategy-badge--{{ info.strategy }}">
+      {{ t('placementResult.strategies.' + info.strategy) }}
+    </span>
+  </div>
+
+  <div class="result-highlight">
+    <span class="highlight-count">{{ info.stationsPlaced }}</span>
+    <span class="highlight-label">{{ t('placementResult.stationsPlaced') }}</span>
+  </div>
+
+  <mat-divider />
+
+  <div class="result-rows">
+    <div class="result-row">
+      <mat-icon class="row-icon">format_list_numbered</mat-icon>
+      <span class="row-label">{{ t('placementResult.k') }}</span>
+      <span class="row-value">{{ info.k }}</span>
+    </div>
+    <div class="result-row">
+      <mat-icon class="row-icon">radar</mat-icon>
+      <span class="row-label">{{ t('placementResult.maxRadius') }}</span>
+      <span class="row-value">{{ info.maxRadiusMeters | number: '1.0-0' }} m</span>
+    </div>
+    @if (info.iterations !== null) {
+      <div class="result-row">
+        <mat-icon class="row-icon">repeat</mat-icon>
+        <span class="row-label">{{ t('placementResult.iterations') }}</span>
+        <span class="row-value">{{ info.iterations }}</span>
+      </div>
+    }
+    @if (info.graspAlpha !== null) {
+      <div class="result-row">
+        <mat-icon class="row-icon">tune</mat-icon>
+        <span class="row-label">{{ t('placementResult.graspAlpha') }}</span>
+        <span class="row-value">{{ info.graspAlpha | number: '1.1-2' }}</span>
+      </div>
+    }
+    @if (info.graspEvalBudget !== null) {
+      <div class="result-row">
+        <mat-icon class="row-icon">manage_search</mat-icon>
+        <span class="row-label">{{ t('placementResult.graspEvalBudget') }}</span>
+        <span class="row-value">{{ info.graspEvalBudget }}</span>
+      </div>
+    }
+  </div>
+
+  <mat-divider />
+
+  <div class="result-footer">
+    <mat-icon class="footer-icon">schedule</mat-icon>
+    <span class="footer-label">{{ t('placementResult.computationTime') }}</span>
+    <span class="footer-value">{{ info.computationTimeMs }} ms</span>
+  </div>
+</mat-card>

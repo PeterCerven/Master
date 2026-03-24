@@ -10,7 +10,8 @@ public record PlacementResponseDto(
         List<StationNodeDto> stations,
         double objectiveValue,
         int totalNodes,
-        Map<String, Double> coverageDistances
+        Map<String, Double> coverageDistances,
+        long computationTimeMs
 ) {
     public record StationNodeDto(
             String id,
@@ -19,7 +20,7 @@ public record PlacementResponseDto(
             int rank
     ) {}
 
-    public static PlacementResponseDto fromResult(PlacementResult result) {
+    public static PlacementResponseDto fromResult(PlacementResult result, long computationTimeMs) {
         List<StationNodeDto> stations = new ArrayList<>();
         for (int i = 0; i < result.getSelectedNodes().size(); i++) {
             var node = result.getSelectedNodes().get(i);
@@ -29,7 +30,8 @@ public record PlacementResponseDto(
                 stations,
                 result.getObjectiveValue(),
                 result.getNodeDistances().size(),
-                result.getNodeDistances()
+                result.getNodeDistances(),
+                computationTimeMs
         );
     }
 }

@@ -45,12 +45,14 @@ public class ChargingStationPlacementServiceImpl implements ChargingStationPlace
                 request.getAlgorithm(), request.getK(),
                 graph.getNodeCount(), graph.getEdgeCount());
 
+        long startMs = System.currentTimeMillis();
         PlacementResult result = strategy.computePlacement(graph, params);
+        long computationTimeMs = System.currentTimeMillis() - startMs;
 
-        log.info("Algorithm '{}' finished: selected {} charging stations, value = {}",
-                request.getAlgorithm(), result.getSelectedNodes().size(), result.getObjectiveValue());
+        log.info("Algorithm '{}' finished: selected {} charging stations, value = {}, time = {}ms",
+                request.getAlgorithm(), result.getSelectedNodes().size(), result.getObjectiveValue(), computationTimeMs);
 
-        return PlacementResponseDto.fromResult(result);
+        return PlacementResponseDto.fromResult(result, computationTimeMs);
     }
 
     private PlacementStrategy resolveStrategy(PlacementAlgorithm algorithm) {

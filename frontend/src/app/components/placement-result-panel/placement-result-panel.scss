@@ -1,0 +1,132 @@
+.result-card {
+  background: var(--mat-sys-surface-container-high);
+  border-radius: 12px !important;
+  overflow: hidden;
+  padding: 0 !important;
+
+  .result-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px 8px;
+    border-bottom: 2px solid #00897b;
+  }
+
+  .result-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    opacity: 0.65;
+  }
+
+  .strategy-badge {
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+    line-height: 1.6;
+    letter-spacing: 0.04em;
+
+    &--RANDOM_STRATEGY {
+      background: rgba(33, 150, 243, 0.18);
+      color: #1565c0;
+    }
+
+    &--GREEDY_STRATEGY {
+      background: rgba(255, 152, 0, 0.18);
+      color: #e65100;
+    }
+
+    &--GRASP_STRATEGY {
+      background: rgba(156, 39, 176, 0.18);
+      color: #6a1b9a;
+    }
+  }
+
+  :host-context(.dark) .strategy-badge {
+    &--RANDOM_STRATEGY { background: rgba(33, 150, 243, 0.25); color: #90caf9; }
+    &--GREEDY_STRATEGY { background: rgba(255, 152, 0, 0.25); color: #ffcc80; }
+    &--GRASP_STRATEGY  { background: rgba(156, 39, 176, 0.25); color: #ce93d8; }
+  }
+
+  .result-highlight {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 14px 14px 10px;
+    gap: 2px;
+  }
+
+  .highlight-count {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #00897b;
+    line-height: 1;
+  }
+
+  .highlight-label {
+    font-size: 0.68rem;
+    opacity: 0.55;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+  }
+
+  .result-rows {
+    padding: 8px 14px 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .result-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    padding: 3px 0;
+
+    .row-icon {
+      font-size: 14px;
+      width: 14px;
+      height: 14px;
+      opacity: 0.45;
+      flex-shrink: 0;
+    }
+
+    .row-label {
+      opacity: 0.7;
+      flex: 1;
+    }
+
+    .row-value {
+      font-weight: 500;
+    }
+  }
+
+  .result-footer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px 12px;
+    font-size: 0.8rem;
+
+    .footer-icon {
+      font-size: 14px;
+      width: 14px;
+      height: 14px;
+      opacity: 0.45;
+      flex-shrink: 0;
+    }
+
+    .footer-label {
+      opacity: 0.7;
+      flex: 1;
+    }
+
+    .footer-value {
+      font-weight: 600;
+      color: var(--mat-sys-primary);
+    }
+  }
+}

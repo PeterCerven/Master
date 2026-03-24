@@ -50,6 +50,10 @@
       {{ t('clearGraph') }}
     </button>
 
+    @if (placementResultInfo) {
+      <app-placement-result-panel [info]="placementResultInfo" />
+    }
+
     @if (graphMetrics) {
       <div class="graph-metrics-panel">
         <h4 class="metrics-title">{{ t('metrics.title') }}</h4>

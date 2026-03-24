@@ -3,7 +3,7 @@ import {DecimalPipe} from '@angular/common';
 import {Component, computed, DestroyRef, effect, inject, signal, viewChild} from '@angular/core';
 import {GraphService} from '@services/graph.service';
 import {ThemeService} from '@services/theme.service';
-import {GraphEdgeDto, GraphMetrics, GraphNodeDto, GraphResponseDto, PlacementResponseDto, SavedGraphResponseDto, StationNodeDto} from '@models/my-graph.model';
+import {GraphEdgeDto, GraphMetrics, GraphNodeDto, GraphResponseDto, PlacementResponseDto, PlacementResultInfo, SavedGraphResponseDto, StationNodeDto} from '@models/my-graph.model';
 import {takeUntilDestroyed, toObservable} from '@angular/core/rxjs-interop';
 import {filter, skip} from 'rxjs';
 import {MatFabButton} from '@angular/material/button';
@@ -12,6 +12,7 @@ import {PlacementService} from '@services/placement.service';
 import {MatDialog} from '@angular/material/dialog';
 import {GraphConfigDialog} from '@components/graph-config-dialog/graph-config-dialog';
 import {PlacementConfigDialog, PlacementConfigResult} from '@components/placement-config-dialog/placement-config-dialog';
+import {PlacementResultPanel} from '@components/placement-result-panel/placement-result-panel';
 import {SaveGraphDialog} from '@components/save-graph-dialog/save-graph-dialog';
 import {LoadGraphDialog} from '@components/load-graph-dialog/load-graph-dialog';
 import {TranslocoDirective} from '@jsverse/transloco';
@@ -19,7 +20,7 @@ import {MatTooltip} from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-map',
-  imports: [GoogleMapsModule, GoogleMap, MatFabButton, TranslocoDirective, DecimalPipe, MatTooltip],
+  imports: [GoogleMapsModule, GoogleMap, MatFabButton, TranslocoDirective, DecimalPipe, MatTooltip, PlacementResultPanel],
   templateUrl: './map.html',
   styleUrl: './map.scss'
 })
@@ -37,6 +38,7 @@ export class Map {
   computingPlacement = false;
   graphData: GraphResponseDto | null = null;
   placementData: PlacementResponseDto | null = null;
+  placementResultInfo: PlacementResultInfo | null = null;
   graphMetrics: GraphMetrics | null = null;
   mapVisible = signal(true);
   private graphMarkers: google.maps.marker.AdvancedMarkerElement[] = [];
@@ -281,6 +283,16 @@ export class Map {
           .subscribe({
             next: (result: PlacementResponseDto) => {
               this.placementData = result;
+              this.placementResultInfo = {
+                strategy,
+                k,
+                maxRadiusMeters,
+                iterations: strategy !== 'GREEDY_STRATEGY' ? iterations : null,
+                graspAlpha: strategy === 'GRASP_STRATEGY' ? graspAlpha : null,
+                graspEvalBudget: strategy === 'GRASP_STRATEGY' ? graspEvalBudget : null,
+                computationTimeMs: result.computationTimeMs,
+                stationsPlaced: result.stations.length,
+              };
               this.displayStationsOnMap(result.stations);
               this.computingPlacement = false;
             },
@@ -356,7 +368,7 @@ export class Map {
               this.displayGraphOnMap(this.graphData);
               if (saved.stations.length > 0) {
                 this.placementData = { stations: saved.stations, objectiveValue: 0,
-                  totalNodes: saved.nodes.length, coverageDistances: {} };
+                  totalNodes: saved.nodes.length, coverageDistances: {}, computationTimeMs: 0 };
                 this.displayStationsOnMap(saved.stations);
               } else {
                 this.placementData = null;
@@ -373,6 +385,7 @@ export class Map {
   clearAll(): void {
     this.graphData = null;
     this.placementData = null;
+    this.placementResultInfo = null;
     this.graphMetrics = null;
     this.clearGraph();
     this.stationMarkers.forEach(marker => marker.map = null);

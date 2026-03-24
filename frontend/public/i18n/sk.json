@@ -24,6 +24,22 @@
       "avgBetweennessCentrality": "Priem. centralita medziľahlosti",
       "treewidth": "Šírka stromu (UB)"
     },
+    "placementResult": {
+      "title": "Výsledok umiestnenia",
+      "strategy": "Stratégia",
+      "stationsPlaced": "Umiestnených staníc",
+      "k": "K",
+      "maxRadius": "Dosah stanice",
+      "iterations": "Iterácie",
+      "graspAlpha": "GRASP Alfa",
+      "graspEvalBudget": "GRASP Eval Budget",
+      "computationTime": "Čas výpočtu",
+      "strategies": {
+        "RANDOM_STRATEGY": "RANDOM",
+        "GREEDY_STRATEGY": "GREEDY",
+        "GRASP_STRATEGY": "GRASP"
+      }
+    },
     "tooltips": {
       "nodeCount": "Celkový počet križovatiek a koncových bodov v cestnej sieti",
       "edgeCount": "Celkový počet úsekov ciest spájajúcich vrcholy",

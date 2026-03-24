@@ -58,6 +58,18 @@ export interface PlacementResponseDto {
   objectiveValue: number;
   totalNodes: number;
   coverageDistances: Record<string, number>;
+  computationTimeMs: number;
+}
+
+export interface PlacementResultInfo {
+  strategy: 'RANDOM_STRATEGY' | 'GRASP_STRATEGY' | 'GREEDY_STRATEGY';
+  k: number;
+  maxRadiusMeters: number;
+  iterations: number | null;
+  graspAlpha: number | null;
+  graspEvalBudget: number | null;
+  computationTimeMs: number;
+  stationsPlaced: number;
 }
 
 export interface GraphSummaryDto {

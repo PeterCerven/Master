@@ -1,5 +1,6 @@
 package sk.master.backend.config;
 
+import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +13,7 @@ import sk.master.backend.persistence.model.Role;
 import sk.master.backend.persistence.repository.UserRepository;
 
 @Component
+@RequiredArgsConstructor
 public class AdminUserSeeder implements ApplicationRunner {
 
     private static final Logger log = LoggerFactory.getLogger(AdminUserSeeder.class);
@@ -19,10 +21,6 @@ public class AdminUserSeeder implements ApplicationRunner {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public AdminUserSeeder(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
 
     @Override
     public void run(@NonNull ApplicationArguments args) {

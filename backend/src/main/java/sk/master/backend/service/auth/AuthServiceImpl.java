@@ -1,15 +1,10 @@
 package sk.master.backend.service.auth;
 
-import org.jspecify.annotations.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -26,7 +21,8 @@ import sk.master.backend.persistence.repository.UserRepository;
 import java.util.List;
 
 @Service
-public class AuthServiceImpl implements AuthService, UserDetailsService {
+@RequiredArgsConstructor
+public class AuthServiceImpl implements AuthService {
     private final static Logger log = LoggerFactory.getLogger(AuthServiceImpl.class);
 
     private final UserRepository userRepository;
@@ -38,48 +34,15 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
     private final GraphRepository graphRepository;
     private final PipelineConfigRepository pipelineConfigRepository;
 
-    public AuthServiceImpl(
-            UserRepository userRepository,
-            PasswordEncoder passwordEncoder,
-            JwtService jwtService,
-            RefreshTokenService refreshTokenService,
-            @Lazy AuthenticationManager authenticationManager,
-            RefreshTokenRepository refreshTokenRepository,
-            GraphRepository graphRepository,
-            PipelineConfigRepository pipelineConfigRepository
-    ) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.jwtService = jwtService;
-        this.refreshTokenService = refreshTokenService;
-        this.authenticationManager = authenticationManager;
-        this.refreshTokenRepository = refreshTokenRepository;
-        this.graphRepository = graphRepository;
-        this.pipelineConfigRepository = pipelineConfigRepository;
-    }
-
-    @Override
-    public @NonNull UserDetails loadUserByUsername(@NonNull String email) throws UsernameNotFoundException {
-        UserEntity user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
-
-        return new User(
-                user.getEmail(),
-                user.getPassword(),
-                user.isEnabled(),
-                true, true, true,
-                List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
-        );
-    }
-
     @Override
     public TokenResponseDto login(LoginRequestDto request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );
 
-        UserDetails userDetails = loadUserByUsername(request.getEmail());
-        String accessToken = jwtService.generateAccessToken(userDetails);
+        UserEntity userEntity = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + request.getEmail()));
+        String accessToken = jwtService.generateAccessToken(userEntity);
         return TokenResponseDto.of(accessToken);
     }
 
@@ -95,8 +58,7 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
     @Transactional
     public TokenResponseDto refreshAccessToken(String refreshToken) {
         RefreshTokenEntity token = refreshTokenService.validateRefreshToken(refreshToken);
-        UserDetails userDetails = loadUserByUsername(token.getUser().getEmail());
-        String accessToken = jwtService.generateAccessToken(userDetails);
+        String accessToken = jwtService.generateAccessToken(token.getUser());
         return TokenResponseDto.of(accessToken);
     }
 

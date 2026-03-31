@@ -105,7 +105,7 @@ private List<RoadNode> greedyRandomizedConstruction(
         RoadNode selected = rcl.get(ThreadLocalRandom.current().nextInt(rcl.size()));
         stations.add(selected);
         candidates.remove(selected);
-        if (stations.size() >= bestCount.get()) return stations; // pruning: can't improve
+
 
         Map<RoadNode, Double> reachable = dijkstraCache.computeIfAbsent(selected, n -> dijkstraDistances(graph, n, maxRadius));
         for (RoadNode w : reachable.keySet()) {

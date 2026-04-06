@@ -108,7 +108,9 @@
       "h3DedupResolution": "H3 Deduplikácia Rozlíšenia (0–15)",
       "maxSpeedKmh": "Maximálna rýchlosť (v km/h)",
       "chooseFile": "Vybrať súbor",
-      "noFileChosen": "Žiadny súbor nevybraný"
+      "noFileChosen": "Žiadny súbor nevybraný",
+      "or": "alebo",
+      "sampleFile": "Použiť ukážkový súbor"
     },
     "save": {
       "title": "Uložiť graf do databázy",

@@ -31,12 +31,25 @@
           {{ selectedFile ? selectedFile.name : t('create.noFileChosen') }}
         </span>
       </div>
+
+      @if (sampleFiles().length > 0) {
+        <div class="or-divider">{{ t('create.or') }}</div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>{{ t('create.sampleFile') }}</mat-label>
+          <mat-select [value]="selectedSample" (valueChange)="onSampleChange($event)">
+            @for (file of sampleFiles(); track file) {
+              <mat-option [value]="file">{{ displayName(file) }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      }
     }
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
     <button mat-button (click)="onCancel()">{{ t('cancel') }}</button>
-    <button mat-flat-button color="primary" (click)="onOk()" [disabled]="loading() || saving() || !selectedFile">
+    <button mat-flat-button color="primary" (click)="onOk()" [disabled]="loading() || saving() || !hasSelection">
       {{ saving() ? t('saving') : t('confirm') }}
     </button>
   </mat-dialog-actions>

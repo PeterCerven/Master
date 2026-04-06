@@ -4,6 +4,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 import sk.master.backend.persistence.dto.GraphDto;
 import sk.master.backend.persistence.dto.GraphMetricsDto;
 import sk.master.backend.persistence.dto.GraphSummaryDto;
@@ -35,6 +37,19 @@ public class GraphController {
     @PostMapping("/file-import")
     public ResponseEntity<GraphDto> generateGraphFromFile(@RequestParam("file") MultipartFile file) throws Exception {
         List<PositionalData> positionalData = fileService.parseFile(file);
+        RoadGraph data = graphConstructionService.generateRoadNetwork(null, positionalData);
+        GraphMetricsDto metrics = graphConstructionService.computeMetrics(data);
+        return ResponseEntity.ok(GraphDto.fromRoadGraph(data, metrics));
+    }
+
+    @GetMapping("/samples")
+    public ResponseEntity<List<String>> listSampleFiles() throws IOException {
+        return ResponseEntity.ok(fileService.listSampleFiles());
+    }
+
+    @PostMapping("/sample-import/{filename}")
+    public ResponseEntity<GraphDto> importSampleFile(@PathVariable String filename) throws Exception {
+        List<PositionalData> positionalData = fileService.parseSampleFile(filename);
         RoadGraph data = graphConstructionService.generateRoadNetwork(null, positionalData);
         GraphMetricsDto metrics = graphConstructionService.computeMetrics(data);
         return ResponseEntity.ok(GraphDto.fromRoadGraph(data, metrics));

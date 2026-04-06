@@ -108,7 +108,9 @@
       "h3DedupResolution": "H3 Deduplication Resolution",
       "maxSpeedKmh": "Maximum Speed (in km/h)",
       "chooseFile": "Choose File",
-      "noFileChosen": "No file chosen"
+      "noFileChosen": "No file chosen",
+      "or": "or",
+      "sampleFile": "Use sample file"
     },
     "save": {
       "title": "Save Graph to Database",

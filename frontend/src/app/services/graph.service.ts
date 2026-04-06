@@ -47,6 +47,16 @@ export class GraphService {
     return this.http.post<GraphSummaryDto>(`${this.apiUrl}/save`, request).pipe(catchError(this.handleError));
   }
 
+  public listSamples(): Observable<string[]> {
+    return this.http.get<string[]>(`${this.apiUrl}/samples`).pipe(catchError(this.handleError));
+  }
+
+  public importSampleFile(filename: string): Observable<GraphResponseDto> {
+    return this.http.post<GraphResponseDto>(`${this.apiUrl}/sample-import/${encodeURIComponent(filename)}`, null).pipe(
+      catchError(this.handleError)
+    );
+  }
+
   public deleteGraph(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(catchError(this.handleError));
   }

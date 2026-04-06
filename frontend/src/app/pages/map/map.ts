@@ -113,6 +113,26 @@ export class Map {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(result => {
         if (result instanceof File) this.importGraphFromFile(result);
+        else if (typeof result === 'string') this.importSampleGraph(result);
+      });
+  }
+
+  importSampleGraph(filename: string): void {
+    this.loading = true;
+    this.graphService.importSampleFile(filename)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (graph: GraphResponseDto) => {
+          this.graphData = graph;
+          this.graphMetrics = graph.metrics;
+          this.displayGraphOnMap(graph);
+          this.loading = false;
+          this.saveToSession();
+        },
+        error: () => {
+          this.loading = false;
+          alert('Failed to import sample file.');
+        }
       });
   }
 

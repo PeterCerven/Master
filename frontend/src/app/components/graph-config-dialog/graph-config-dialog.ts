@@ -4,20 +4,23 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PipelineConfigService } from '@services/pipeline-config.service';
+import { GraphService } from '@services/graph.service';
 import { PipelineConfig } from '@models/pipeline-config.model';
 import {TranslocoDirective} from '@jsverse/transloco';
 import {MatTooltip} from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-graph-config-dialog',
-  imports: [FormsModule, MatDialogModule, MatFormFieldModule, MatInputModule, MatButtonModule, TranslocoDirective, MatTooltip],
+  imports: [FormsModule, MatDialogModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatSelectModule, TranslocoDirective, MatTooltip],
   templateUrl: './graph-config-dialog.html',
   styleUrl: './graph-config-dialog.scss',
 })
 export class GraphConfigDialog implements OnInit {
   private readonly configService = inject(PipelineConfigService);
+  private readonly graphService = inject(GraphService);
   private readonly dialogRef = inject(MatDialogRef<GraphConfigDialog>);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -27,6 +30,8 @@ export class GraphConfigDialog implements OnInit {
   loading = signal(true);
   saving = signal(false);
   selectedFile: File | null = null;
+  sampleFiles = signal<string[]>([]);
+  selectedSample: string | null = null;
 
   ngOnInit(): void {
     this.configService
@@ -41,10 +46,28 @@ export class GraphConfigDialog implements OnInit {
         },
         error: () => this.loading.set(false),
       });
+
+    this.graphService.listSamples()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({ next: (files) => this.sampleFiles.set(files) });
   }
 
   onFileChange(event: Event): void {
     this.selectedFile = (event.target as HTMLInputElement).files?.[0] ?? null;
+    if (this.selectedFile) this.selectedSample = null;
+  }
+
+  onSampleChange(filename: string): void {
+    this.selectedSample = filename;
+    this.selectedFile = null;
+  }
+
+  displayName(filename: string): string {
+    return filename.replace(/\.[^.]+$/, '').replace(/[_-]/g, ' ');
+  }
+
+  get hasSelection(): boolean {
+    return !!this.selectedFile || !!this.selectedSample;
   }
 
   onOk(): void {
@@ -56,7 +79,7 @@ export class GraphConfigDialog implements OnInit {
       .subscribe({
         next: () => {
           this.saving.set(false);
-          this.dialogRef.close(this.selectedFile);
+          this.dialogRef.close(this.selectedFile ?? this.selectedSample);
         },
         error: () => this.saving.set(false),
       });

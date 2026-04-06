@@ -3,35 +3,69 @@ package sk.master.backend.service.util;
 import io.jenetics.jpx.GPX;
 import io.jenetics.jpx.Metadata;
 import org.apache.commons.io.FilenameUtils;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import sk.master.backend.persistence.model.PositionalData;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class FileServiceImpl implements FileService {
 
+    private static final PathMatchingResourcePatternResolver resourceResolver =
+            new PathMatchingResourcePatternResolver();
 
     @Override
     public List<PositionalData> parseFile(MultipartFile file) throws Exception {
         String fileExtension = FilenameUtils.getExtension(file.getOriginalFilename());
         return switch (fileExtension) {
-            case "gpx" -> parseGpxFile(file);
-            case "geojson", "json" -> parseGeoJsonFile(file);
+            case "gpx" -> parseGpxStream(file.getInputStream());
+            case "geojson", "json" -> parseGeoJsonStream(file.getInputStream());
             case null, default -> throw new IllegalArgumentException("Unsupported file format: " + fileExtension);
         };
     }
 
-    private List<PositionalData> parseGpxFile(MultipartFile file) throws Exception {
-        try (InputStream inputStream = file.getInputStream()) {
+    @Override
+    public List<String> listSampleFiles() throws IOException {
+        Resource[] resources = resourceResolver.getResources("classpath:samples/*.*");
+        return Arrays.stream(resources)
+                .map(Resource::getFilename)
+                .filter(Objects::nonNull)
+                .toList();
+    }
+
+    @Override
+    public List<PositionalData> parseSampleFile(String filename) throws Exception {
+        if (filename.contains("/") || filename.contains("\\") || filename.contains("..")) {
+            throw new IllegalArgumentException("Invalid filename");
+        }
+        Resource resource = new ClassPathResource("samples/" + filename);
+        if (!resource.exists()) {
+            throw new IllegalArgumentException("Sample file not found: " + filename);
+        }
+        String extension = FilenameUtils.getExtension(filename);
+        try (InputStream inputStream = resource.getInputStream()) {
+            return switch (extension) {
+                case "gpx" -> parseGpxStream(inputStream);
+                case "geojson", "json" -> parseGeoJsonStream(inputStream);
+                default -> throw new IllegalArgumentException("Unsupported file format: " + extension);
+            };
+        }
+    }
+
+    private List<PositionalData> parseGpxStream(InputStream inputStream) throws Exception {
+        try {
             GPX gpx = GPX.Reader.of(GPX.Reader.Mode.LENIENT).read(inputStream);
 
             Instant metadataTime = gpx.getMetadata()
@@ -50,7 +84,7 @@ public class FileServiceImpl implements FileService {
                             point.getLatitude().doubleValue(),
                             point.getLongitude().doubleValue(),
                             point.getTime().orElse(metadataTime),
-                            currentTripId // Assign the tripId right here!
+                            currentTripId
                     )));
 
                     // Increment trip ID for the next segment (a new continuous drive)
@@ -64,9 +98,9 @@ public class FileServiceImpl implements FileService {
         }
     }
 
-    private List<PositionalData> parseGeoJsonFile(MultipartFile file) throws IOException {
+    private List<PositionalData> parseGeoJsonStream(InputStream inputStream) {
         JsonMapper mapper = JsonMapper.builder().build();
-        JsonNode root = mapper.readTree(file.getBytes());
+        JsonNode root = mapper.readTree(inputStream);
 
         List<PositionalData> result = new ArrayList<>();
         int defaultTripId = 1;
@@ -82,7 +116,6 @@ public class FileServiceImpl implements FileService {
             // Check if the GeoJSON properties contain a trip identifier
             int tripId = props.has("trip_id") ? props.get("trip_id").asInt() : defaultTripId;
 
-            // Use the constructor with tripId
             result.add(new PositionalData(lat, lon, timestamp, tripId));
         }
 

@@ -1,0 +1,20 @@
+# Build stage
+FROM node:24-alpine AS build
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npx ng build --configuration=production
+
+# Serve stage
+FROM caddy:2-alpine
+COPY --from=build /app/dist/frontend/browser /srv
+COPY <<EOF /etc/caddy/Caddyfile
+:80 {
+    root * /srv
+    file_server
+    try_files {path} /index.html
+    encode gzip
+}
+EOF
+EXPOSE 80

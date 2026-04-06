@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
-  apiUrl: 'http://my-prod-url',
-  googleMapId: 'YOUR_GOOGLE_MAP_ID'
+  apiUrl: '/api',
+  googleMapId: '9fa4a935d30a755443acf54d'
 };

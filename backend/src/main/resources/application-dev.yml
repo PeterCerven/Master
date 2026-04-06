@@ -1,18 +1,25 @@
 spring:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    defer-datasource-initialization: true
+    show-sql: true
   datasource:
-    username: user
-    password: password
     url: jdbc:postgresql://localhost:5432/master
-    driver-class-name: org.postgresql.Driver
-    hikari:
-      connection-timeout: 20000
-      maximum-pool-size: 10
+    username: postgres
+    password: password
   devtools:
     restart:
       enabled: true
+
+jwt:
+  secret: dGhpc0lzQVNlY3JldEtleUZvckRldmVsb3BtZW50T25seURvTm90VXNlSW5Qcm9k
+
 frontend:
   url: http://localhost:4200
-jwt:
-  secret: ZGV2T25seVNlY3JldEtleVRoYXRJc0xvbmdFbm91Z2hGb3JIZWF2ZW5zU2FrZQ==
-server:
-  port: 8080
+
+graphhopper:
+  osm:
+    file: infrastructure/data/merged_sk_cz_au.osm.pbf
+  graph:
+    location: infrastructure/data/gh-cache

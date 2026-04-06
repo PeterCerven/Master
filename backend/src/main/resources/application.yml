@@ -5,7 +5,14 @@ spring:
     hibernate:
       ddl-auto: update
     defer-datasource-initialization: true
-    show-sql: true
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      connection-timeout: 20000
+      maximum-pool-size: 10
   servlet:
     multipart:
       max-file-size: 50MB
@@ -14,11 +21,15 @@ spring:
     init:
       mode: never
 jwt:
-  secret: ${JWT_SECRET:dGhpc0lzQVNlY3JldEtleUZvckRldmVsb3BtZW50T25seURvTm90VXNlSW5Qcm9k}
-  access-token-expiration-ms: 900000
-  refresh-token-expiration-ms: 604800000
+  secret: ${JWT_SECRET}
+  access-token-expiration-ms: ${JWT_ACCESS_TOKEN_EXPIRATION_MS:900000}
+  refresh-token-expiration-ms: ${JWT_REFRESH_TOKEN_EXPIRATION_MS:604800000}
 graphhopper:
   osm:
     file: data/merged_sk_cz_au.osm.pbf
   graph:
     location: data/gh-cache
+server:
+  port: 8080
+frontend:
+  url: ${FRONTEND_URL}

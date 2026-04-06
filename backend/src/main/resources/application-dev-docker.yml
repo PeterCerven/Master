@@ -1,0 +1,11 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    defer-datasource-initialization: true
+    show-sql: true
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+  devtools:
+    restart:
+      enabled: true

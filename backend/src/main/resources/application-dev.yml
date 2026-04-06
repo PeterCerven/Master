@@ -18,6 +18,11 @@ jwt:
 frontend:
   url: http://localhost:4200
 
+admin:
+  email: admin@master.sk
+  name: Admin
+  password: admin123
+
 graphhopper:
   osm:
     file: infrastructure/data/merged_sk_cz_au.osm.pbf

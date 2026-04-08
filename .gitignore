@@ -6,3 +6,4 @@
 /.claude/settings.local.json
 
 /infrastructure/.env.prod
+/infrastructure/.env

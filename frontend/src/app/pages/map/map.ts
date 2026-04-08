@@ -204,7 +204,6 @@ export class Map {
       getColor: [52, 152, 219, 178],
       getWidth: 3,
       widthUnits: 'pixels',
-      parameters: {depthCompare: 'always', depthWriteEnabled: false},
       pickable: true,
       onClick: ({object, coordinate}) => {
         if (!object || !coordinate) return;
@@ -232,7 +231,6 @@ export class Map {
       radiusUnits: 'pixels',
       stroked: true,
       lineWidthMinPixels: 2,
-      parameters: {depthCompare: 'always', depthWriteEnabled: false},
       pickable: true,
       onClick: ({object, coordinate}) => {
         if (!object || !coordinate) return;
@@ -251,7 +249,10 @@ export class Map {
     });
 
     if (!this.deckOverlay) {
-      this.deckOverlay = new GoogleMapsOverlay({layers: [edgeLayer, nodeLayer]});
+      this.deckOverlay = new GoogleMapsOverlay({
+        layers: [edgeLayer, nodeLayer],
+        interleaved: false
+      });
       this.deckOverlay.setMap(nativeMap);
     } else {
       this.deckOverlay.setProps({layers: [edgeLayer, nodeLayer]});

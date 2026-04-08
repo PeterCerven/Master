@@ -17,6 +17,17 @@ import {SaveGraphDialog} from '@components/save-graph-dialog/save-graph-dialog';
 import {LoadGraphDialog} from '@components/load-graph-dialog/load-graph-dialog';
 import {TranslocoDirective} from '@jsverse/transloco';
 import {MatTooltip} from '@angular/material/tooltip';
+import {GoogleMapsOverlay} from '@deck.gl/google-maps';
+import {LineLayer, ScatterplotLayer} from '@deck.gl/layers';
+
+interface NodeDatum extends GraphNodeDto {
+  position: [number, number];
+}
+
+interface EdgeDatum extends GraphEdgeDto {
+  sourcePosition: [number, number];
+  targetPosition: [number, number];
+}
 
 @Component({
   selector: 'app-map',
@@ -46,8 +57,7 @@ export class Map {
   placementResultInfo: PlacementResultInfo | null = null;
   graphMetrics: GraphMetrics | null = null;
   mapVisible = signal(true);
-  private graphMarkers: google.maps.marker.AdvancedMarkerElement[] = [];
-  private graphPolylines: google.maps.Polyline[] = [];
+  private deckOverlay: GoogleMapsOverlay | null = null;
   private stationMarkers: google.maps.marker.AdvancedMarkerElement[] = [];
   private rightClickListenerSetup = false;
 
@@ -83,17 +93,14 @@ export class Map {
 
       const subscription = mapEl.tilesloaded.subscribe(async () => {
         if (mapEl.googleMap && !this.rightClickListenerSetup) {
-          const {AdvancedMarkerElement: _AdvancedMarkerElement} = await google.maps.importLibrary('marker') as google.maps.MarkerLibrary;
-          if (!_AdvancedMarkerElement) {
-            console.error('AdvancedMarkerElement not available in the Google Maps library');
-            subscription.unsubscribe();
-            return;
-          }
+          this.rightClickListenerSetup = true;
           subscription.unsubscribe();
 
+          // Pre-load marker library for station markers
+          await google.maps.importLibrary('marker');
+
           // After recreation, drop orphaned references and re-render onto new map instance
-          this.graphMarkers = [];
-          this.graphPolylines = [];
+          this.deckOverlay = null;
           this.stationMarkers = [];
           if (this.graphData) {
             this.displayGraphOnMap(this.graphData);
@@ -166,91 +173,86 @@ export class Map {
     this.clearGraph();
 
     const nodeMap: Record<string, GraphNodeDto> = {};
-    graph.nodes.forEach(node => nodeMap[node.id] = node);
+    graph.nodes.forEach(node => (nodeMap[node.id] = node));
 
-    this.displayGraphNodes(mapInstance, graph.nodes);
-    this.displayGraphEdges(mapInstance, graph.edges, nodeMap);
+    this.renderGraphWithDeckGl(mapInstance, graph.nodes, graph.edges, nodeMap);
     this.fitGraphBounds(mapInstance, graph.nodes);
   }
 
-  private async displayGraphNodes(nativeMap: google.maps.Map, nodes: GraphNodeDto[]): Promise<void> {
-    const {AdvancedMarkerElement} = google.maps.marker;
-
-    nodes.forEach(node => {
-      const dot = document.createElement('div');
-      dot.style.width = '12px';
-      dot.style.height = '12px';
-      dot.style.backgroundColor = '#e74c3c';
-      dot.style.border = '2px solid #ffffff';
-      dot.style.borderRadius = '50%';
-      dot.style.boxShadow = '0 0 3px rgba(0,0,0,0.6)';
-
-      const marker = new AdvancedMarkerElement({
-        map: nativeMap,
-        position: {lat: node.lat, lng: node.lon},
-        title: `Node ${node.id}`,
-        content: dot,
-      });
-
-      marker.addListener('gmp-click', () => {
-        const infoWindow = new google.maps.InfoWindow({
-          content: `<div style="color: #333;">
-                      <h4>Node ${node.id}</h4>
-                      <p>Lat: ${node.lat.toFixed(5)}</p>
-                      <p>Lon: ${node.lon.toFixed(5)}</p>
-                      ${node.roadName ? `<p>Road: ${node.roadName}</p>` : ''}
-                      ${node.roadClass ? `<p>Class: ${node.roadClass}</p>` : ''}
-                    </div>`
-        });
-        infoWindow.open({anchor: marker, map: nativeMap});
-      });
-
-      this.graphMarkers.push(marker);
-    });
-  }
-
-  private displayGraphEdges(
+  private renderGraphWithDeckGl(
     nativeMap: google.maps.Map,
+    nodes: GraphNodeDto[],
     edges: GraphEdgeDto[],
     nodeMap: Record<string, GraphNodeDto>
   ): void {
-    edges.forEach(edge => {
-      const sourceNode = nodeMap[edge.sourceId];
-      const targetNode = nodeMap[edge.targetId];
+    const nodeData: NodeDatum[] = nodes.map(n => ({...n, position: [n.lon, n.lat]}));
 
-      if (!sourceNode || !targetNode) {
-        console.warn(`Missing node for edge: ${edge.sourceId} -> ${edge.targetId}`);
-        return;
-      }
+    const edgeData: EdgeDatum[] = edges
+      .filter(e => nodeMap[e.sourceId] && nodeMap[e.targetId])
+      .map(e => ({
+        ...e,
+        sourcePosition: [nodeMap[e.sourceId].lon, nodeMap[e.sourceId].lat],
+        targetPosition: [nodeMap[e.targetId].lon, nodeMap[e.targetId].lat],
+      }));
 
-      const polyline = new google.maps.Polyline({
-        path: [
-          {lat: sourceNode.lat, lng: sourceNode.lon},
-          {lat: targetNode.lat, lng: targetNode.lon}
-        ],
-        geodesic: true,
-        strokeColor: '#3498db',
-        strokeOpacity: 0.7,
-        strokeWeight: 3,
-        map: nativeMap
-      });
-
-      polyline.addListener('click', () => {
+    const edgeLayer = new LineLayer<EdgeDatum>({
+      id: 'graph-edges',
+      data: edgeData,
+      getSourcePosition: d => d.sourcePosition,
+      getTargetPosition: d => d.targetPosition,
+      getColor: [52, 152, 219, 178],
+      getWidth: 3,
+      widthUnits: 'pixels',
+      pickable: true,
+      onClick: ({object, coordinate}) => {
+        if (!object || !coordinate) return;
         const infoWindow = new google.maps.InfoWindow({
           content: `<div style="color: #333;">
                       <h4>Edge</h4>
-                      <p>From: ${edge.sourceId}</p>
-                      <p>To: ${edge.targetId}</p>
-                      <p>Distance: ${edge.distanceMeters.toFixed(2)}m</p>
-                      ${edge.roadName ? `<p>Road: ${edge.roadName}</p>` : ''}
+                      <p>From: ${object.sourceId}</p>
+                      <p>To: ${object.targetId}</p>
+                      <p>Distance: ${object.distanceMeters.toFixed(2)}m</p>
+                      ${object.roadName ? `<p>Road: ${object.roadName}</p>` : ''}
                     </div>`,
-          position: {lat: sourceNode.lat, lng: sourceNode.lon}
+          position: {lat: coordinate[1], lng: coordinate[0]},
         });
         infoWindow.open(nativeMap);
-      });
-
-      this.graphPolylines.push(polyline);
+      },
     });
+
+    const nodeLayer = new ScatterplotLayer<NodeDatum>({
+      id: 'graph-nodes',
+      data: nodeData,
+      getPosition: d => d.position,
+      getFillColor: [231, 76, 60, 255],
+      getLineColor: [255, 255, 255, 255],
+      getRadius: 6,
+      radiusUnits: 'pixels',
+      stroked: true,
+      lineWidthMinPixels: 2,
+      pickable: true,
+      onClick: ({object, coordinate}) => {
+        if (!object || !coordinate) return;
+        const infoWindow = new google.maps.InfoWindow({
+          content: `<div style="color: #333;">
+                      <h4>Node ${object.id}</h4>
+                      <p>Lat: ${object.lat.toFixed(5)}</p>
+                      <p>Lon: ${object.lon.toFixed(5)}</p>
+                      ${object.roadName ? `<p>Road: ${object.roadName}</p>` : ''}
+                      ${object.roadClass ? `<p>Class: ${object.roadClass}</p>` : ''}
+                    </div>`,
+          position: {lat: coordinate[1], lng: coordinate[0]},
+        });
+        infoWindow.open(nativeMap);
+      },
+    });
+
+    if (!this.deckOverlay) {
+      this.deckOverlay = new GoogleMapsOverlay({interleaved: true, layers: [edgeLayer, nodeLayer]});
+      this.deckOverlay.setMap(nativeMap);
+    } else {
+      this.deckOverlay.setProps({layers: [edgeLayer, nodeLayer]});
+    }
   }
 
   private fitGraphBounds(nativeMap: google.maps.Map, nodes: GraphNodeDto[]): void {
@@ -266,15 +268,10 @@ export class Map {
   }
 
   private clearGraph(): void {
-    this.graphMarkers.forEach(marker => {
-      marker.map = null;
-    });
-    this.graphMarkers = [];
-
-    this.graphPolylines.forEach(polyline => {
-      polyline.setMap(null);
-    });
-    this.graphPolylines = [];
+    if (this.deckOverlay) {
+      this.deckOverlay.setMap(null);
+      this.deckOverlay = null;
+    }
   }
 
   openSaveGraphDialog(): void {
@@ -338,7 +335,7 @@ export class Map {
     const mapInstance = this.map()?.googleMap;
     if (!mapInstance) return;
 
-    this.stationMarkers.forEach(marker => marker.map = null);
+    this.stationMarkers.forEach(marker => (marker.map = null));
     this.stationMarkers = [];
 
     const {AdvancedMarkerElement} = google.maps.marker;
@@ -401,7 +398,7 @@ export class Map {
                 this.displayStationsOnMap(saved.stations);
               } else {
                 this.placementData = null;
-                this.stationMarkers.forEach(m => m.map = null);
+                this.stationMarkers.forEach(m => (m.map = null));
                 this.stationMarkers = [];
               }
               this.loading = false;
@@ -418,7 +415,7 @@ export class Map {
     this.placementResultInfo = null;
     this.graphMetrics = null;
     this.clearGraph();
-    this.stationMarkers.forEach(marker => marker.map = null);
+    this.stationMarkers.forEach(marker => (marker.map = null));
     this.stationMarkers = [];
     this.clearSession();
   }

@@ -421,7 +421,6 @@ export class Map {
     this.stationMarkers.forEach(marker => marker.map = null);
     this.stationMarkers = [];
     this.clearSession();
-    console.log('All graph data cleared');
   }
 
   private saveToSession(): void {

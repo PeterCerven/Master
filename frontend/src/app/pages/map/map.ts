@@ -65,6 +65,7 @@ export class Map {
     center: {lat: 48.1478, lng: 17.1072},
     zoom: 13,
     mapId: environment.googleMapId,
+    renderingType: 'VECTOR' as google.maps.RenderingType,
     colorScheme: (this.themeService.isDarkMode() ? 'DARK' : 'LIGHT') as google.maps.ColorScheme,
     disableDefaultUI: true,
     zoomControl: false,
@@ -203,6 +204,7 @@ export class Map {
       getColor: [52, 152, 219, 178],
       getWidth: 3,
       widthUnits: 'pixels',
+      parameters: {depthCompare: 'always', depthWriteEnabled: false},
       pickable: true,
       onClick: ({object, coordinate}) => {
         if (!object || !coordinate) return;
@@ -230,6 +232,7 @@ export class Map {
       radiusUnits: 'pixels',
       stroked: true,
       lineWidthMinPixels: 2,
+      parameters: {depthCompare: 'always', depthWriteEnabled: false},
       pickable: true,
       onClick: ({object, coordinate}) => {
         if (!object || !coordinate) return;
@@ -248,7 +251,7 @@ export class Map {
     });
 
     if (!this.deckOverlay) {
-      this.deckOverlay = new GoogleMapsOverlay({interleaved: true, layers: [edgeLayer, nodeLayer]});
+      this.deckOverlay = new GoogleMapsOverlay({layers: [edgeLayer, nodeLayer]});
       this.deckOverlay.setMap(nativeMap);
     } else {
       this.deckOverlay.setProps({layers: [edgeLayer, nodeLayer]});

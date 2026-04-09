@@ -20,7 +20,7 @@
       </mat-form-field>
 
       <div class="file-picker">
-        <input #hiddenFileInput type="file" accept=".gpx,.json,.geojson" hidden (change)="onFileChange($event)"/>
+        <input #hiddenFileInput type="file" accept=".gpx,.json,.geojson,.csv" hidden (change)="onFileChange($event)"/>
         <button mat-stroked-button type="button"
           [matTooltip]="t('tooltips.chooseFile')"
           matTooltipPosition="above"

@@ -152,7 +152,7 @@
     "tooltips": {
       "maxSpeedKmh": "GPS body s rýchlosťou (poloha/čas) nad touto hranicou sú považované za odľahlé hodnoty a počas predspracovania sa odstránia",
       "h3DedupResolution": "Rozlíšenie H3 hexagónu pre zlúčenie blízkych vrcholov (0 = hrubé, 15 = jemné). Vyššie hodnoty zachovávajú viac detailov ciest.",
-      "chooseFile": "Vyberte súbor GPX, JSON alebo GeoJSON obsahujúci GPS trajektórie",
+      "chooseFile": "Vyberte súbor GPX, GeoJSON alebo CSV obsahujúci GPS trajektórie",
       "strategy": "Algoritmus použitý na určenie optimálnych umiestnení nabíjacích staníc",
       "kDominatingSet": "Počet nabíjacích staníc, ktoré sa majú umiestniť pre pokrytie každého bodu",
       "maxRadiusMeters": "Dosah jednej nabíjacej stanice v metroch — vrcholy v tejto vzdialenosti sú považované za pokryté",

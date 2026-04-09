@@ -12,8 +12,11 @@ import sk.master.backend.persistence.model.PositionalData;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,6 +35,7 @@ public class FileServiceImpl implements FileService {
         return switch (fileExtension) {
             case "gpx" -> parseGpxStream(file.getInputStream());
             case "geojson", "json" -> parseGeoJsonStream(file.getInputStream());
+            case "csv" -> parseCsvStream(file.getInputStream());
             case null, default -> throw new IllegalArgumentException("Unsupported file format: " + fileExtension);
         };
     }
@@ -59,6 +63,7 @@ public class FileServiceImpl implements FileService {
             return switch (extension) {
                 case "gpx" -> parseGpxStream(inputStream);
                 case "geojson", "json" -> parseGeoJsonStream(inputStream);
+                case "csv" -> parseCsvStream(inputStream);
                 default -> throw new IllegalArgumentException("Unsupported file format: " + extension);
             };
         }
@@ -95,6 +100,57 @@ public class FileServiceImpl implements FileService {
             throw new Exception("No GPS points");
         } catch (Exception e) {
             throw new Exception("Failed to parse GPX file", e);
+        }
+    }
+
+    private List<PositionalData> parseCsvStream(InputStream inputStream) throws Exception {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+            String headerLine = reader.readLine();
+            if (headerLine == null) throw new Exception("CSV file is empty");
+            headerLine = headerLine.replace("\uFEFF", "");
+
+            String[] headers = headerLine.split(",");
+            int latCol = -1, lonCol = -1, tsCol = -1, tripCol = -1;
+            for (int i = 0; i < headers.length; i++) {
+                String h = headers[i].trim().toLowerCase();
+                switch (h) {
+                    case "lat", "latitude"               -> latCol  = i;
+                    case "lon", "longitude", "lng"       -> lonCol  = i;
+                    case "timestamp", "time", "datetime" -> tsCol   = i;
+                    case "trip_id", "trip", "tripid"     -> tripCol = i;
+                }
+            }
+            if (latCol == -1 || lonCol == -1)
+                throw new IllegalArgumentException("CSV file missing required lat/lon columns");
+
+            List<PositionalData> result = new ArrayList<>();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
+                if (line.isEmpty()) continue;
+                String[] tokens = line.split(",");
+                if (tokens.length <= Math.max(latCol, lonCol)) continue;
+
+                double lat = Double.parseDouble(tokens[latCol].trim());
+                double lon = Double.parseDouble(tokens[lonCol].trim());
+
+                Instant timeStamp = null;
+                if (tsCol != -1 && tsCol < tokens.length && !tokens[tsCol].trim().isEmpty()) {
+                    try { timeStamp = Instant.parse(tokens[tsCol].trim()); } catch (Exception ignored) {}
+                }
+
+                int tripId = 1;
+                if (tripCol != -1 && tripCol < tokens.length && !tokens[tripCol].trim().isEmpty()) {
+                    try { tripId = Integer.parseInt(tokens[tripCol].trim()); } catch (Exception ignored) {}
+                }
+
+                result.add(new PositionalData(lat, lon, timeStamp, tripId));
+            }
+
+            if (result.isEmpty()) throw new Exception("No GPS points found in CSV file");
+            return result;
+        } catch (Exception e) {
+            throw new Exception("Failed to parse CSV file", e);
         }
     }
 

@@ -152,7 +152,7 @@
     "tooltips": {
       "maxSpeedKmh": "GPS points with speed (location/time) above this threshold are treated as outliers and removed during preprocessing",
       "h3DedupResolution": "H3 hexagon resolution for merging nearby nodes (0 = coarse, 15 = fine). Higher values preserve more road detail.",
-      "chooseFile": "Select a GPX, JSON, or GeoJSON file containing GPS trajectory data",
+      "chooseFile": "Select a GPX, GeoJSON, or CSV file containing GPS trajectory data",
       "strategy": "Algorithm used to determine optimal charging station locations",
       "kDominatingSet": "Number of charging stations to cover each point",
       "maxRadiusMeters": "Coverage radius of a single charging station in meters — nodes within this distance are considered covered",

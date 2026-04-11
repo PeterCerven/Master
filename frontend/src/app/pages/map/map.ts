@@ -144,9 +144,9 @@ export class Map {
           this.loading = false;
           this.saveToSession();
         },
-        error: () => {
+        error: (err: Error) => {
           this.loading = false;
-          alert('Failed to import city graph.');
+          alert(err.message || 'Failed to import city graph.');
         }
       });
   }

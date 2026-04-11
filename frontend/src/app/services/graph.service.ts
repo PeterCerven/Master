@@ -76,6 +76,7 @@ export class GraphService {
 
   private handleError(error: any): Observable<never> {
     console.error('Graph error:', error);
-    return throwError(() => new Error(error.message || 'Server Error'));
+    const message = error?.error?.message || error?.message || 'Server Error';
+    return throwError(() => new Error(message));
   }
 }

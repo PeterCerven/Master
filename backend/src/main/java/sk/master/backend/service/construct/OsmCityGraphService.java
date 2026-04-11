@@ -53,6 +53,12 @@ public class OsmCityGraphService {
         RoadGraph result = extractFromGraphHopper(boundary);
         log.info("Extracted {} nodes and {} edges for city: {}",
                 result.getNodeCount(), result.getEdgeCount(), cityName);
+
+        if (result.getNodeCount() > 50_000) {
+            throw new IllegalArgumentException(
+                "Area too large (%d nodes). Please choose a smaller city.".formatted(result.getNodeCount()));
+        }
+
         return result;
     }
 
@@ -61,7 +67,7 @@ public class OsmCityGraphService {
     private CityBoundary geocodeCityBoundary(String cityName) {
         try {
             String encoded = URLEncoder.encode(cityName, StandardCharsets.UTF_8);
-            String url = NOMINATIM_URL + "?q=" + encoded + "&format=json&limit=1&polygon_geojson=1";
+            String url = NOMINATIM_URL + "?q=" + encoded + "&format=json&limit=1&polygon_geojson=1&featuretype=settlement";
 
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))

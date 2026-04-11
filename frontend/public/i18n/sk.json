@@ -9,6 +9,8 @@
     "loading": "Načítavanie...",
     "saving": "Ukladanie...",
     "placing": "Umiestňovanie...",
+    "computeMetrics": "Vypočítať metriky",
+    "computingMetrics": "Počítam...",
     "metrics": {
       "title": "Metriky grafu",
       "nodeCount": "Vrcholy",

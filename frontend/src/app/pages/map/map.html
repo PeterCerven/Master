@@ -58,6 +58,14 @@
       {{ t('clearGraph') }}
     </button>
 
+    <button
+      matFab extended
+      class="control-btn compute-metrics-btn"
+      [disabled]="computingMetrics || !graphData"
+      (click)="computeGraphMetrics()">
+      {{ computingMetrics ? t('computingMetrics') : t('computeMetrics') }}
+    </button>
+
     @if (placementResultInfo) {
       <app-placement-result-panel [info]="placementResultInfo" />
     }

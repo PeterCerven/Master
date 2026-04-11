@@ -17,6 +17,8 @@ public interface GraphConstructionService {
 
     GraphMetricsDto computeMetrics(RoadGraph roadGraph);
 
+    GraphMetricsDto computeCurrentGraphMetrics();
+
     SavedGraphDto importGraphFromDatabase(Long graphId, Long userId);
 
     List<GraphSummaryDto> listUserGraphs(Long userId);

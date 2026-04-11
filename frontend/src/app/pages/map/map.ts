@@ -53,6 +53,7 @@ export class Map {
   loading = false;
   saving = false;
   computingPlacement = false;
+  computingMetrics = false;
   graphData: GraphResponseDto | null = null;
   placementData: PlacementResponseDto | null = null;
   placementResultInfo: PlacementResultInfo | null = null;
@@ -139,7 +140,7 @@ export class Map {
       .subscribe({
         next: (graph: GraphResponseDto) => {
           this.graphData = graph;
-          this.graphMetrics = graph.metrics;
+          this.graphMetrics = null;
           this.displayGraphOnMap(graph);
           this.loading = false;
           this.saveToSession();
@@ -158,7 +159,7 @@ export class Map {
       .subscribe({
         next: (graph: GraphResponseDto) => {
           this.graphData = graph;
-          this.graphMetrics = graph.metrics;
+          this.graphMetrics = null;
           this.displayGraphOnMap(graph);
           this.loading = false;
           this.saveToSession();
@@ -177,7 +178,7 @@ export class Map {
       .subscribe({
         next: (graph: GraphResponseDto) => {
           this.graphData = graph;
-          this.graphMetrics = graph.metrics;
+          this.graphMetrics = null;
           this.displayGraphOnMap(graph);
           this.loading = false;
           this.saveToSession();
@@ -361,6 +362,20 @@ export class Map {
       });
   }
 
+  computeGraphMetrics(): void {
+    this.computingMetrics = true;
+    this.graphService.computeGraphMetrics()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (metrics: GraphMetrics) => {
+          this.graphMetrics = metrics;
+          this.computingMetrics = false;
+          this.saveToSession();
+        },
+        error: () => { this.computingMetrics = false; }
+      });
+  }
+
   private displayStationsOnMap(stations: StationNodeDto[]): void {
     const mapInstance = this.map()?.googleMap;
     if (!mapInstance) return;
@@ -420,7 +435,7 @@ export class Map {
           .subscribe({
             next: (saved: SavedGraphResponseDto) => {
               this.graphData = { nodes: saved.nodes, edges: saved.edges, metrics: saved.metrics };
-              this.graphMetrics = saved.metrics ?? null;
+              this.graphMetrics = null;
               this.displayGraphOnMap(this.graphData);
               if (saved.stations.length > 0) {
                 this.placementData = { stations: saved.stations, objectiveValue: 0,

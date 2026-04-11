@@ -2,7 +2,7 @@ import {inject, Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {environment} from '@env/environment.production';
 import {catchError, Observable, throwError} from 'rxjs';
-import {GraphResponseDto, GraphSummaryDto, SavedGraphResponseDto, StationNodeDto} from '@models/my-graph.model';
+import {GraphMetrics, GraphResponseDto, GraphSummaryDto, SavedGraphResponseDto, StationNodeDto} from '@models/my-graph.model';
 
 @Injectable({
   providedIn: 'root'
@@ -72,6 +72,10 @@ export class GraphService {
     return this.http.patch<GraphSummaryDto>(`${this.apiUrl}/${id}/rename`, { name }).pipe(
       catchError(this.handleError)
     );
+  }
+
+  public computeGraphMetrics(): Observable<GraphMetrics> {
+    return this.http.get<GraphMetrics>(`${this.apiUrl}/metrics`).pipe(catchError(this.handleError));
   }
 
   private handleError(error: any): Observable<never> {

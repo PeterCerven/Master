@@ -9,6 +9,8 @@
     "loading": "Loading...",
     "saving": "Saving...",
     "placing": "Placing...",
+    "computeMetrics": "Compute Metrics",
+    "computingMetrics": "Computing...",
     "metrics": {
       "title": "Graph Metrics",
       "nodeCount": "Nodes",

@@ -42,15 +42,13 @@ public class GraphController {
     public ResponseEntity<GraphDto> generateGraphFromFile(@RequestParam("file") MultipartFile file) throws Exception {
         List<PositionalData> positionalData = fileService.parseFile(file);
         RoadGraph data = graphConstructionService.generateRoadNetwork(null, positionalData);
-        GraphMetricsDto metrics = graphConstructionService.computeMetrics(data);
-        return ResponseEntity.ok(GraphDto.fromRoadGraph(data, metrics));
+        return ResponseEntity.ok(GraphDto.fromRoadGraph(data, null));
     }
 
     @GetMapping("/city-import")
     public ResponseEntity<GraphDto> importCityGraph(@RequestParam String city) {
         RoadGraph roadGraph = osmCityGraphService.extractCityGraph(city);
-        GraphMetricsDto metrics = graphConstructionService.computeMetrics(roadGraph);
-        return ResponseEntity.ok(GraphDto.fromRoadGraph(roadGraph, metrics));
+        return ResponseEntity.ok(GraphDto.fromRoadGraph(roadGraph, null));
     }
 
     @GetMapping("/samples")
@@ -62,8 +60,14 @@ public class GraphController {
     public ResponseEntity<GraphDto> importSampleFile(@PathVariable String filename) throws Exception {
         List<PositionalData> positionalData = fileService.parseSampleFile(filename);
         RoadGraph data = graphConstructionService.generateRoadNetwork(null, positionalData);
-        GraphMetricsDto metrics = graphConstructionService.computeMetrics(data);
-        return ResponseEntity.ok(GraphDto.fromRoadGraph(data, metrics));
+        return ResponseEntity.ok(GraphDto.fromRoadGraph(data, null));
+    }
+
+    @GetMapping("/metrics")
+    public ResponseEntity<GraphMetricsDto> computeCurrentGraphMetrics() {
+        GraphMetricsDto metrics = graphConstructionService.computeCurrentGraphMetrics();
+        if (metrics == null) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(metrics);
     }
 
     @GetMapping("/list")

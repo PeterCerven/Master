@@ -28,6 +28,14 @@
 
     <button
       matFab extended
+      class="control-btn import-city-btn"
+      [disabled]="loading"
+      (click)="openCityImportDialog()">
+      {{ loading ? t('loading') : t('importCity') }}
+    </button>
+
+    <button
+      matFab extended
       class="control-btn save-graph-btn"
       [disabled]="saving || !graphData"
       (click)="openSaveGraphDialog()">

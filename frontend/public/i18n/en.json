@@ -5,6 +5,7 @@
     "saveGraph": "Save Graph to Database",
     "computePlacement": "Place Stations",
     "clearGraph": "Clear Graph",
+    "importCity": "Import City Graph",
     "loading": "Loading...",
     "saving": "Saving...",
     "placing": "Placing...",
@@ -144,6 +145,10 @@
       "maxRadiusMeters": "Max Coverage Radius (metres)",
       "graspAlpha": "GRASP Alpha (RCL greediness)",
       "graspEvalBudget": "GRASP Eval Budget"
+    },
+    "city": {
+      "title": "Import City Road Graph",
+      "cityLabel": "City Name"
     },
     "confirm": "Confirm",
     "cancel": "Cancel",

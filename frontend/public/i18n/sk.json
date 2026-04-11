@@ -5,6 +5,7 @@
     "saveGraph": "Ulož graf do databázy",
     "computePlacement": "Umiestni stanice",
     "clearGraph": "Vyčisti graf",
+    "importCity": "Importovať graf mesta",
     "loading": "Načítavanie...",
     "saving": "Ukladanie...",
     "placing": "Umiestňovanie...",
@@ -144,6 +145,10 @@
       "maxRadiusMeters": "Maximálny dosah (v metroch)",
       "graspAlpha": "GRASP Alfa (chamtivosť RCL)",
       "graspEvalBudget": "GRASP Eval Budget"
+    },
+    "city": {
+      "title": "Importovať cestný graf mesta",
+      "cityLabel": "Názov mesta"
     },
     "confirm": "Potvrdiť",
     "cancel": "Zrušiť",

@@ -75,6 +75,14 @@
   }
 }
 
+.import-city-btn {
+  background-color: #e67e22;
+
+  &:hover:not(:disabled) {
+    background-color: #d35400;
+  }
+}
+
 .save-graph-btn {
   background-color: #27ae60;
 

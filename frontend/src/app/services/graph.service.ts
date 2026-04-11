@@ -58,6 +58,12 @@ export class GraphService {
     );
   }
 
+  public importCityGraph(city: string): Observable<GraphResponseDto> {
+    return this.http.get<GraphResponseDto>(`${this.apiUrl}/city-import`, { params: { city } }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
   public deleteGraph(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(catchError(this.handleError));
   }

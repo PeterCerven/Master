@@ -15,6 +15,7 @@ import {PlacementConfigDialog, PlacementConfigResult} from '@components/placemen
 import {PlacementResultPanel} from '@components/placement-result-panel/placement-result-panel';
 import {SaveGraphDialog} from '@components/save-graph-dialog/save-graph-dialog';
 import {LoadGraphDialog} from '@components/load-graph-dialog/load-graph-dialog';
+import {CityImportDialog} from '@components/city-import-dialog/city-import-dialog';
 import {TranslocoDirective} from '@jsverse/transloco';
 import {MatTooltip} from '@angular/material/tooltip';
 import {GoogleMapsOverlay} from '@deck.gl/google-maps';
@@ -122,6 +123,31 @@ export class Map {
       .subscribe(result => {
         if (result instanceof File) this.importGraphFromFile(result);
         else if (typeof result === 'string') this.importSampleGraph(result);
+      });
+  }
+
+  openCityImportDialog(): void {
+    this.dialog.open(CityImportDialog, { minWidth: 'min(380px, calc(100vw - 32px))' }).afterClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(city => { if (city) this.importCityGraph(city); });
+  }
+
+  importCityGraph(city: string): void {
+    this.loading = true;
+    this.graphService.importCityGraph(city)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (graph: GraphResponseDto) => {
+          this.graphData = graph;
+          this.graphMetrics = graph.metrics;
+          this.displayGraphOnMap(graph);
+          this.loading = false;
+          this.saveToSession();
+        },
+        error: () => {
+          this.loading = false;
+          alert('Failed to import city graph.');
+        }
       });
   }
 

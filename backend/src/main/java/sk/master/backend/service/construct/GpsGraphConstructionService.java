@@ -431,6 +431,12 @@ public class GpsGraphConstructionService implements GraphConstructionService {
     }
 
     @Override
+    public GraphMetricsDto computeCurrentGraphMetrics() {
+        if (roadGraph == null) return null;
+        return computeMetrics(roadGraph);
+    }
+
+    @Override
     @Transactional
     public GraphSummaryDto saveGraphToDatabase(GraphDto graph, List<PlacementResponseDto.StationNodeDto> stations, String name, Long userId) {
         GraphEntity graphEntity = new GraphEntity();

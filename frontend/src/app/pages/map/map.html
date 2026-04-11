@@ -16,14 +16,14 @@
       class="control-btn load-graph-file-btn"
       [disabled]="loading"
       (click)="openGraphConfigDialog()">
-      {{ loading ? t('loading') : t('createGraphFromFile') }}
+      {{ loading ? t('loadingWithTime', { elapsed: loadingElapsed }) : t('createGraphFromFile') }}
     </button>
     <button
       matFab extended
       class="control-btn load-graph-database-btn"
       [disabled]="loading"
       (click)="openLoadGraphDialog()">
-      {{ loading ? t('loading') : t('loadGraphFromDatabase') }}
+      {{ loading ? t('loadingWithTime', { elapsed: loadingElapsed }) : t('loadGraphFromDatabase') }}
     </button>
 
     <button
@@ -31,8 +31,14 @@
       class="control-btn import-city-btn"
       [disabled]="loading"
       (click)="openCityImportDialog()">
-      {{ loading ? t('loading') : t('importCity') }}
+      {{ loading ? t('loadingWithTime', { elapsed: loadingElapsed }) : t('importCity') }}
     </button>
+
+    @if (loading) {
+      <button matFab extended class="control-btn cancel-btn" (click)="cancelLoading()">
+        {{ t('cancel') }}
+      </button>
+    }
 
     <button
       matFab extended
@@ -47,8 +53,14 @@
       class="control-btn compute-placement-btn"
       [disabled]="computingPlacement || !graphData"
       (click)="computePlacement()">
-      {{ computingPlacement ? t('placing') : t('computePlacement') }}
+      {{ computingPlacement ? t('placingWithTime', { elapsed: placementElapsed }) : t('computePlacement') }}
     </button>
+
+    @if (computingPlacement) {
+      <button matFab extended class="control-btn cancel-btn" (click)="cancelPlacement()">
+        {{ t('cancel') }}
+      </button>
+    }
 
     <button
       matFab extended
@@ -63,8 +75,14 @@
       class="control-btn compute-metrics-btn"
       [disabled]="computingMetrics || !graphData"
       (click)="computeGraphMetrics()">
-      {{ computingMetrics ? t('computingMetrics') : t('computeMetrics') }}
+      {{ computingMetrics ? t('computingMetricsWithTime', { elapsed: metricsElapsed }) : t('computeMetrics') }}
     </button>
+
+    @if (computingMetrics) {
+      <button matFab extended class="control-btn cancel-btn" (click)="cancelMetrics()">
+        {{ t('cancel') }}
+      </button>
+    }
 
     @if (placementResultInfo) {
       <app-placement-result-panel [info]="placementResultInfo" />

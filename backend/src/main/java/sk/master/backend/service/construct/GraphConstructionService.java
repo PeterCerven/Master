@@ -15,6 +15,8 @@ public interface GraphConstructionService {
 
     RoadGraph generateRoadNetwork(GraphDto graph, List<PositionalData> positionalData);
 
+    RoadGraph importCityGraph(String city);
+
     GraphMetricsDto computeMetrics(RoadGraph roadGraph);
 
     GraphMetricsDto computeCurrentGraphMetrics();

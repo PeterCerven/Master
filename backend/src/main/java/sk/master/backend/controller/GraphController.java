@@ -17,7 +17,6 @@ import sk.master.backend.persistence.model.RoadGraph;
 import sk.master.backend.persistence.repository.UserRepository;
 import sk.master.backend.service.util.FileService;
 import sk.master.backend.service.construct.GraphConstructionService;
-import sk.master.backend.service.construct.OsmCityGraphService;
 
 import java.util.List;
 
@@ -28,14 +27,12 @@ public class GraphController {
     private final GraphConstructionService graphConstructionService;
     private final FileService fileService;
     private final UserRepository userRepository;
-    private final OsmCityGraphService osmCityGraphService;
 
     public GraphController(GraphConstructionService graphConstructionService, FileService fileService,
-                           UserRepository userRepository, OsmCityGraphService osmCityGraphService) {
+                           UserRepository userRepository) {
         this.fileService = fileService;
         this.graphConstructionService = graphConstructionService;
         this.userRepository = userRepository;
-        this.osmCityGraphService = osmCityGraphService;
     }
 
     @PostMapping("/file-import")
@@ -47,7 +44,7 @@ public class GraphController {
 
     @GetMapping("/city-import")
     public ResponseEntity<GraphDto> importCityGraph(@RequestParam String city) {
-        RoadGraph roadGraph = osmCityGraphService.extractCityGraph(city);
+        RoadGraph roadGraph = graphConstructionService.importCityGraph(city);
         return ResponseEntity.ok(GraphDto.fromRoadGraph(roadGraph, null));
     }
 

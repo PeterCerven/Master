@@ -5,7 +5,7 @@ import {GraphService} from '@services/graph.service';
 import {ThemeService} from '@services/theme.service';
 import {GraphEdgeDto, GraphMetrics, GraphNodeDto, GraphResponseDto, PlacementResponseDto, PlacementResultInfo, SavedGraphResponseDto, StationNodeDto} from '@models/my-graph.model';
 import {takeUntilDestroyed, toObservable} from '@angular/core/rxjs-interop';
-import {filter, skip} from 'rxjs';
+import {filter, skip, Subject, takeUntil} from 'rxjs';
 import {MatFabButton} from '@angular/material/button';
 import {environment} from '@env/environment.production';
 import {PlacementService} from '@services/placement.service';
@@ -54,6 +54,15 @@ export class Map {
   saving = false;
   computingPlacement = false;
   computingMetrics = false;
+  loadingElapsed = 0;
+  placementElapsed = 0;
+  metricsElapsed = 0;
+  private loadingTimer: ReturnType<typeof setInterval> | null = null;
+  private placementTimer: ReturnType<typeof setInterval> | null = null;
+  private metricsTimer: ReturnType<typeof setInterval> | null = null;
+  private readonly cancelLoading$ = new Subject<void>();
+  private readonly cancelPlacement$ = new Subject<void>();
+  private readonly cancelMetrics$ = new Subject<void>();
   graphData: GraphResponseDto | null = null;
   placementData: PlacementResponseDto | null = null;
   placementResultInfo: PlacementResultInfo | null = null;
@@ -86,6 +95,15 @@ export class Map {
         this.mapVisible.set(false);
         setTimeout(() => this.mapVisible.set(true));
       });
+
+    this.destroyRef.onDestroy(() => {
+      if (this.loadingTimer) clearInterval(this.loadingTimer);
+      if (this.placementTimer) clearInterval(this.placementTimer);
+      if (this.metricsTimer) clearInterval(this.metricsTimer);
+      this.cancelLoading$.complete();
+      this.cancelPlacement$.complete();
+      this.cancelMetrics$.complete();
+    });
 
     // Setup map each time it becomes available (initial load and after recreation)
     effect((onCleanup) => {
@@ -135,18 +153,21 @@ export class Map {
 
   importCityGraph(city: string): void {
     this.loading = true;
+    this.startTimer('loading');
     this.graphService.importCityGraph(city)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(takeUntil(this.cancelLoading$), takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (graph: GraphResponseDto) => {
           this.graphData = graph;
           this.graphMetrics = null;
           this.displayGraphOnMap(graph);
           this.loading = false;
+          this.stopTimer('loading');
           this.saveToSession();
         },
         error: (err: Error) => {
           this.loading = false;
+          this.stopTimer('loading');
           alert(err.message || 'Failed to import city graph.');
         }
       });
@@ -154,18 +175,21 @@ export class Map {
 
   importSampleGraph(filename: string): void {
     this.loading = true;
+    this.startTimer('loading');
     this.graphService.importSampleFile(filename)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(takeUntil(this.cancelLoading$), takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (graph: GraphResponseDto) => {
           this.graphData = graph;
           this.graphMetrics = null;
           this.displayGraphOnMap(graph);
           this.loading = false;
+          this.stopTimer('loading');
           this.saveToSession();
         },
         error: () => {
           this.loading = false;
+          this.stopTimer('loading');
           alert('Failed to import sample file.');
         }
       });
@@ -173,19 +197,22 @@ export class Map {
 
   importGraphFromFile(file: File): void {
     this.loading = true;
+    this.startTimer('loading');
     this.graphService.generateGraphFromFile(file)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(takeUntil(this.cancelLoading$), takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (graph: GraphResponseDto) => {
           this.graphData = graph;
           this.graphMetrics = null;
           this.displayGraphOnMap(graph);
           this.loading = false;
+          this.stopTimer('loading');
           this.saveToSession();
         },
         error: (error) => {
           console.error('Error loading graph:', error);
           this.loading = false;
+          this.stopTimer('loading');
           alert('Failed to load graph from backend. Please check the console for details.');
         }
       });
@@ -334,8 +361,9 @@ export class Map {
       )
       .subscribe(({strategy, k, maxRadiusMeters, iterations, graspAlpha, graspEvalBudget}) => {
         this.computingPlacement = true;
+        this.startTimer('placement');
         this.placementService.computePlacement(this.graphData!, k, maxRadiusMeters, iterations, strategy, graspAlpha, graspEvalBudget)
-          .pipe(takeUntilDestroyed(this.destroyRef))
+          .pipe(takeUntil(this.cancelPlacement$), takeUntilDestroyed(this.destroyRef))
           .subscribe({
             next: (result: PlacementResponseDto) => {
               this.placementData = result;
@@ -351,11 +379,13 @@ export class Map {
               };
               this.displayStationsOnMap(result.stations);
               this.computingPlacement = false;
+              this.stopTimer('placement');
               this.saveToSession();
             },
             error: (error) => {
               console.error('Error computing placement:', error);
               this.computingPlacement = false;
+              this.stopTimer('placement');
               alert('Failed to compute placement. Please check the console for details.');
             }
           });
@@ -364,16 +394,63 @@ export class Map {
 
   computeGraphMetrics(): void {
     this.computingMetrics = true;
+    this.startTimer('metrics');
     this.graphService.computeGraphMetrics()
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(takeUntil(this.cancelMetrics$), takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (metrics: GraphMetrics) => {
           this.graphMetrics = metrics;
           this.computingMetrics = false;
+          this.stopTimer('metrics');
           this.saveToSession();
         },
-        error: () => { this.computingMetrics = false; }
+        error: () => { this.computingMetrics = false; this.stopTimer('metrics'); }
       });
+  }
+
+  cancelLoading(): void {
+    this.cancelLoading$.next();
+    this.loading = false;
+    this.stopTimer('loading');
+  }
+
+  cancelPlacement(): void {
+    this.cancelPlacement$.next();
+    this.computingPlacement = false;
+    this.stopTimer('placement');
+  }
+
+  cancelMetrics(): void {
+    this.cancelMetrics$.next();
+    this.computingMetrics = false;
+    this.stopTimer('metrics');
+  }
+
+  private startTimer(which: 'loading' | 'placement' | 'metrics'): void {
+    this.stopTimer(which);
+    if (which === 'loading') {
+      this.loadingElapsed = 0;
+      this.loadingTimer = setInterval(() => this.loadingElapsed++, 1000);
+    } else if (which === 'placement') {
+      this.placementElapsed = 0;
+      this.placementTimer = setInterval(() => this.placementElapsed++, 1000);
+    } else {
+      this.metricsElapsed = 0;
+      this.metricsTimer = setInterval(() => this.metricsElapsed++, 1000);
+    }
+  }
+
+  private stopTimer(which: 'loading' | 'placement' | 'metrics'): void {
+    if (which === 'loading' && this.loadingTimer) {
+      clearInterval(this.loadingTimer);
+      this.loadingTimer = null;
+    } else if (which === 'placement' && this.placementTimer) {
+      clearInterval(this.placementTimer);
+      this.placementTimer = null;
+    } else if (which === 'metrics' && this.metricsTimer) {
+      clearInterval(this.metricsTimer);
+      this.metricsTimer = null;
+    }
   }
 
   private displayStationsOnMap(stations: StationNodeDto[]): void {
@@ -430,8 +507,9 @@ export class Map {
       .pipe(takeUntilDestroyed(this.destroyRef), filter(id => id != null))
       .subscribe(id => {
         this.loading = true;
+        this.startTimer('loading');
         this.graphService.loadGraphFromDatabase(id)
-          .pipe(takeUntilDestroyed(this.destroyRef))
+          .pipe(takeUntil(this.cancelLoading$), takeUntilDestroyed(this.destroyRef))
           .subscribe({
             next: (saved: SavedGraphResponseDto) => {
               this.graphData = { nodes: saved.nodes, edges: saved.edges, metrics: saved.metrics };
@@ -447,9 +525,10 @@ export class Map {
                 this.stationMarkers = [];
               }
               this.loading = false;
+              this.stopTimer('loading');
               this.saveToSession();
             },
-            error: () => { this.loading = false; }
+            error: () => { this.loading = false; this.stopTimer('loading'); }
           });
       });
   }

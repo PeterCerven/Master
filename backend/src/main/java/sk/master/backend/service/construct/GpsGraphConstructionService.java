@@ -39,15 +39,18 @@ public class GpsGraphConstructionService implements GraphConstructionService {
 
     private final PipelineConfigService configService;
     private final MapMatchingService mapMatchingService;
+    private final OsmCityGraphService osmCityGraphService;
     private final H3Core h3;
     private final GraphRepository graphRepository;
     @Getter
     private RoadGraph roadGraph;
 
-    public GpsGraphConstructionService(GraphRepository graphRepository, PipelineConfigService configService, MapMatchingService mapMatchingService) {
+    public GpsGraphConstructionService(GraphRepository graphRepository, PipelineConfigService configService,
+                                       MapMatchingService mapMatchingService, OsmCityGraphService osmCityGraphService) {
         this.graphRepository = graphRepository;
         this.configService = configService;
         this.mapMatchingService = mapMatchingService;
+        this.osmCityGraphService = osmCityGraphService;
         try {
             this.h3 = H3Core.newInstance();
         } catch (IOException e) {
@@ -273,13 +276,22 @@ public class GpsGraphConstructionService implements GraphConstructionService {
     }
 
     @Override
+    public RoadGraph importCityGraph(String city) {
+        roadGraph = osmCityGraphService.extractCityGraph(city);
+        return roadGraph;
+    }
+
+    @Override
     public GraphMetricsDto computeMetrics(RoadGraph roadGraph) {
         int nodeCount = roadGraph.getNodeCount();
         int edgeCount = roadGraph.getEdgeCount();
 
+        log.info("Computing graph metrics: nodes={}, edges={}", nodeCount, edgeCount);
+
         if (nodeCount == 0) {
             return new GraphMetricsDto(0, 0, 0, 0, 0, 0, 0, false, 0, 0, 0);
         }
+
 
         double avgDegree = nodeCount > 0 ? 2.0 * edgeCount / nodeCount : 0.0;
 
@@ -287,6 +299,8 @@ public class GpsGraphConstructionService implements GraphConstructionService {
                 .mapToDouble(RoadEdge::distanceMeters)
                 .average()
                 .orElse(0.0);
+
+        log.info("Average degree: {}, Average edge length: {} meters", avgDegree, avgEdgeLengthMeters);
 
         // Node density: bounding box area
         double minLat = Double.MAX_VALUE, maxLat = -Double.MAX_VALUE;
@@ -303,15 +317,21 @@ public class GpsGraphConstructionService implements GraphConstructionService {
         double areaKm2 = widthKm * heightKm;
         double nodeDensityPerKm2 = areaKm2 > 0 ? nodeCount / areaKm2 : 0.0;
 
+        log.info("Node density: {} nodes/km² (area: {} km²)", nodeDensityPerKm2, areaKm2);
+
         // Clustering coefficient via JGraphT
         var cc = new ClusteringCoefficient<>(roadGraph.getGraph());
         double clusteringCoefficient = cc.getAverageClusteringCoefficient();
+
+        log.info("Average clustering coefficient: {}", clusteringCoefficient);
 
         // Diameter & radius via Dijkstra
         var graph = roadGraph.getGraph();
         List<RoadNode> sources = new ArrayList<>(roadGraph.getNodes());
 
         boolean connected = new ConnectivityInspector<>(graph).isConnected();
+
+        log.info("Graph connectivity: {}", connected ? "Connected" : "Disconnected. Diameter and radius will be computed on largest component.");
 
         double diameter = 0.0;
         double radius = Double.MAX_VALUE;
@@ -349,11 +369,18 @@ public class GpsGraphConstructionService implements GraphConstructionService {
 
         double radiusMeters = radius == Double.MAX_VALUE ? 0.0 : radius;
 
+        log.info("Diameter: {} meters, Radius: {} meters", diameter, radiusMeters);
+
         var bc = new BetweennessCentrality<>(roadGraph.getGraph(), true);
         double avgBetweennessCentrality = bc.getScores().values().stream()
                 .mapToDouble(Double::doubleValue).average().orElse(0.0);
 
+        log.info("Average betweenness centrality: {}", avgBetweennessCentrality);
+
         int treewidth = computeTreewidth(roadGraph);
+
+        log.info("Treewidth: {}", treewidth);
+
 
         return new GraphMetricsDto(
                 nodeCount,

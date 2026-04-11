@@ -107,6 +107,14 @@
   }
 }
 
+.cancel-btn {
+  background-color: #c0392b;
+
+  &:hover:not(:disabled) {
+    background-color: #a93226;
+  }
+}
+
 .graph-metrics-panel {
   margin-top: auto;
 

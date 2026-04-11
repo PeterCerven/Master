@@ -54,7 +54,7 @@ public class OsmCityGraphService {
         log.info("Extracted {} nodes and {} edges for city: {}",
                 result.getNodeCount(), result.getEdgeCount(), cityName);
 
-        if (result.getNodeCount() > 100_000) {
+        if (result.getNodeCount() > 250_000) {
             throw new IllegalArgumentException(
                 "Area too large (%d nodes). Please choose a smaller city.".formatted(result.getNodeCount()));
         }

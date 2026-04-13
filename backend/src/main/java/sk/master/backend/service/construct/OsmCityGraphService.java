@@ -1,6 +1,8 @@
 package sk.master.backend.service.construct;
 
 import com.graphhopper.GraphHopper;
+import com.graphhopper.routing.ev.BooleanEncodedValue;
+import com.graphhopper.routing.ev.VehicleAccess;
 import com.graphhopper.storage.BaseGraph;
 import com.graphhopper.storage.NodeAccess;
 import com.graphhopper.storage.index.LocationIndexTree;
@@ -111,6 +113,9 @@ public class OsmCityGraphService {
         // Pre-index polygon for fast repeated contains() — avoids re-traversing polygon vertices each call
         PreparedGeometry preparedPolygon = PreparedGeometryFactory.prepare(boundary.polygon());
 
+        BooleanEncodedValue carAccessEnc = hopper.getEncodingManager()
+                .getBooleanEncodedValue(VehicleAccess.key("car"));
+
         // LocationIndexTree.query() returns only edges within the bbox — O(log N + E_bbox)
         // instead of iterating all edges in SK+CZ+AU — O(E_total ≈ 10M+)
         Set<Integer> visitedEdges = new HashSet<>();
@@ -120,6 +125,10 @@ public class OsmCityGraphService {
             if (!visitedEdges.add(edgeId)) return; // edge can appear in multiple index cells
 
             var edge = baseGraph.getEdgeIteratorState(edgeId, Integer.MIN_VALUE);
+
+            // Skip edges that are not car-accessible in either direction
+            if (!edge.get(carAccessEnc) && !edge.getReverse(carAccessEnc)) return;
+
             int baseNodeId = edge.getBaseNode();
             int adjNodeId = edge.getAdjNode();
 

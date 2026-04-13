@@ -99,6 +99,14 @@
   }
 }
 
+.compute-metrics-btn {
+  background-color: #e65100;
+
+  &:hover:not(:disabled) {
+    background-color: #bf360c;
+  }
+}
+
 .clear-graph-btn {
   background-color: #e74c3c;
 
@@ -106,6 +114,7 @@
     background-color: #c0392b;
   }
 }
+
 
 .cancel-btn {
   background-color: #c0392b;

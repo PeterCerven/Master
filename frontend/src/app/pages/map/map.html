@@ -20,19 +20,20 @@
     </button>
     <button
       matFab extended
+      class="control-btn import-city-btn"
+      [disabled]="loading"
+      (click)="openCityImportDialog()">
+      {{ loading ? t('loadingWithTime', { elapsed: loadingElapsed }) : t('importCity') }}
+    </button>
+
+    <button
+      matFab extended
       class="control-btn load-graph-database-btn"
       [disabled]="loading"
       (click)="openLoadGraphDialog()">
       {{ loading ? t('loadingWithTime', { elapsed: loadingElapsed }) : t('loadGraphFromDatabase') }}
     </button>
 
-    <button
-      matFab extended
-      class="control-btn import-city-btn"
-      [disabled]="loading"
-      (click)="openCityImportDialog()">
-      {{ loading ? t('loadingWithTime', { elapsed: loadingElapsed }) : t('importCity') }}
-    </button>
 
     @if (loading) {
       <button matFab extended class="control-btn cancel-btn" (click)="cancelLoading()">
@@ -64,14 +65,6 @@
 
     <button
       matFab extended
-      class="control-btn clear-graph-btn"
-      [disabled]="!graphData"
-      (click)="clearAll()">
-      {{ t('clearGraph') }}
-    </button>
-
-    <button
-      matFab extended
       class="control-btn compute-metrics-btn"
       [disabled]="computingMetrics || !graphData"
       (click)="computeGraphMetrics()">
@@ -83,6 +76,15 @@
         {{ t('cancel') }}
       </button>
     }
+
+    <button
+      matFab extended
+      class="control-btn clear-graph-btn"
+      [disabled]="!graphData"
+      (click)="clearAll()">
+      {{ t('clearGraph') }}
+    </button>
+
 
     @if (placementResultInfo) {
       <app-placement-result-panel [info]="placementResultInfo" />

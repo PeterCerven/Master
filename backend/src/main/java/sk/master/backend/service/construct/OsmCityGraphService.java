@@ -3,6 +3,7 @@ package sk.master.backend.service.construct;
 import com.graphhopper.GraphHopper;
 import com.graphhopper.routing.ev.BooleanEncodedValue;
 import com.graphhopper.routing.ev.VehicleAccess;
+import org.jgrapht.alg.connectivity.ConnectivityInspector;
 import com.graphhopper.storage.BaseGraph;
 import com.graphhopper.storage.NodeAccess;
 import com.graphhopper.storage.index.LocationIndexTree;
@@ -53,7 +54,8 @@ public class OsmCityGraphService {
         CityBoundary boundary = geocodeCityBoundary(cityName);
         log.info("City boundary for {}: polygon type={}", cityName, boundary.polygon().getGeometryType());
         RoadGraph result = extractFromGraphHopper(boundary);
-        log.info("Extracted {} nodes and {} edges for city: {}",
+        retainLargestComponent(result);
+        log.info("Extracted {} nodes and {} edges for city: {} (after pruning isolated subgraphs)",
                 result.getNodeCount(), result.getEdgeCount(), cityName);
 
         if (result.getNodeCount() > 250_000) {
@@ -110,8 +112,9 @@ public class OsmCityGraphService {
         RoadGraph roadGraph = new RoadGraph();
         Map<Integer, RoadNode> towerNodeCache = new HashMap<>();
 
-        // Pre-index polygon for fast repeated contains() — avoids re-traversing polygon vertices each call
-        PreparedGeometry preparedPolygon = PreparedGeometryFactory.prepare(boundary.polygon());
+        // Buffer the polygon by ~1000 m so roads just outside the boundary that connect
+        // boundary-adjacent subgraphs to the main network are included, reducing pruning later.
+        PreparedGeometry preparedPolygon = PreparedGeometryFactory.prepare(boundary.polygon().buffer(0.001));
 
         BooleanEncodedValue carAccessEnc = hopper.getEncodingManager()
                 .getBooleanEncodedValue(VehicleAccess.key("car"));
@@ -151,6 +154,23 @@ public class OsmCityGraphService {
         });
 
         return roadGraph;
+    }
+
+    private void retainLargestComponent(RoadGraph roadGraph) {
+        var inspector = new ConnectivityInspector<>(roadGraph.getGraph());
+        List<Set<RoadNode>> components = inspector.connectedSets();
+        if (components.size() <= 1) return;
+
+        int threshold = Math.max(1, roadGraph.getNodeCount() / 1000); // 0.1% of total nodes
+        List<Set<RoadNode>> small = components.stream()
+                .filter(c -> c.size() < threshold)
+                .toList();
+
+        int removed = small.stream().mapToInt(Set::size).sum();
+        small.stream().flatMap(Set::stream).forEach(roadGraph::removeNode);
+
+        log.info("Pruned {} node(s) from {} small subgraph(s) (threshold: {} nodes, {} subgraph(s) kept)",
+                removed, small.size(), threshold, components.size() - small.size());
     }
 
     private boolean isInside(double lat, double lon, BBox bbox, PreparedGeometry preparedPolygon) {

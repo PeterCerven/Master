@@ -49,12 +49,12 @@ public class OsmCityGraphService {
         this.geometryFactory = new GeometryFactory();
     }
 
-    public RoadGraph extractCityGraph(String cityName) {
+    public RoadGraph extractCityGraph(String cityName, String cityCountry, double retainLargestComponentPercent) {
         log.info("Extracting road graph for city: {}", cityName);
-        CityBoundary boundary = geocodeCityBoundary(cityName);
+        CityBoundary boundary = geocodeCityBoundary(cityName, cityCountry);
         log.info("City boundary for {}: polygon type={}", cityName, boundary.polygon().getGeometryType());
         RoadGraph result = extractFromGraphHopper(boundary);
-        retainLargestComponent(result);
+        retainLargestComponent(result, retainLargestComponentPercent);
         log.info("Extracted {} nodes and {} edges for city: {} (after pruning isolated subgraphs)",
                 result.getNodeCount(), result.getEdgeCount(), cityName);
 
@@ -68,10 +68,11 @@ public class OsmCityGraphService {
 
     private record CityBoundary(BBox bbox, Geometry polygon) {}
 
-    private CityBoundary geocodeCityBoundary(String cityName) {
+    private CityBoundary geocodeCityBoundary(String cityName, String cityCountry) {
         try {
             String encoded = URLEncoder.encode(cityName, StandardCharsets.UTF_8);
-            String url = NOMINATIM_URL + "?q=" + encoded + "&format=json&limit=1&polygon_geojson=1&featuretype=settlement";
+            String url = NOMINATIM_URL + "?q=" + encoded + "&format=json&limit=1&polygon_geojson=1&featuretype=settlement"
+                    + (cityCountry != null ? "&countrycodes=" + cityCountry : "");
 
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
@@ -156,12 +157,12 @@ public class OsmCityGraphService {
         return roadGraph;
     }
 
-    private void retainLargestComponent(RoadGraph roadGraph) {
+    private void retainLargestComponent(RoadGraph roadGraph, double retainLargestComponentPercent) {
         var inspector = new ConnectivityInspector<>(roadGraph.getGraph());
         List<Set<RoadNode>> components = inspector.connectedSets();
         if (components.size() <= 1) return;
 
-        int threshold = Math.max(1, roadGraph.getNodeCount() / 1000); // 0.1% of total nodes
+        int threshold = Math.max(1, (int)(roadGraph.getNodeCount() * retainLargestComponentPercent / 100.0));
         List<Set<RoadNode>> small = components.stream()
                 .filter(c -> c.size() < threshold)
                 .toList();
@@ -169,8 +170,8 @@ public class OsmCityGraphService {
         int removed = small.stream().mapToInt(Set::size).sum();
         small.stream().flatMap(Set::stream).forEach(roadGraph::removeNode);
 
-        log.info("Pruned {} node(s) from {} small subgraph(s) (threshold: {} nodes, {} subgraph(s) kept)",
-                removed, small.size(), threshold, components.size() - small.size());
+        log.info("Pruned {} node(s) from {} small subgraph(s) (threshold: {} nodes at {}%, {} subgraph(s) kept)",
+                removed, small.size(), threshold, retainLargestComponentPercent, components.size() - small.size());
     }
 
     private boolean isInside(double lat, double lon, BBox bbox, PreparedGeometry preparedPolygon) {

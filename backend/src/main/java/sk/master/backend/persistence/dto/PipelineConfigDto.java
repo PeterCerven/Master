@@ -35,6 +35,12 @@ public class PipelineConfigDto {
     @Min(1)
     private int graspEvalBudget;
 
+    @Pattern(regexp = "sk|cz|at")
+    private String cityCountry;
+
+    @DecimalMin("0.0") @DecimalMax("100.0")
+    private double retainLargestComponentPercent;
+
     @NotNull
     private PlacementAlgorithm lastAlgorithm;
 

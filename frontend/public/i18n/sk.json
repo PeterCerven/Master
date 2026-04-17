@@ -154,7 +154,13 @@
     },
     "city": {
       "title": "Importovať cestný graf mesta",
-      "cityLabel": "Názov mesta"
+      "cityLabel": "Názov mesta",
+      "countryLabel": "Filter krajiny",
+      "countryAny": "Akákoľvek krajina",
+      "countrySk": "Slovensko (sk)",
+      "countryCz": "Česko (cz)",
+      "countryAt": "Rakúsko (at)",
+      "retainLargestComponentPercent": "Ponechať komponenty väčšie ako (%)"
     },
     "confirm": "Potvrdiť",
     "cancel": "Zrušiť",
@@ -169,7 +175,9 @@
       "maxRadiusMeters": "Dosah jednej nabíjacej stanice v metroch — vrcholy v tejto vzdialenosti sú považované za pokryté",
       "iterations": "Počet nezávislých opakovaní — viac iterácií zlepšuje kvalitu riešenia na úkor výpočtového času (stratégie Random a GRASP)",
       "graspAlpha": "Ovláda chamtivosť RCL (0.0 = čisto chamtivý, 1.0 = čisto náhodný). Nižšie hodnoty uprednostňujú kandidátov s vysokým ziskom; vyššie hodnoty umožňujú väčšiu diverzitu.",
-      "graspEvalBudget": "Maximálny počet kandidátnych vrcholov vyhodnotených v každom kroku konštrukcie. Nižšie hodnoty urýchľujú každú iteráciu; vyššie hodnoty zlepšujú kvalitu riešenia."
+      "graspEvalBudget": "Maximálny počet kandidátnych vrcholov vyhodnotených v každom kroku konštrukcie. Nižšie hodnoty urýchľujú každú iteráciu; vyššie hodnoty zlepšujú kvalitu riešenia.",
+      "cityCountry": "Obmedzte vyhľadávanie mesta na konkrétnu krajinu. Nechajte ako 'Akákoľvek krajina' pre globálne vyhľadávanie.",
+      "retainLargestComponentPercent": "Minimálna veľkosť komponentu ako percento z celkového počtu vrcholov. Menšie komponenty sú odstránené. Predvolené: 0,1 % (zodpovedá 1/1000 vrcholov)."
     }
   }
 }

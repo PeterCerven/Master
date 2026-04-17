@@ -11,5 +11,7 @@ public class PipelineConfig {
 
     private double maxSpeedKmh;
     private int h3DedupResolution;
+    private String cityCountry;
+    private double retainLargestComponentPercent;
 
 }

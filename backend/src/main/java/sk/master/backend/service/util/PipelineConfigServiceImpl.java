@@ -85,6 +85,8 @@ public class PipelineConfigServiceImpl implements PipelineConfigService {
             userConfig.setIterations(defaultConfig.getIterations());
             userConfig.setGraspAlpha(defaultConfig.getGraspAlpha());
             userConfig.setGraspEvalBudget(defaultConfig.getGraspEvalBudget());
+            userConfig.setCityCountry(defaultConfig.getCityCountry());
+            userConfig.setRetainLargestComponentPercent(defaultConfig.getRetainLargestComponentPercent());
             userConfig.setLastAlgorithm(defaultConfig.getLastAlgorithm());
 
             userConfig = repository.save(userConfig);
@@ -105,6 +107,8 @@ public class PipelineConfigServiceImpl implements PipelineConfigService {
                 e.getIterations(),
                 e.getGraspAlpha(),
                 e.getGraspEvalBudget(),
+                e.getCityCountry(),
+                e.getRetainLargestComponentPercent(),
                 e.getLastAlgorithm()
         );
     }
@@ -118,13 +122,17 @@ public class PipelineConfigServiceImpl implements PipelineConfigService {
         e.setIterations(d.getIterations());
         e.setGraspAlpha(d.getGraspAlpha());
         e.setGraspEvalBudget(d.getGraspEvalBudget());
+        e.setCityCountry(d.getCityCountry());
+        e.setRetainLargestComponentPercent(d.getRetainLargestComponentPercent());
         if (d.getLastAlgorithm() != null) e.setLastAlgorithm(d.getLastAlgorithm());
     }
 
     private PipelineConfig toPipelineConfig(PipelineConfigEntity e) {
         return new PipelineConfig(
                 e.getMaxSpeedKmh(),
-                e.getH3DedupResolution()
+                e.getH3DedupResolution(),
+                e.getCityCountry(),
+                e.getRetainLargestComponentPercent()
         );
     }
 
@@ -142,6 +150,8 @@ public class PipelineConfigServiceImpl implements PipelineConfigService {
         e.setIterations(10);
         e.setGraspAlpha(0.3);
         e.setGraspEvalBudget(500);
+        e.setCityCountry(null);
+        e.setRetainLargestComponentPercent(0.1);
         e.setLastAlgorithm(PlacementAlgorithm.RANDOM_STRATEGY);
     }
 }

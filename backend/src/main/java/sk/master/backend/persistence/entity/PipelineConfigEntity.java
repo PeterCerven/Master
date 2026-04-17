@@ -49,6 +49,12 @@ public class PipelineConfigEntity {
     @Column(name = "grasp_eval_budget", nullable = false)
     private int graspEvalBudget;
 
+    @Column(name = "city_country")
+    private String cityCountry;
+
+    @Column(name = "retain_largest_component_percent", nullable = false)
+    private double retainLargestComponentPercent;
+
     @Column(name = "last_algorithm", nullable = false)
     @Enumerated(EnumType.STRING)
     private PlacementAlgorithm lastAlgorithm;

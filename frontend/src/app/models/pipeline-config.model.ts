@@ -14,5 +14,10 @@ export interface PipelineConfig {
   iterations: number;
   graspAlpha: number;
   graspEvalBudget: number;
+
+  // City import
+  cityCountry: 'sk' | 'cz' | 'at' | null;
+  retainLargestComponentPercent: number;
+
   lastAlgorithm: 'RANDOM_STRATEGY' | 'GREEDY_STRATEGY' | 'GRASP_STRATEGY';
 }

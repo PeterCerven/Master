@@ -32,5 +32,14 @@ public class PipelineConfigSeeder implements ApplicationRunner {
         } else {
             log.debug("Pipeline configuration already exists, skipping seed.");
         }
+
+
+        repository.findByUserIdIsNullAndActiveTrue().ifPresent(entity -> {
+            if (entity.getRetainLargestComponentPercent() == 0.0) {
+                entity.setRetainLargestComponentPercent(0.1);
+                repository.save(entity);
+                log.info("Migrated default config: retainLargestComponentPercent set to 0.1");
+            }
+        });
     }
 }

@@ -11,81 +11,82 @@
   </div>
 
   <div class="control-panel">
-    <button
-      matFab extended
-      class="control-btn load-graph-file-btn"
-      [disabled]="isBusy"
-      (click)="openGraphConfigDialog()">
-      {{ loading ? t('loadingWithTime', { elapsed: loadingElapsed }) : t('createGraphFromFile') }}
-    </button>
-    <button
-      matFab extended
-      class="control-btn import-city-btn"
-      [disabled]="isBusy"
-      (click)="openCityImportDialog()">
-      {{ loading ? t('loadingWithTime', { elapsed: loadingElapsed }) : t('importCity') }}
-    </button>
-
-    <button
-      matFab extended
-      class="control-btn load-graph-database-btn"
-      [disabled]="isBusy"
-      (click)="openLoadGraphDialog()">
-      {{ loading ? t('loadingWithTime', { elapsed: loadingElapsed }) : t('loadGraphFromDatabase') }}
-    </button>
-
-
-    @if (loading) {
-      <button matFab extended class="control-btn cancel-btn" (click)="cancelLoading()">
-        {{ t('cancel') }}
+    <div class="button-strip">
+      <button
+        matFab extended
+        class="control-btn load-graph-file-btn"
+        [disabled]="isBusy"
+        (click)="openGraphConfigDialog()">
+        {{ loading ? t('loadingWithTime', { elapsed: loadingElapsed }) : t('createGraphFromFile') }}
       </button>
-    }
-
-    <button
-      matFab extended
-      class="control-btn save-graph-btn"
-      [disabled]="isBusy || !graphData"
-      (click)="openSaveGraphDialog()">
-      {{ saving ? t('saving') : t('saveGraph') }}
-    </button>
-
-    <button
-      matFab extended
-      class="control-btn compute-placement-btn"
-      [disabled]="isBusy || !graphData"
-      (click)="computePlacement()">
-      {{ computingPlacement ? t('placingWithTime', { elapsed: placementElapsed }) : t('computePlacement') }}
-    </button>
-
-    @if (computingPlacement) {
-      <button matFab extended class="control-btn cancel-btn" (click)="cancelPlacement()">
-        {{ t('cancel') }}
+      <button
+        matFab extended
+        class="control-btn import-city-btn"
+        [disabled]="isBusy"
+        (click)="openCityImportDialog()">
+        {{ loading ? t('loadingWithTime', { elapsed: loadingElapsed }) : t('importCity') }}
       </button>
-    }
 
-    <button
-      matFab extended
-      class="control-btn compute-metrics-btn"
-      [disabled]="isBusy || !graphData"
-      (click)="computeGraphMetrics()">
-      {{ computingMetrics ? t('computingMetricsWithTime', { elapsed: metricsElapsed }) : t('computeMetrics') }}
-    </button>
-
-    @if (computingMetrics) {
-      <button matFab extended class="control-btn cancel-btn" (click)="cancelMetrics()">
-        {{ t('cancel') }}
+      <button
+        matFab extended
+        class="control-btn load-graph-database-btn"
+        [disabled]="isBusy"
+        (click)="openLoadGraphDialog()">
+        {{ loading ? t('loadingWithTime', { elapsed: loadingElapsed }) : t('loadGraphFromDatabase') }}
       </button>
-    }
 
-    <button
-      matFab extended
-      class="control-btn clear-graph-btn"
-      [disabled]="isBusy || !graphData"
-      (click)="clearAll()">
-      {{ t('clearGraph') }}
-    </button>
+      @if (loading) {
+        <button matFab extended class="control-btn cancel-btn" (click)="cancelLoading()">
+          {{ t('cancel') }}
+        </button>
+      }
 
+      <button
+        matFab extended
+        class="control-btn save-graph-btn"
+        [disabled]="isBusy || !graphData"
+        (click)="openSaveGraphDialog()">
+        {{ saving ? t('saving') : t('saveGraph') }}
+      </button>
 
+      <button
+        matFab extended
+        class="control-btn compute-placement-btn"
+        [disabled]="isBusy || !graphData"
+        (click)="computePlacement()">
+        {{ computingPlacement ? t('placingWithTime', { elapsed: placementElapsed }) : t('computePlacement') }}
+      </button>
+
+      @if (computingPlacement) {
+        <button matFab extended class="control-btn cancel-btn" (click)="cancelPlacement()">
+          {{ t('cancel') }}
+        </button>
+      }
+
+      <button
+        matFab extended
+        class="control-btn compute-metrics-btn"
+        [disabled]="isBusy || !graphData"
+        (click)="computeGraphMetrics()">
+        {{ computingMetrics ? t('computingMetricsWithTime', { elapsed: metricsElapsed }) : t('computeMetrics') }}
+      </button>
+
+      @if (computingMetrics) {
+        <button matFab extended class="control-btn cancel-btn" (click)="cancelMetrics()">
+          {{ t('cancel') }}
+        </button>
+      }
+
+      <button
+        matFab extended
+        class="control-btn clear-graph-btn"
+        [disabled]="isBusy || !graphData"
+        (click)="clearAll()">
+        {{ t('clearGraph') }}
+      </button>
+    </div>
+
+    <div class="info-panels">
     @if (placementResultInfo) {
       <app-placement-result-panel [info]="placementResultInfo" />
     }
@@ -145,6 +146,7 @@
         </div>
       </div>
     }
+    </div>
   </div>
 </div>
 

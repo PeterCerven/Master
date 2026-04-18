@@ -63,6 +63,10 @@ export class Map {
   private readonly cancelLoading$ = new Subject<void>();
   private readonly cancelPlacement$ = new Subject<void>();
   private readonly cancelMetrics$ = new Subject<void>();
+  get isBusy(): boolean {
+    return this.loading || this.saving || this.computingPlacement || this.computingMetrics;
+  }
+
   graphData: GraphResponseDto | null = null;
   placementData: PlacementResponseDto | null = null;
   placementResultInfo: PlacementResultInfo | null = null;

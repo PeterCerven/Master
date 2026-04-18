@@ -87,6 +87,7 @@ public class PipelineConfigServiceImpl implements PipelineConfigService {
             userConfig.setGraspEvalBudget(defaultConfig.getGraspEvalBudget());
             userConfig.setCityCountry(defaultConfig.getCityCountry());
             userConfig.setRetainLargestComponentPercent(defaultConfig.getRetainLargestComponentPercent());
+            userConfig.setCityBoundaryBufferMeters(defaultConfig.getCityBoundaryBufferMeters());
             userConfig.setLastAlgorithm(defaultConfig.getLastAlgorithm());
 
             userConfig = repository.save(userConfig);
@@ -109,6 +110,7 @@ public class PipelineConfigServiceImpl implements PipelineConfigService {
                 e.getGraspEvalBudget(),
                 e.getCityCountry(),
                 e.getRetainLargestComponentPercent(),
+                e.getCityBoundaryBufferMeters(),
                 e.getLastAlgorithm()
         );
     }
@@ -124,6 +126,7 @@ public class PipelineConfigServiceImpl implements PipelineConfigService {
         e.setGraspEvalBudget(d.getGraspEvalBudget());
         e.setCityCountry(d.getCityCountry());
         e.setRetainLargestComponentPercent(d.getRetainLargestComponentPercent());
+        e.setCityBoundaryBufferMeters(d.getCityBoundaryBufferMeters());
         if (d.getLastAlgorithm() != null) e.setLastAlgorithm(d.getLastAlgorithm());
     }
 
@@ -132,7 +135,8 @@ public class PipelineConfigServiceImpl implements PipelineConfigService {
                 e.getMaxSpeedKmh(),
                 e.getH3DedupResolution(),
                 e.getCityCountry(),
-                e.getRetainLargestComponentPercent()
+                e.getRetainLargestComponentPercent(),
+                e.getCityBoundaryBufferMeters()
         );
     }
 
@@ -152,6 +156,7 @@ public class PipelineConfigServiceImpl implements PipelineConfigService {
         e.setGraspEvalBudget(500);
         e.setCityCountry(null);
         e.setRetainLargestComponentPercent(0.1);
+        e.setCityBoundaryBufferMeters(100.0);
         e.setLastAlgorithm(PlacementAlgorithm.RANDOM_STRATEGY);
     }
 }

@@ -18,6 +18,7 @@ export interface PipelineConfig {
   // City import
   cityCountry: 'sk' | 'cz' | 'at' | null;
   retainLargestComponentPercent: number;
+  cityBoundaryBufferMeters: number;
 
   lastAlgorithm: 'RANDOM_STRATEGY' | 'GREEDY_STRATEGY' | 'GRASP_STRATEGY';
 }

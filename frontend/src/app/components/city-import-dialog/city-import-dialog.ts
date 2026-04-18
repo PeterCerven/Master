@@ -35,6 +35,7 @@ export class CityImportDialog implements OnInit {
   loadedConfig: PipelineConfig | null = null;
   cityCountry: 'sk' | 'cz' | 'at' | null = null;
   retainLargestComponentPercent = 0.1;
+  cityBoundaryBufferMeters = 100;
   loading = signal(true);
   saving = signal(false);
 
@@ -54,6 +55,7 @@ export class CityImportDialog implements OnInit {
           this.loadedConfig = config;
           this.cityCountry = config.cityCountry;
           this.retainLargestComponentPercent = config.retainLargestComponentPercent;
+          this.cityBoundaryBufferMeters = config.cityBoundaryBufferMeters;
           this.loading.set(false);
         },
         error: () => this.loading.set(false),
@@ -70,6 +72,7 @@ export class CityImportDialog implements OnInit {
         ...this.loadedConfig,
         cityCountry: this.cityCountry,
         retainLargestComponentPercent: this.retainLargestComponentPercent,
+        cityBoundaryBufferMeters: this.cityBoundaryBufferMeters,
       })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({

@@ -13,5 +13,6 @@ public class PipelineConfig {
     private int h3DedupResolution;
     private String cityCountry;
     private double retainLargestComponentPercent;
+    private double cityBoundaryBufferMeters;
 
 }

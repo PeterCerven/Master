@@ -18,7 +18,7 @@ public class GraphMetricsEmbeddable {
     private Double clusteringCoefficient;
     private Double avgEdgeLengthMeters;
     private Double nodeDensityPerKm2;
-    private Boolean connected;
+    private Integer connectedComponents;
     private Double radiusMeters;
     private Double avgBetweennessCentrality;
     private Integer treewidth;
@@ -32,7 +32,7 @@ public class GraphMetricsEmbeddable {
                 dto.clusteringCoefficient(),
                 dto.avgEdgeLengthMeters(),
                 dto.nodeDensityPerKm2(),
-                dto.connected(),
+                dto.connectedComponents(),
                 dto.radiusMeters(),
                 dto.avgBetweennessCentrality(),
                 dto.treewidth()
@@ -48,7 +48,7 @@ public class GraphMetricsEmbeddable {
                 clusteringCoefficient,
                 avgEdgeLengthMeters,
                 nodeDensityPerKm2,
-                connected,
+                connectedComponents,
                 radiusMeters,
                 avgBetweennessCentrality,
                 treewidth != null ? treewidth : 0

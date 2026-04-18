@@ -549,13 +549,35 @@ export class Map {
   }
 
   private saveToSession(): void {
+    const graphToStore: GraphResponseDto | null = this.graphData
+      ? { ...this.graphData, metrics: null }
+      : null;
+
+    const placementToStore: PlacementResponseDto | null = this.placementData
+      ? { ...this.placementData, coverageDistances: {} }
+      : null;
+
     try {
-      sessionStorage.setItem(Map.SK_GRAPH, JSON.stringify(this.graphData));
-      sessionStorage.setItem(Map.SK_PLACEMENT, JSON.stringify(this.placementData));
+      sessionStorage.setItem(Map.SK_PLACEMENT, JSON.stringify(placementToStore));
+    } catch (e) {
+      console.warn('Could not persist placement data to sessionStorage', e);
+    }
+    try {
       sessionStorage.setItem(Map.SK_PLACEMENT_INFO, JSON.stringify(this.placementResultInfo));
+    } catch (e) {
+      console.warn('Could not persist placement result info to sessionStorage', e);
+    }
+    try {
       sessionStorage.setItem(Map.SK_METRICS, JSON.stringify(this.graphMetrics));
     } catch (e) {
-      console.warn('Could not persist state to sessionStorage', e);
+      console.warn('Could not persist graph metrics to sessionStorage', e);
+    }
+
+    try {
+      sessionStorage.setItem(Map.SK_GRAPH, JSON.stringify(graphToStore));
+    } catch (e) {
+      console.warn('Graph data too large for sessionStorage; graph will not be restored on refresh', e);
+      sessionStorage.removeItem(Map.SK_GRAPH);
     }
   }
 

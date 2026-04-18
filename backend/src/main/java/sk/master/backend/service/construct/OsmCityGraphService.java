@@ -2,6 +2,8 @@ package sk.master.backend.service.construct;
 
 import com.graphhopper.GraphHopper;
 import com.graphhopper.routing.ev.BooleanEncodedValue;
+import com.graphhopper.routing.ev.EnumEncodedValue;
+import com.graphhopper.routing.ev.RoadEnvironment;
 import com.graphhopper.routing.ev.VehicleAccess;
 import org.jgrapht.alg.connectivity.ConnectivityInspector;
 import com.graphhopper.storage.BaseGraph;
@@ -119,6 +121,8 @@ public class OsmCityGraphService {
 
         BooleanEncodedValue carAccessEnc = hopper.getEncodingManager()
                 .getBooleanEncodedValue(VehicleAccess.key("car"));
+        EnumEncodedValue<RoadEnvironment> roadEnvEnc = hopper.getEncodingManager()
+                .getEnumEncodedValue(RoadEnvironment.KEY, RoadEnvironment.class);
 
         // LocationIndexTree.query() returns only edges within the bbox — O(log N + E_bbox)
         // instead of iterating all edges in SK+CZ+AU — O(E_total ≈ 10M+)
@@ -132,6 +136,7 @@ public class OsmCityGraphService {
 
             // Skip edges that are not car-accessible in either direction
             if (!edge.get(carAccessEnc) && !edge.getReverse(carAccessEnc)) return;
+            if (edge.get(roadEnvEnc) == RoadEnvironment.FERRY) return;
 
             int baseNodeId = edge.getBaseNode();
             int adjNodeId = edge.getAdjNode();

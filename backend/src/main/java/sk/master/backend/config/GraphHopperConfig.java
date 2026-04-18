@@ -2,6 +2,7 @@ package sk.master.backend.config;
 
 import com.graphhopper.GraphHopper;
 import com.graphhopper.config.Profile;
+import com.graphhopper.util.CustomModel;
 import com.graphhopper.util.GHUtility;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -30,12 +31,13 @@ public class GraphHopperConfig {
 
         hopper = new GraphHopper();
         hopper.init(new com.graphhopper.GraphHopperConfig()
-                .putObject("graph.encoded_values", "car_access,car_average_speed")
+                .putObject("graph.encoded_values", "car_access,car_average_speed,road_environment")
                 .putObject("graph.location", graphLocation)
                 .putObject("import.osm.ignored_highways", "footway,construction,cycleway,path,steps"));
         hopper.setOSMFile(osmFile);
 
-        hopper.setProfiles(new Profile("car").setCustomModel(GHUtility.loadCustomModelFromJar("car.json")));
+        CustomModel carModel = GHUtility.loadCustomModelFromJar("car.json");
+        hopper.setProfiles(new Profile("car").setCustomModel(carModel));
 
         hopper.importOrLoad();
         log.info("GraphHopper initialized. Nodes: {}, Edges: {}", hopper.getBaseGraph().getNodes(), hopper.getBaseGraph().getEdges());

@@ -129,4 +129,38 @@
       color: var(--mat-sys-primary);
     }
   }
+
+  @media (max-width: 768px) {
+    .result-header {
+      padding: 6px 10px 5px;
+    }
+
+    .result-highlight {
+      padding: 6px 10px 5px;
+      gap: 1px;
+    }
+
+    .highlight-count {
+      font-size: 1.4rem;
+    }
+
+    .highlight-label {
+      font-size: 0.6rem;
+    }
+
+    .result-rows {
+      padding: 4px 10px 3px;
+      gap: 0;
+    }
+
+    .result-row {
+      font-size: 0.72rem;
+      padding: 1px 0;
+    }
+
+    .result-footer {
+      padding: 4px 10px 8px;
+      font-size: 0.72rem;
+    }
+  }
 }

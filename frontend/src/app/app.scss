@@ -55,3 +55,19 @@
   }
 }
 
+@media (max-width: 768px) {
+  .mat-toolbar {
+    height: 48px;
+    min-height: 48px;
+  }
+
+  .user-email {
+    display: none;
+  }
+
+  .content {
+    padding: 0;
+    height: calc(100vh - 48px);
+  }
+}
+

@@ -290,7 +290,7 @@ public class GpsGraphConstructionService implements GraphConstructionService {
         log.info("Computing graph metrics: nodes={}, edges={}", nodeCount, edgeCount);
 
         if (nodeCount == 0) {
-            return new GraphMetricsDto(0, 0, 0, 0, 0, 0, 0, false, 0, 0, 0);
+            return new GraphMetricsDto(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         }
 
 
@@ -330,9 +330,9 @@ public class GpsGraphConstructionService implements GraphConstructionService {
         var graph = roadGraph.getGraph();
         List<RoadNode> sources = new ArrayList<>(roadGraph.getNodes());
 
-        boolean connected = new ConnectivityInspector<>(graph).isConnected();
+        int connectedComponents = new ConnectivityInspector<>(graph).connectedSets().size();
 
-        log.info("Graph connectivity: {}", connected ? "Connected" : "Disconnected. Diameter and radius will be computed on largest component.");
+        log.info("Graph connectivity: {} component(s)", connectedComponents);
 
         double diameter = 0.0;
         double radius = Double.MAX_VALUE;
@@ -391,7 +391,7 @@ public class GpsGraphConstructionService implements GraphConstructionService {
                 clusteringCoefficient,
                 avgEdgeLengthMeters,
                 nodeDensityPerKm2,
-                connected,
+                connectedComponents,
                 radiusMeters,
                 avgBetweennessCentrality,
                 treewidth

@@ -8,7 +8,7 @@ public record GraphMetricsDto(
         double clusteringCoefficient,
         double avgEdgeLengthMeters,
         double nodeDensityPerKm2,
-        boolean connected,
+        int connectedComponents,
         double radiusMeters,
         double avgBetweennessCentrality,
         int treewidth

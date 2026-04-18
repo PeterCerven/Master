@@ -126,8 +126,8 @@
           <span class="metric-value">{{ graphMetrics.nodeDensityPerKm2 | number: '1.2-2' }} /km²</span>
         </div>
         <div class="metric-row">
-          <span class="metric-label" [matTooltip]="t('tooltips.connected')" matTooltipPosition="right">{{ t('metrics.connected') }}</span>
-          <span class="metric-value">{{ graphMetrics.connected ? t('metrics.yes') : t('metrics.no') }}</span>
+          <span class="metric-label" [matTooltip]="t('tooltips.connectedComponents')" matTooltipPosition="right">{{ t('metrics.connectedComponents') }}</span>
+          <span class="metric-value">{{ graphMetrics.connectedComponents }}</span>
         </div>
         <div class="metric-row">
           <span class="metric-label" [matTooltip]="t('tooltips.avgBetweennessCentrality')" matTooltipPosition="right">{{ t('metrics.avgBetweennessCentrality') }}</span>

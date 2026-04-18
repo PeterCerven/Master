@@ -6,7 +6,7 @@ export interface GraphMetrics {
   clusteringCoefficient: number;
   avgEdgeLengthMeters: number;
   nodeDensityPerKm2: number;
-  connected: boolean;
+  connectedComponents: number;
   radiusMeters: number;
   avgBetweennessCentrality: number;
   treewidth: number;

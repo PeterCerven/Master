@@ -25,9 +25,7 @@
       "clusteringCoefficient": "Koeficient klasterizácie",
       "avgEdgeLengthMeters": "Priem. dĺžka hrany",
       "nodeDensityPerKm2": "Hustota vrcholov grafu",
-      "connected": "Súvislosť",
-      "yes": "Áno",
-      "no": "Nie",
+      "connectedComponents": "Komponenty",
       "avgBetweennessCentrality": "Priem. centralita medziľahlosti",
       "treewidth": "Šírka stromu (UB)"
     },
@@ -56,7 +54,7 @@
       "clusteringCoefficient": "Miera zhlukovania vrcholov (0 = žiadne, 1 = plne zhluknutie vrcholov)",
       "avgEdgeLengthMeters": "Priemerná dĺžka úsekov ciest v metroch",
       "nodeDensityPerKm2": "Počet vrcholov na kilometer štvorcový",
-      "connected": "Či sú všetky vrcholy navzájom dosiahnuteľné",
+      "connectedComponents": "Počet neprepojených podgrafov. Plne súvislý graf má 1 komponent.",
       "avgBetweennessCentrality": "Priemerný podiel najkratších ciest prechádzajúcich každým vrcholom",
       "treewidth": "Horná hranica šírky stromu heuristikou min. stupňa — meria podobnosť grafu so stromom (1 = strom, vyššie = zložitejší)"
     }

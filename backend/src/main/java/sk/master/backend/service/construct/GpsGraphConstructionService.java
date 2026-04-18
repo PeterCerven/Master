@@ -36,6 +36,8 @@ import java.util.stream.Collectors;
 public class GpsGraphConstructionService implements GraphConstructionService {
     private static final Logger log = LoggerFactory.getLogger(GpsGraphConstructionService.class);
     private static final double EARTH_RADIUS_METERS = 6_371_000.0;
+    private static final int LARGE_GRAPH_NODE_THRESHOLD = 10_000;
+    private static final int APPROXIMATE_NODES_COUNT = 50;
 
     private final PipelineConfigService configService;
     private final MapMatchingService mapMatchingService;
@@ -293,8 +295,7 @@ public class GpsGraphConstructionService implements GraphConstructionService {
             return new GraphMetricsDto(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         }
 
-
-        double avgDegree = nodeCount > 0 ? 2.0 * edgeCount / nodeCount : 0.0;
+        double avgDegree = 2.0 * edgeCount / nodeCount;
 
         double avgEdgeLengthMeters = roadGraph.getEdges().stream()
                 .mapToDouble(RoadEdge::distanceMeters)
@@ -303,7 +304,6 @@ public class GpsGraphConstructionService implements GraphConstructionService {
 
         log.info("Average degree: {}, Average edge length: {} meters", avgDegree, avgEdgeLengthMeters);
 
-        // Node density: bounding box area
         double minLat = Double.MAX_VALUE, maxLat = -Double.MAX_VALUE;
         double minLon = Double.MAX_VALUE, maxLon = -Double.MAX_VALUE;
         for (var node : roadGraph.getNodes()) {
@@ -320,68 +320,105 @@ public class GpsGraphConstructionService implements GraphConstructionService {
 
         log.info("Node density: {} nodes/km² (area: {} km²)", nodeDensityPerKm2, areaKm2);
 
-        // Clustering coefficient via JGraphT
         var cc = new ClusteringCoefficient<>(roadGraph.getGraph());
         double clusteringCoefficient = cc.getAverageClusteringCoefficient();
 
         log.info("Average clustering coefficient: {}", clusteringCoefficient);
 
-        // Diameter & radius via Dijkstra
         var graph = roadGraph.getGraph();
-        List<RoadNode> sources = new ArrayList<>(roadGraph.getNodes());
-
         int connectedComponents = new ConnectivityInspector<>(graph).connectedSets().size();
 
         log.info("Graph connectivity: {} component(s)", connectedComponents);
 
-        double diameter = 0.0;
-        double radius = Double.MAX_VALUE;
+        double diameter;
+        double radiusMeters;
+        double avgBetweennessCentrality;
+        int treewidth;
 
-        for (RoadNode source : sources) {
-            Map<RoadNode, Double> dist = new HashMap<>();
-            dist.put(source, 0.0);
-            PriorityQueue<RoadNode> pq = new PriorityQueue<>(Comparator.comparingDouble(n -> dist.getOrDefault(n, Double.MAX_VALUE)));
-            pq.add(source);
+        if (nodeCount > LARGE_GRAPH_NODE_THRESHOLD) {
+            log.warn("Large graph ({} nodes) — approximating diameter/radius with k-sweep; skipping betweenness and treewidth", nodeCount);
 
-            while (!pq.isEmpty()) {
-                RoadNode u = pq.poll();
-                double du = dist.get(u);
-                for (RoadEdge edge : graph.edgesOf(u)) {
-                    RoadNode src = graph.getEdgeSource(edge);
-                    RoadNode v = src.equals(u) ? graph.getEdgeTarget(edge) : src;
-                    double dv = du + graph.getEdgeWeight(edge);
-                    if (dv < dist.getOrDefault(v, Double.MAX_VALUE)) {
-                        dist.put(v, dv);
-                        pq.add(v);
+            record SweepResult(double eccentricity) {}
+            List<RoadNode> seeds = new ArrayList<>(roadGraph.getNodes());
+            Collections.shuffle(seeds);
+            seeds = seeds.subList(0, APPROXIMATE_NODES_COUNT);
+
+            List<SweepResult> results = seeds.parallelStream().map(source -> {
+                Map<RoadNode, Double> dist = new HashMap<>();
+                dist.put(source, 0.0);
+                PriorityQueue<RoadNode> pq = new PriorityQueue<>(Comparator.comparingDouble(n -> dist.getOrDefault(n, Double.MAX_VALUE)));
+                pq.add(source);
+                while (!pq.isEmpty()) {
+                    RoadNode u = pq.poll();
+                    double du = dist.get(u);
+                    for (RoadEdge edge : graph.edgesOf(u)) {
+                        RoadNode src = graph.getEdgeSource(edge);
+                        RoadNode v = src.equals(u) ? graph.getEdgeTarget(edge) : src;
+                        double dv = du + graph.getEdgeWeight(edge);
+                        if (dv < dist.getOrDefault(v, Double.MAX_VALUE)) {
+                            dist.put(v, dv);
+                            pq.add(v);
+                        }
                     }
                 }
+                double ecc = dist.values().stream().mapToDouble(Double::doubleValue).max().orElse(0.0);
+                return new SweepResult(ecc);
+            }).toList();
+
+            diameter = results.stream().mapToDouble(SweepResult::eccentricity).max().orElse(0.0);
+            radiusMeters = results.stream().mapToDouble(SweepResult::eccentricity)
+                    .filter(e -> e > 0).min().orElse(0.0);
+            avgBetweennessCentrality = -1.0;
+            treewidth = -1;
+
+        } else {
+            List<RoadNode> sources = new ArrayList<>(roadGraph.getNodes());
+            diameter = 0.0;
+            double radius = Double.MAX_VALUE;
+
+            for (RoadNode source : sources) {
+                Map<RoadNode, Double> dist = new HashMap<>();
+                dist.put(source, 0.0);
+                PriorityQueue<RoadNode> pq = new PriorityQueue<>(Comparator.comparingDouble(n -> dist.getOrDefault(n, Double.MAX_VALUE)));
+                pq.add(source);
+
+                while (!pq.isEmpty()) {
+                    RoadNode u = pq.poll();
+                    double du = dist.get(u);
+                    for (RoadEdge edge : graph.edgesOf(u)) {
+                        RoadNode src = graph.getEdgeSource(edge);
+                        RoadNode v = src.equals(u) ? graph.getEdgeTarget(edge) : src;
+                        double dv = du + graph.getEdgeWeight(edge);
+                        if (dv < dist.getOrDefault(v, Double.MAX_VALUE)) {
+                            dist.put(v, dv);
+                            pq.add(v);
+                        }
+                    }
+                }
+
+                double eccentricity = 0.0;
+                for (Map.Entry<RoadNode, Double> entry : dist.entrySet()) {
+                    if (!entry.getKey().equals(source)) {
+                        double d = entry.getValue();
+                        if (d > diameter) diameter = d;
+                        if (d > eccentricity) eccentricity = d;
+                    }
+                }
+                if (eccentricity > 0 && eccentricity < radius) radius = eccentricity;
             }
 
-            double eccentricity = 0.0;
-            for (Map.Entry<RoadNode, Double> entry : dist.entrySet()) {
-                if (!entry.getKey().equals(source)) {
-                    double d = entry.getValue();
-                    if (d > diameter) diameter = d;
-                    if (d > eccentricity) eccentricity = d;
-                }
-            }
-            if (eccentricity > 0 && eccentricity < radius) radius = eccentricity;
+            radiusMeters = radius == Double.MAX_VALUE ? 0.0 : radius;
+
+            var bc = new BetweennessCentrality<>(roadGraph.getGraph(), true);
+            avgBetweennessCentrality = bc.getScores().values().stream()
+                    .mapToDouble(Double::doubleValue).average().orElse(0.0);
+
+            treewidth = computeTreewidth(roadGraph);
         }
 
-        double radiusMeters = radius == Double.MAX_VALUE ? 0.0 : radius;
-
         log.info("Diameter: {} meters, Radius: {} meters", diameter, radiusMeters);
-
-        var bc = new BetweennessCentrality<>(roadGraph.getGraph(), true);
-        double avgBetweennessCentrality = bc.getScores().values().stream()
-                .mapToDouble(Double::doubleValue).average().orElse(0.0);
-
         log.info("Average betweenness centrality: {}", avgBetweennessCentrality);
-
-        int treewidth = computeTreewidth(roadGraph);
-
         log.info("Treewidth: {}", treewidth);
-
 
         return new GraphMetricsDto(
                 nodeCount,

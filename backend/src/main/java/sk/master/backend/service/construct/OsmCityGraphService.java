@@ -51,11 +51,11 @@ public class OsmCityGraphService {
         this.geometryFactory = new GeometryFactory();
     }
 
-    public RoadGraph extractCityGraph(String cityName, String cityCountry, double retainLargestComponentPercent) {
+    public RoadGraph extractCityGraph(String cityName, String cityCountry, double retainLargestComponentPercent, double cityBoundaryBufferMeters) {
         log.info("Extracting road graph for city: {}", cityName);
         CityBoundary boundary = geocodeCityBoundary(cityName, cityCountry);
         log.info("City boundary for {}: polygon type={}", cityName, boundary.polygon().getGeometryType());
-        RoadGraph result = extractFromGraphHopper(boundary);
+        RoadGraph result = extractFromGraphHopper(boundary, cityBoundaryBufferMeters);
         retainLargestComponent(result, retainLargestComponentPercent);
         log.info("Extracted {} nodes and {} edges for city: {} (after pruning isolated subgraphs)",
                 result.getNodeCount(), result.getEdgeCount(), cityName);
@@ -109,15 +109,16 @@ public class OsmCityGraphService {
         }
     }
 
-    private RoadGraph extractFromGraphHopper(CityBoundary boundary) {
+    private RoadGraph extractFromGraphHopper(CityBoundary boundary, double cityBoundaryBufferMeters) {
         BaseGraph baseGraph = hopper.getBaseGraph();
         NodeAccess nodeAccess = baseGraph.getNodeAccess();
         RoadGraph roadGraph = new RoadGraph();
         Map<Integer, RoadNode> towerNodeCache = new HashMap<>();
 
-        // Buffer the polygon by ~1000 m so roads just outside the boundary that connect
-        // boundary-adjacent subgraphs to the main network are included, reducing pruning later.
-        PreparedGeometry preparedPolygon = PreparedGeometryFactory.prepare(boundary.polygon().buffer(0.001));
+        double buffer = cityBoundaryBufferMeters != 0 ? cityBoundaryBufferMeters / 111_000.0 : 0;
+
+        PreparedGeometry preparedPolygon = PreparedGeometryFactory.prepare(
+                boundary.polygon().buffer(buffer));
 
         BooleanEncodedValue carAccessEnc = hopper.getEncodingManager()
                 .getBooleanEncodedValue(VehicleAccess.key("car"));

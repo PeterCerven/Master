@@ -278,7 +278,7 @@ public class GpsGraphConstructionService implements GraphConstructionService {
     @Override
     public RoadGraph importCityGraph(String city) {
         PipelineConfig cityConfig = configService.getActivePipelineConfig();
-        roadGraph = osmCityGraphService.extractCityGraph(city, cityConfig.getCityCountry(), cityConfig.getRetainLargestComponentPercent());
+        roadGraph = osmCityGraphService.extractCityGraph(city, cityConfig.getCityCountry(), cityConfig.getRetainLargestComponentPercent(), cityConfig.getCityBoundaryBufferMeters());
         return roadGraph;
     }
 

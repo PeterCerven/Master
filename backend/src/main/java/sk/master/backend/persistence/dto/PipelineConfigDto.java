@@ -41,6 +41,9 @@ public class PipelineConfigDto {
     @DecimalMin("0.0") @DecimalMax("100.0")
     private double retainLargestComponentPercent;
 
+    @DecimalMin("0.0")
+    private double cityBoundaryBufferMeters;
+
     @NotNull
     private PlacementAlgorithm lastAlgorithm;
 

@@ -160,7 +160,8 @@
       "countrySk": "Slovensko (sk)",
       "countryCz": "Česko (cz)",
       "countryAt": "Rakúsko (at)",
-      "retainLargestComponentPercent": "Ponechať komponenty väčšie ako (%)"
+      "retainLargestComponentPercent": "Ponechať komponenty väčšie ako (%)",
+      "cityBoundaryBufferMeters": "Rozšírenie hranice (metre)"
     },
     "confirm": "Potvrdiť",
     "cancel": "Zrušiť",
@@ -177,7 +178,8 @@
       "graspAlpha": "Ovláda chamtivosť RCL (0.0 = čisto chamtivý, 1.0 = čisto náhodný). Nižšie hodnoty uprednostňujú kandidátov s vysokým ziskom; vyššie hodnoty umožňujú väčšiu diverzitu.",
       "graspEvalBudget": "Maximálny počet kandidátnych vrcholov vyhodnotených v každom kroku konštrukcie. Nižšie hodnoty urýchľujú každú iteráciu; vyššie hodnoty zlepšujú kvalitu riešenia.",
       "cityCountry": "Obmedzte vyhľadávanie mesta na konkrétnu krajinu. Nechajte ako 'Akákoľvek krajina' pre globálne vyhľadávanie.",
-      "retainLargestComponentPercent": "Minimálna veľkosť komponentu ako percento z celkového počtu vrcholov. Menšie komponenty sú odstránené. Predvolené: 0,1 % (zodpovedá 1/1000 vrcholov)."
+      "retainLargestComponentPercent": "Minimálna veľkosť komponentu ako percento z celkového počtu vrcholov. Menšie komponenty sú odstránené. Predvolené: 0,1 % (zodpovedá 1/1000 vrcholov).",
+      "cityBoundaryBufferMeters": "Rozšíri polygon hranice mesta o zadaný počet metrov pred extrakciou ciest. Väčšie hodnoty zahŕňajú viac ciest na okrajoch a znižujú počet izolovaných podgrafov."
     }
   }
 }

@@ -55,6 +55,9 @@ public class PipelineConfigEntity {
     @Column(name = "retain_largest_component_percent", nullable = false)
     private double retainLargestComponentPercent;
 
+    @Column(name = "city_boundary_buffer_meters", nullable = false)
+    private double cityBoundaryBufferMeters;
+
     @Column(name = "last_algorithm", nullable = false)
     @Enumerated(EnumType.STRING)
     private PlacementAlgorithm lastAlgorithm;

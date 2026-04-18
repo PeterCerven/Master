@@ -35,11 +35,18 @@ public class PipelineConfigSeeder implements ApplicationRunner {
 
 
         repository.findByUserIdIsNullAndActiveTrue().ifPresent(entity -> {
+            boolean dirty = false;
             if (entity.getRetainLargestComponentPercent() == 0.0) {
                 entity.setRetainLargestComponentPercent(0.1);
-                repository.save(entity);
+                dirty = true;
                 log.info("Migrated default config: retainLargestComponentPercent set to 0.1");
             }
+            if (entity.getCityBoundaryBufferMeters() == 0.0) {
+                entity.setCityBoundaryBufferMeters(100.0);
+                dirty = true;
+                log.info("Migrated default config: cityBoundaryBufferMeters set to 100.0");
+            }
+            if (dirty) repository.save(entity);
         });
     }
 }

@@ -36,8 +36,7 @@ public class MapMatchingServiceGraphHopper implements MapMatchingService {
                 .map(p -> new Observation(new GHPoint(p.getLat(), p.getLon())))
                 .collect(Collectors.toList());
 
-        // 2. Initialize MapMatching per request (MapMatching is NOT thread-safe, so we instantiate it here)
-        // Ensure "car" matches the profile name you configured when starting GraphHopper
+        // 2. Initialize MapMatching per request
         PMap hints = new PMap().putObject("profile", "car");
         MapMatching mapMatching = MapMatching.fromGraphHopper(hopper, hints);
 
@@ -51,8 +50,6 @@ public class MapMatchingServiceGraphHopper implements MapMatchingService {
             int tripId = trip.getFirst().getTripId(); // Preserve the trip ID
 
             for (int i = 0; i < matchedPoints.size(); i++) {
-                // Note: GraphHopper's merged path drops timestamps. We leave them null.
-                // For building a static road network graph, physical geometry is what matters.
                 matchedTrajectory.add(new PositionalData(
                         matchedPoints.getLat(i),
                         matchedPoints.getLon(i),
@@ -64,9 +61,8 @@ public class MapMatchingServiceGraphHopper implements MapMatchingService {
             return matchedTrajectory;
 
         } catch (Exception e) {
-            // Matching can fail if the GPS track is completely off-road or too noisy
             log.debug("HMM Map matching failed for trip {}: {}", trip.getFirst().getTripId(), e.getMessage());
-            return null; // Our GpsGraphConstructionService will gracefully fallback to raw points when this returns null
+            return null;
         }
     }
 }

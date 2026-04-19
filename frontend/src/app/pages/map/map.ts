@@ -28,6 +28,24 @@ interface NodeDatum extends GraphNodeDto {
 interface EdgeDatum extends GraphEdgeDto {
   sourcePosition: [number, number];
   targetPosition: [number, number];
+  color: [number, number, number, number];
+}
+
+const COMPONENT_COLORS: [number, number, number, number][] = [
+  [231,  76,  60, 255],
+  [ 52, 152, 219, 255],
+  [155,  89, 182, 255],
+  [241, 196,  15, 255],
+  [230, 126,  34, 255],
+  [236,  72, 153, 255],
+  [149, 165, 166, 255],
+  [ 52,  73,  94, 255],
+  [  0, 172, 193, 255],
+  [255, 112,  67, 255],
+];
+
+function getComponentColor(componentId: number): [number, number, number, number] {
+  return COMPONENT_COLORS[componentId % COMPONENT_COLORS.length];
 }
 
 @Component({
@@ -246,12 +264,15 @@ export class Map {
   ): void {
     const nodeData: NodeDatum[] = nodes.map(n => ({...n, position: [n.lon, n.lat]}));
 
+    const nodeComponentMap = new Map<string, number>(nodes.map(n => [n.id, n.componentId]));
+
     const edgeData: EdgeDatum[] = edges
       .filter(e => nodeMap[e.sourceId] && nodeMap[e.targetId])
       .map(e => ({
         ...e,
         sourcePosition: [nodeMap[e.sourceId].lon, nodeMap[e.sourceId].lat],
         targetPosition: [nodeMap[e.targetId].lon, nodeMap[e.targetId].lat],
+        color: getComponentColor(nodeComponentMap.get(e.sourceId) ?? 0),
       }));
 
     const edgeLayer = new LineLayer<EdgeDatum>({
@@ -259,7 +280,7 @@ export class Map {
       data: edgeData,
       getSourcePosition: d => d.sourcePosition,
       getTargetPosition: d => d.targetPosition,
-      getColor: [52, 152, 219, 178],
+      getColor: (d: EdgeDatum) => [d.color[0], d.color[1], d.color[2], 178],
       getWidth: 3,
       widthUnits: 'pixels',
       pickable: true,
@@ -283,7 +304,7 @@ export class Map {
       id: 'graph-nodes',
       data: nodeData,
       getPosition: d => d.position,
-      getFillColor: [231, 76, 60, 255],
+      getFillColor: (d: NodeDatum) => getComponentColor(d.componentId),
       getLineColor: [255, 255, 255, 255],
       getRadius: 6,
       radiusUnits: 'pixels',

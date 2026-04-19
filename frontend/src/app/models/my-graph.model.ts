@@ -24,6 +24,7 @@ export interface GraphNodeDto {
   lon: number;
   roadName: string | null;
   roadClass: string | null;
+  componentId: number;
 }
 
 export interface GraphEdgeDto {

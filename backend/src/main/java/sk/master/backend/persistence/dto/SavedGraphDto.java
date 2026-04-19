@@ -20,7 +20,7 @@ public record SavedGraphDto(
 
     public static SavedGraphDto fromEntity(GraphEntity entity) {
         List<GraphDto.NodeDto> nodes = entity.getNodes().stream()
-                .map(n -> new GraphDto.NodeDto(n.getNodeId(), n.getLat(), n.getLon()))
+                .map(n -> new GraphDto.NodeDto(n.getNodeId(), n.getLat(), n.getLon(), n.getComponentId()))
                 .toList();
 
         List<GraphDto.EdgeDto> edges = entity.getEdges().stream()

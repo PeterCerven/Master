@@ -20,4 +20,7 @@ public class GraphNodeEntity {
 
     @Column(nullable = false)
     private double lon;
+
+    @Column(nullable = false)
+    private int componentId;
 }

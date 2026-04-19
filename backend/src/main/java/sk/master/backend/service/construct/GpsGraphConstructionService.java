@@ -509,7 +509,7 @@ public class GpsGraphConstructionService implements GraphConstructionService {
         graphEntity.setUserId(userId);
 
         graphEntity.setNodes(graph.nodes().stream()
-                .map(node -> new GraphNodeEntity(node.id(), node.lat(), node.lon()))
+                .map(node -> new GraphNodeEntity(node.id(), node.lat(), node.lon(), node.componentId()))
                 .collect(Collectors.toList()));
 
         graphEntity.setEdges(graph.edges().stream()

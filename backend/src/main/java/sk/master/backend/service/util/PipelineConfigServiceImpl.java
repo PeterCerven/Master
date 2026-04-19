@@ -155,7 +155,7 @@ public class PipelineConfigServiceImpl implements PipelineConfigService {
         e.setGraspAlpha(0.3);
         e.setGraspEvalBudget(500);
         e.setCityCountry(null);
-        e.setRetainLargestComponentPercent(0.1);
+        e.setRetainLargestComponentPercent(2.0);
         e.setCityBoundaryBufferMeters(100.0);
         e.setLastAlgorithm(PlacementAlgorithm.RANDOM_STRATEGY);
     }

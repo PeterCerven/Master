@@ -176,7 +176,7 @@
       "graspAlpha": "Controls RCL greediness (0.0 = pure greedy, 1.0 = pure random). Lower values favour high-gain candidates; higher values allow more diversity.",
       "graspEvalBudget": "Maximum number of candidate nodes evaluated per construction step. Lower values speed up each iteration; higher values improve solution quality.",
       "cityCountry": "Restrict city search to a specific country. Leave as 'Any country' to search globally.",
-      "retainLargestComponentPercent": "Minimum component size as a percentage of total nodes. Components smaller than this are pruned. Default: 0.1% (matches 1/1000 of nodes).",
+      "retainLargestComponentPercent": "Minimum component size as a percentage of total nodes. Components smaller than this are pruned. Default: 2%.",
       "cityBoundaryBufferMeters": "Expands the city boundary polygon by this many metres before extracting roads. Larger values include more roads at the edges, reducing isolated subgraphs."
     }
   }

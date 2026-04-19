@@ -18,8 +18,9 @@ import {LoadGraphDialog} from '@components/load-graph-dialog/load-graph-dialog';
 import {CityImportDialog} from '@components/city-import-dialog/city-import-dialog';
 import {TranslocoDirective} from '@jsverse/transloco';
 import {MatTooltip} from '@angular/material/tooltip';
+import {Layer} from '@deck.gl/core';
 import {GoogleMapsOverlay} from '@deck.gl/google-maps';
-import {LineLayer, ScatterplotLayer} from '@deck.gl/layers';
+import {LineLayer, ScatterplotLayer, TextLayer} from '@deck.gl/layers';
 
 interface NodeDatum extends GraphNodeDto {
   position: [number, number];
@@ -91,7 +92,8 @@ export class Map {
   graphMetrics: GraphMetrics | null = null;
   mapVisible = signal(true);
   private deckOverlay: GoogleMapsOverlay | null = null;
-  private stationMarkers: google.maps.marker.AdvancedMarkerElement[] = [];
+  private graphLayers: Layer[] = [];
+  private stationLayers: Layer[] = [];
   private rightClickListenerSetup = false;
 
   options = computed<google.maps.MapOptions>(() => ({
@@ -134,17 +136,15 @@ export class Map {
 
       this.rightClickListenerSetup = false;
 
-      const subscription = mapEl.tilesloaded.subscribe(async () => {
+      const subscription = mapEl.tilesloaded.subscribe(() => {
         if (mapEl.googleMap && !this.rightClickListenerSetup) {
           this.rightClickListenerSetup = true;
           subscription.unsubscribe();
 
-          // Pre-load marker library for station markers
-          await google.maps.importLibrary('marker');
-
           // After recreation, drop orphaned references and re-render onto new map instance
           this.deckOverlay = null;
-          this.stationMarkers = [];
+          this.graphLayers = [];
+          this.stationLayers = [];
           if (this.graphData) {
             this.displayGraphOnMap(this.graphData);
           }
@@ -264,7 +264,7 @@ export class Map {
   ): void {
     const nodeData: NodeDatum[] = nodes.map(n => ({...n, position: [n.lon, n.lat]}));
 
-    const nodeComponentMap = new Map<string, number>(nodes.map(n => [n.id, n.componentId]));
+    const nodeComponentMap: Record<string, number> = Object.fromEntries(nodes.map(n => [n.id, n.componentId]));
 
     const edgeData: EdgeDatum[] = edges
       .filter(e => nodeMap[e.sourceId] && nodeMap[e.targetId])
@@ -272,7 +272,7 @@ export class Map {
         ...e,
         sourcePosition: [nodeMap[e.sourceId].lon, nodeMap[e.sourceId].lat],
         targetPosition: [nodeMap[e.targetId].lon, nodeMap[e.targetId].lat],
-        color: getComponentColor(nodeComponentMap.get(e.sourceId) ?? 0),
+        color: getComponentColor(nodeComponentMap[e.sourceId] ?? 0),
       }));
 
     const edgeLayer = new LineLayer<EdgeDatum>({
@@ -327,14 +327,24 @@ export class Map {
       },
     });
 
+    this.graphLayers = [edgeLayer, nodeLayer];
+    this.updateDeckOverlay(nativeMap);
+  }
+
+  private updateDeckOverlay(mapInstance: google.maps.Map): void {
+    const allLayers = [...this.graphLayers, ...this.stationLayers];
+    if (allLayers.length === 0) {
+      if (this.deckOverlay) {
+        this.deckOverlay.setMap(null);
+        this.deckOverlay = null;
+      }
+      return;
+    }
     if (!this.deckOverlay) {
-      this.deckOverlay = new GoogleMapsOverlay({
-        layers: [edgeLayer, nodeLayer],
-        interleaved: false
-      });
-      this.deckOverlay.setMap(nativeMap);
+      this.deckOverlay = new GoogleMapsOverlay({layers: allLayers, interleaved: false});
+      this.deckOverlay.setMap(mapInstance);
     } else {
-      this.deckOverlay.setProps({layers: [edgeLayer, nodeLayer]});
+      this.deckOverlay.setProps({layers: allLayers});
     }
   }
 
@@ -351,7 +361,11 @@ export class Map {
   }
 
   private clearGraph(): void {
-    if (this.deckOverlay) {
+    this.graphLayers = [];
+    const mapInstance = this.map()?.googleMap;
+    if (mapInstance) {
+      this.updateDeckOverlay(mapInstance);
+    } else if (this.deckOverlay) {
       this.deckOverlay.setMap(null);
       this.deckOverlay = null;
     }
@@ -482,48 +496,51 @@ export class Map {
     const mapInstance = this.map()?.googleMap;
     if (!mapInstance) return;
 
-    this.stationMarkers.forEach(marker => (marker.map = null));
-    this.stationMarkers = [];
+    this.stationLayers = [];
 
-    const {AdvancedMarkerElement} = google.maps.marker;
-
-    stations.forEach(station => {
-      const square = document.createElement('div');
-      square.style.width = '18px';
-      square.style.height = '18px';
-      square.style.backgroundColor = '#2ecc71';
-      square.style.border = '2px solid #ffffff';
-      square.style.borderRadius = '3px';
-      square.style.boxShadow = '0 0 4px rgba(0,0,0,0.6)';
-      square.style.display = 'flex';
-      square.style.alignItems = 'center';
-      square.style.justifyContent = 'center';
-      square.style.color = '#ffffff';
-      square.style.fontSize = '9px';
-      square.style.fontWeight = '700';
-      square.textContent = String(station.rank);
-
-      const marker = new AdvancedMarkerElement({
-        map: mapInstance,
-        position: {lat: station.lat, lng: station.lon},
-        title: `Station #${station.rank}`,
-        content: square,
+    if (stations.length > 0) {
+      const stationCircleLayer = new ScatterplotLayer<StationNodeDto>({
+        id: 'station-nodes',
+        data: stations,
+        getPosition: d => [d.lon, d.lat],
+        getFillColor: [46, 204, 113, 255],
+        getLineColor: [255, 255, 255, 255],
+        getRadius: 8,
+        radiusUnits: 'pixels',
+        stroked: true,
+        lineWidthMinPixels: 2,
+        pickable: true,
+        onClick: ({object, coordinate}) => {
+          if (!object || !coordinate) return;
+          const infoWindow = new google.maps.InfoWindow({
+            content: `<div style="color: #333;">
+                        <h4>Charging Station #${object.rank}</h4>
+                        <p>ID: ${object.id}</p>
+                        <p>Lat: ${object.lat.toFixed(5)}</p>
+                        <p>Lon: ${object.lon.toFixed(5)}</p>
+                      </div>`,
+            position: {lat: coordinate[1], lng: coordinate[0]},
+          });
+          infoWindow.open(mapInstance);
+        },
       });
 
-      marker.addListener('gmp-click', () => {
-        const infoWindow = new google.maps.InfoWindow({
-          content: `<div style="color: #333;">
-                      <h4>Charging Station #${station.rank}</h4>
-                      <p>ID: ${station.id}</p>
-                      <p>Lat: ${station.lat.toFixed(5)}</p>
-                      <p>Lon: ${station.lon.toFixed(5)}</p>
-                    </div>`
-        });
-        infoWindow.open({anchor: marker, map: mapInstance});
+      const stationTextLayer = new TextLayer<StationNodeDto>({
+        id: 'station-labels',
+        data: stations,
+        getPosition: d => [d.lon, d.lat],
+        getText: d => String(d.rank),
+        getSize: 9,
+        getColor: [255, 255, 255, 255],
+        fontWeight: 'bold',
+        getTextAnchor: 'middle',
+        getAlignmentBaseline: 'center',
       });
 
-      this.stationMarkers.push(marker);
-    });
+      this.stationLayers = [stationCircleLayer, stationTextLayer];
+    }
+
+    this.updateDeckOverlay(mapInstance);
   }
 
   openLoadGraphDialog(): void {
@@ -546,8 +563,9 @@ export class Map {
                 this.displayStationsOnMap(saved.stations);
               } else {
                 this.placementData = null;
-                this.stationMarkers.forEach(m => (m.map = null));
-                this.stationMarkers = [];
+                this.stationLayers = [];
+                const mi = this.map()?.googleMap;
+                if (mi) this.updateDeckOverlay(mi);
               }
               this.loading = false;
               this.stopTimer('loading');
@@ -563,9 +581,12 @@ export class Map {
     this.placementData = null;
     this.placementResultInfo = null;
     this.graphMetrics = null;
-    this.clearGraph();
-    this.stationMarkers.forEach(marker => (marker.map = null));
-    this.stationMarkers = [];
+    this.graphLayers = [];
+    this.stationLayers = [];
+    if (this.deckOverlay) {
+      this.deckOverlay.setMap(null);
+      this.deckOverlay = null;
+    }
     this.clearSession();
   }
 

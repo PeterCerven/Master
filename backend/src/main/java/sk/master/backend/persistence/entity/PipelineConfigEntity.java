@@ -52,10 +52,10 @@ public class PipelineConfigEntity {
     @Column(name = "city_country")
     private String cityCountry;
 
-    @Column(name = "retain_largest_component_percent", nullable = false)
+    @Column(name = "retain_largest_component_percent", nullable = false, columnDefinition = "double precision default 0")
     private double retainLargestComponentPercent;
 
-    @Column(name = "city_boundary_buffer_meters", nullable = false)
+    @Column(name = "city_boundary_buffer_meters", nullable = false, columnDefinition = "double precision default 0")
     private double cityBoundaryBufferMeters;
 
     @Column(name = "last_algorithm", nullable = false)

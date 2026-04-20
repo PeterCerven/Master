@@ -19,7 +19,7 @@ public record GraphDto(
             String id,
             double lat,
             double lon,
-            int componentId
+            Integer componentId
     ) {}
 
     public record EdgeDto(

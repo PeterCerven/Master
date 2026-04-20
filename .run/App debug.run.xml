@@ -1,5 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="App debug" type="CompoundRunConfigurationType">
+    <toRun name="Angular Application (frontend)" type="JavascriptDebugType" />
     <toRun name="Debug Frontend" type="js.build_tools.npm" />
     <toRun name="Debug Backend" type="SpringBootApplicationConfigurationType" />
     <method v="2" />

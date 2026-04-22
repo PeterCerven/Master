@@ -26,7 +26,6 @@
       "avgEdgeLengthMeters": "Avg. Edge Length",
       "nodeDensityPerKm2": "Node Density",
       "connectedComponents": "Components",
-      "avgBetweennessCentrality": "Avg. Betweenness Centrality",
       "treewidth": "Treewidth (UB)"
     },
     "placementResult": {
@@ -55,7 +54,6 @@
       "avgEdgeLengthMeters": "Average length of road segments in meters",
       "nodeDensityPerKm2": "Number of nodes per square kilometer",
       "connectedComponents": "Number of disconnected subgraphs. A fully connected graph has 1 component.",
-      "avgBetweennessCentrality": "Average fraction of shortest paths that pass through each node",
       "treewidth": "Upper bound on treewidth via min-degree elimination — measures how tree-like the graph is (1 = tree, higher = more complex)"
     }
   },

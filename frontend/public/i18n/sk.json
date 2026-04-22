@@ -26,7 +26,6 @@
       "avgEdgeLengthMeters": "Priem. dĺžka hrany",
       "nodeDensityPerKm2": "Hustota vrcholov grafu",
       "connectedComponents": "Komponenty",
-      "avgBetweennessCentrality": "Priem. centralita medziľahlosti",
       "treewidth": "Šírka stromu (UB)"
     },
     "placementResult": {
@@ -55,7 +54,6 @@
       "avgEdgeLengthMeters": "Priemerná dĺžka úsekov ciest v metroch",
       "nodeDensityPerKm2": "Počet vrcholov na kilometer štvorcový",
       "connectedComponents": "Počet neprepojených podgrafov. Plne súvislý graf má 1 komponent.",
-      "avgBetweennessCentrality": "Priemerný podiel najkratších ciest prechádzajúcich každým vrcholom",
       "treewidth": "Horná hranica šírky stromu heuristikou min. stupňa — meria podobnosť grafu so stromom (1 = strom, vyššie = zložitejší)"
     }
   },

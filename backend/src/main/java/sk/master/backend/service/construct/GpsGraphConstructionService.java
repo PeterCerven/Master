@@ -3,7 +3,6 @@ package sk.master.backend.service.construct;
 import com.uber.h3core.H3Core;
 import lombok.Getter;
 import org.jgrapht.alg.connectivity.ConnectivityInspector;
-import org.jgrapht.alg.scoring.BetweennessCentrality;
 import org.jgrapht.alg.scoring.ClusteringCoefficient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -292,7 +291,7 @@ public class GpsGraphConstructionService implements GraphConstructionService {
         log.info("Computing graph metrics: nodes={}, edges={}", nodeCount, edgeCount);
 
         if (nodeCount == 0) {
-            return new GraphMetricsDto(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+            return new GraphMetricsDto(0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         }
 
         double avgDegree = 2.0 * edgeCount / nodeCount;
@@ -332,11 +331,10 @@ public class GpsGraphConstructionService implements GraphConstructionService {
 
         double diameter;
         double radiusMeters;
-        double avgBetweennessCentrality;
         int treewidth;
 
         if (nodeCount > LARGE_GRAPH_NODE_THRESHOLD) {
-            log.warn("Large graph ({} nodes) — approximating diameter/radius with k-sweep; skipping betweenness and treewidth", nodeCount);
+            log.warn("Large graph ({} nodes) — approximating diameter/radius with k-sweep; skipping treewidth", nodeCount);
 
             record SweepResult(double eccentricity) {}
             List<RoadNode> seeds = new ArrayList<>(roadGraph.getNodes());
@@ -368,7 +366,6 @@ public class GpsGraphConstructionService implements GraphConstructionService {
             diameter = results.stream().mapToDouble(SweepResult::eccentricity).max().orElse(0.0);
             radiusMeters = results.stream().mapToDouble(SweepResult::eccentricity)
                     .filter(e -> e > 0).min().orElse(0.0);
-            avgBetweennessCentrality = -1.0;
             treewidth = -1;
 
         } else {
@@ -409,15 +406,10 @@ public class GpsGraphConstructionService implements GraphConstructionService {
 
             radiusMeters = radius == Double.MAX_VALUE ? 0.0 : radius;
 
-            var bc = new BetweennessCentrality<>(roadGraph.getGraph(), true);
-            avgBetweennessCentrality = bc.getScores().values().stream()
-                    .mapToDouble(Double::doubleValue).average().orElse(0.0);
-
             treewidth = computeTreewidth(roadGraph);
         }
 
         log.info("Diameter: {} meters, Radius: {} meters", diameter, radiusMeters);
-        log.info("Average betweenness centrality: {}", avgBetweennessCentrality);
         log.info("Treewidth: {}", treewidth);
 
         return new GraphMetricsDto(
@@ -430,7 +422,6 @@ public class GpsGraphConstructionService implements GraphConstructionService {
                 nodeDensityPerKm2,
                 connectedComponents,
                 radiusMeters,
-                avgBetweennessCentrality,
                 treewidth
         );
     }

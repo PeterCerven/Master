@@ -8,7 +8,6 @@ export interface GraphMetrics {
   nodeDensityPerKm2: number;
   connectedComponents: number;
   radiusMeters: number;
-  avgBetweennessCentrality: number;
   treewidth: number;
 }
 

@@ -36,7 +36,6 @@ class GpsGraphConstructionServiceTest {
                 .thenAnswer(inv -> inv.getArgument(0));
     }
 
-    /** H3 res 13 cells are ~1.2 m wide — points spaced tens of meters land in different cells. */
     private GpsGraphConstructionService serviceWithConfig(double maxSpeedKmh, int h3DedupResolution) {
         when(configService.getActivePipelineConfig())
                 .thenReturn(new PipelineConfig(maxSpeedKmh, h3DedupResolution, "Slovakia", 0.02, 0.0));
@@ -58,7 +57,6 @@ class GpsGraphConstructionServiceTest {
         GpsGraphConstructionService service = serviceWithConfig(200, 13);
         Instant t0 = Instant.parse("2024-01-01T00:00:00Z");
 
-        // Two valid Slovak points + one out-of-range latitude + one (0,0) island point.
         List<PositionalData> input = List.of(
                 new PositionalData(48.0000, 17.0000, t0, 1),
                 new PositionalData(95.0000, 17.0001, t0.plusSeconds(1), 1),    // invalid lat

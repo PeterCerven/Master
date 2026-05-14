@@ -7,12 +7,15 @@ import org.springframework.stereotype.Component;
 import sk.master.backend.persistence.model.*;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 @Component
 public class GreedyStrategy implements PlacementStrategy {
 
     private static final Logger log = LoggerFactory.getLogger(GreedyStrategy.class);
+
+    private record GainEntry(int gain, int stamp, RoadNode node) {}
 
     @Override
     public PlacementResult computePlacement(RoadGraph roadGraph, PlacementParams params) {
@@ -28,37 +31,52 @@ public class GreedyStrategy implements PlacementStrategy {
         log.info("Greedy k-coverage: k={}, maxRadius={}m, nodes={}, edges={}",
                 k, maxRadiusMeters, allNodes.size(), graph.edgeSet().size());
 
-        Map<RoadNode, Integer> coverageCount = new HashMap<>();
+        Map<RoadNode, Map<RoadNode, Double>> dijkstraCache = new ConcurrentHashMap<>();
+
+        Map<RoadNode, Integer> coverageCount = new HashMap<>(allNodes.size());
         for (RoadNode node : allNodes) coverageCount.put(node, 0);
 
         Set<RoadNode> unsatisfied = new HashSet<>(allNodes);
         List<RoadNode> stations = new ArrayList<>();
         Set<RoadNode> stationSet = new HashSet<>();
 
-        while (!unsatisfied.isEmpty()) {
-            RoadNode best = null;
-            int bestGain = -1;
-            Map<RoadNode, Double> bestReachable = null;
+        allNodes.parallelStream().forEach(n ->
+                dijkstraCache.computeIfAbsent(n, src -> dijkstraDistances(graph, src, maxRadiusMeters)));
 
-            for (RoadNode candidate : unsatisfied) {
-                if (stationSet.contains(candidate)) continue;
-                Map<RoadNode, Double> reachable = dijkstraDistances(graph, candidate, maxRadiusMeters);
-                int gain = (int) reachable.keySet().stream().filter(unsatisfied::contains).count();
-                if (gain > bestGain) {
-                    bestGain = gain;
-                    best = candidate;
-                    bestReachable = reachable;
+        PriorityQueue<GainEntry> heap =
+                new PriorityQueue<>(Comparator.comparingInt((GainEntry e) -> -e.gain()));
+        Map<RoadNode, Integer> latestStamp = new HashMap<>(allNodes.size());
+        for (RoadNode n : allNodes) {
+            int g = dijkstraCache.get(n).size();
+            heap.add(new GainEntry(g, 0, n));
+            latestStamp.put(n, 0);
+        }
+
+        int stamp = 0;
+        while (!unsatisfied.isEmpty()) {
+            GainEntry top = heap.poll();
+            if (top == null) break;
+            RoadNode candidate = top.node();
+            if (stationSet.contains(candidate)) continue;
+
+            if (top.stamp() != latestStamp.get(candidate)) {
+                Map<RoadNode, Double> reachable = dijkstraCache.get(candidate);
+                int g = 0;
+                for (RoadNode w : reachable.keySet()) {
+                    if (unsatisfied.contains(w)) g++;
                 }
+                int newStamp = ++stamp;
+                latestStamp.put(candidate, newStamp);
+                heap.add(new GainEntry(g, newStamp, candidate));
+                continue;
             }
 
-            if (best == null) break;
-
-            stations.add(best);
-            stationSet.add(best);
-
-            for (RoadNode node : bestReachable.keySet()) {
-                int count = coverageCount.merge(node, 1, Integer::sum);
-                if (count >= k) unsatisfied.remove(node);
+            if (top.gain() == 0) break;
+            stations.add(candidate);
+            stationSet.add(candidate);
+            for (RoadNode w : dijkstraCache.get(candidate).keySet()) {
+                int c = coverageCount.merge(w, 1, Integer::sum);
+                if (c >= k) unsatisfied.remove(w);
             }
         }
 
@@ -95,26 +113,34 @@ public class GreedyStrategy implements PlacementStrategy {
             Graph<RoadNode, RoadEdge> graph,
             Set<RoadNode> allNodes,
             List<RoadNode> stations,
-            double maxRadiusMeters) {
+            double maxRadius) {
 
-        Map<String, Double> distances = new HashMap<>();
-        for (RoadNode node : allNodes) {
-            distances.put(node.getId(), Double.MAX_VALUE);
-        }
+        Map<RoadNode, Double> dist = new HashMap<>();
+        for (RoadNode station : stations) dist.put(station, 0.0);
 
-        for (RoadNode station : stations) {
-            Map<RoadNode, Double> stationDist = dijkstraDistances(graph, station, maxRadiusMeters);
-            for (Map.Entry<RoadNode, Double> entry : stationDist.entrySet()) {
-                String nodeId = entry.getKey().getId();
-                if (entry.getValue() < distances.get(nodeId)) {
-                    distances.put(nodeId, entry.getValue());
+        PriorityQueue<RoadNode> pq = new PriorityQueue<>(Comparator.comparingDouble(dist::get));
+        pq.addAll(stations);
+        Set<RoadNode> visited = new HashSet<>();
+
+        while (!pq.isEmpty()) {
+            RoadNode u = pq.poll();
+            if (!visited.add(u)) continue;
+            double du = dist.get(u);
+            for (RoadEdge edge : graph.edgesOf(u)) {
+                RoadNode v = getOpposite(graph, u, edge);
+                double dv = du + graph.getEdgeWeight(edge);
+                if (dv <= maxRadius && dv < dist.getOrDefault(v, Double.MAX_VALUE)) {
+                    dist.put(v, dv);
+                    pq.add(v);
                 }
             }
         }
 
-        distances.replaceAll((_, d) -> d == Double.MAX_VALUE ? -1.0 : d);
-
-        return distances;
+        Map<String, Double> result = new HashMap<>(allNodes.size());
+        for (RoadNode node : allNodes) {
+            result.put(node.getId(), dist.getOrDefault(node, -1.0));
+        }
+        return result;
     }
 
     private RoadNode getOpposite(Graph<RoadNode, RoadEdge> graph, RoadNode node, RoadEdge edge) {

@@ -525,6 +525,20 @@ public class GpsGraphConstructionService implements GraphConstructionService {
     public SavedGraphDto importGraphFromDatabase(Long graphId, Long userId) {
         GraphEntity graphEntity = graphRepository.findByIdAndUserId(graphId, userId)
                 .orElseThrow(() -> new IllegalArgumentException("Graph not found: " + graphId));
+
+        RoadGraph loaded = new RoadGraph();
+        for (var nodeEntity : graphEntity.getNodes()) {
+            loaded.addNode(new RoadNode(nodeEntity.getNodeId(), nodeEntity.getLat(), nodeEntity.getLon()));
+        }
+        for (var edgeEntity : graphEntity.getEdges()) {
+            RoadNode source = loaded.getNode(edgeEntity.getSourceId());
+            RoadNode target = loaded.getNode(edgeEntity.getTargetId());
+            if (source != null && target != null) {
+                loaded.addEdge(source, target, edgeEntity.getDistance());
+            }
+        }
+        roadGraph = loaded;
+
         return SavedGraphDto.fromEntity(graphEntity);
     }
 

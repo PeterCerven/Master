@@ -45,29 +45,23 @@ public class GreedyStrategy implements PlacementStrategy {
 
         PriorityQueue<GainEntry> heap =
                 new PriorityQueue<>(Comparator.comparingInt((GainEntry e) -> -e.gain()));
-        Map<RoadNode, Integer> latestStamp = new HashMap<>(allNodes.size());
         for (RoadNode n : allNodes) {
-            int g = dijkstraCache.get(n).size();
-            heap.add(new GainEntry(g, 0, n));
-            latestStamp.put(n, 0);
+            heap.add(new GainEntry(dijkstraCache.get(n).size(), 0, n));
         }
 
-        int stamp = 0;
+        int iteration = 0;
         while (!unsatisfied.isEmpty()) {
             GainEntry top = heap.poll();
             if (top == null) break;
             RoadNode candidate = top.node();
             if (stationSet.contains(candidate)) continue;
 
-            if (top.stamp() != latestStamp.get(candidate)) {
-                Map<RoadNode, Double> reachable = dijkstraCache.get(candidate);
+            if (top.stamp() < iteration) {
                 int g = 0;
-                for (RoadNode w : reachable.keySet()) {
+                for (RoadNode w : dijkstraCache.get(candidate).keySet()) {
                     if (unsatisfied.contains(w)) g++;
                 }
-                int newStamp = ++stamp;
-                latestStamp.put(candidate, newStamp);
-                heap.add(new GainEntry(g, newStamp, candidate));
+                heap.add(new GainEntry(g, iteration, candidate));
                 continue;
             }
 
@@ -78,6 +72,7 @@ public class GreedyStrategy implements PlacementStrategy {
                 int c = coverageCount.merge(w, 1, Integer::sum);
                 if (c >= k) unsatisfied.remove(w);
             }
+            iteration++;
         }
 
         Map<String, Double> nodeDistances = computeMinWeightedDistances(graph, allNodes, stations, maxRadiusMeters);

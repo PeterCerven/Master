@@ -174,6 +174,7 @@ export class Map {
   }
 
   importCityGraph(city: string): void {
+    this.clearAll();
     this.loading = true;
     this.startTimer('loading');
     this.graphService.importCityGraph(city)
@@ -196,6 +197,7 @@ export class Map {
   }
 
   importSampleGraph(filename: string): void {
+    this.clearAll();
     this.loading = true;
     this.startTimer('loading');
     this.graphService.importSampleFile(filename)
@@ -218,6 +220,7 @@ export class Map {
   }
 
   importGraphFromFile(file: File): void {
+    this.clearAll();
     this.loading = true;
     this.startTimer('loading');
     this.graphService.generateGraphFromFile(file)
@@ -548,6 +551,7 @@ export class Map {
       .afterClosed()
       .pipe(takeUntilDestroyed(this.destroyRef), filter(id => id != null))
       .subscribe(id => {
+        this.clearAll();
         this.loading = true;
         this.startTimer('loading');
         this.graphService.loadGraphFromDatabase(id)

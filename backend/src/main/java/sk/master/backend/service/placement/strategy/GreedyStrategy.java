@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import sk.master.backend.persistence.model.*;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.IntStream;
 
 
 @Component
@@ -15,93 +15,121 @@ public class GreedyStrategy implements PlacementStrategy {
 
     private static final Logger log = LoggerFactory.getLogger(GreedyStrategy.class);
 
-    private record GainEntry(int gain, int stamp, RoadNode node) {}
+    private record GainEntry(int gain, int stamp, int nodeIdx) {}
+    private record DistEntry(double dist, RoadNode node) {}
 
     @Override
     public PlacementResult computePlacement(RoadGraph roadGraph, PlacementParams params) {
         int k = params.getK();
         double maxRadiusMeters = params.getMaxRadiusMeters();
         Graph<RoadNode, RoadEdge> graph = roadGraph.getGraph();
-        Set<RoadNode> allNodes = graph.vertexSet();
+        Set<RoadNode> allNodesSet = graph.vertexSet();
 
-        if (allNodes.isEmpty()) {
+        if (allNodesSet.isEmpty()) {
             return new PlacementResult(List.of(), 0, Map.of());
         }
 
+        int n = allNodesSet.size();
         log.info("Greedy k-coverage: k={}, maxRadius={}m, nodes={}, edges={}",
-                k, maxRadiusMeters, allNodes.size(), graph.edgeSet().size());
+                k, maxRadiusMeters, n, graph.edgeSet().size());
 
-        Map<RoadNode, Map<RoadNode, Double>> dijkstraCache = new ConcurrentHashMap<>();
+        RoadNode[] indexToNode = allNodesSet.toArray(new RoadNode[0]);
+        Map<RoadNode, Integer> nodeIndex = new HashMap<>(n * 2);
+        for (int i = 0; i < n; i++) {
+            nodeIndex.put(indexToNode[i], i);
+        }
 
-        Map<RoadNode, Integer> coverageCount = new HashMap<>(allNodes.size());
-        for (RoadNode node : allNodes) coverageCount.put(node, 0);
+        long t0 = System.currentTimeMillis();
+        BitSet[] reachable = new BitSet[n];
+        IntStream.range(0, n).parallel().forEach(i ->
+                reachable[i] = dijkstraReachable(graph, indexToNode[i], maxRadiusMeters, nodeIndex));
+        log.info("Dijkstra reachability phase done in {} ms", System.currentTimeMillis() - t0);
 
-        Set<RoadNode> unsatisfied = new HashSet<>(allNodes);
+        int[] coverageCount = new int[n];
+        BitSet unsatisfied = new BitSet(n);
+        unsatisfied.set(0, n);
+
         List<RoadNode> stations = new ArrayList<>();
-        Set<RoadNode> stationSet = new HashSet<>();
-
-        allNodes.parallelStream().forEach(n ->
-                dijkstraCache.computeIfAbsent(n, src -> dijkstraDistances(graph, src, maxRadiusMeters)));
+        BitSet stationSet = new BitSet(n);
 
         PriorityQueue<GainEntry> heap =
                 new PriorityQueue<>(Comparator.comparingInt((GainEntry e) -> -e.gain()));
-        for (RoadNode n : allNodes) {
-            heap.add(new GainEntry(dijkstraCache.get(n).size(), 0, n));
+        for (int i = 0; i < n; i++) {
+            heap.add(new GainEntry(reachable[i].cardinality(), 0, i));
         }
 
         int iteration = 0;
-        while (!unsatisfied.isEmpty()) {
+        int unsatisfiedRemaining = n;
+
+        while (unsatisfiedRemaining > 0) {
             GainEntry top = heap.poll();
             if (top == null) break;
-            RoadNode candidate = top.node();
-            if (stationSet.contains(candidate)) continue;
+            int candIdx = top.nodeIdx();
+            if (stationSet.get(candIdx)) continue;
 
             if (top.stamp() < iteration) {
+                BitSet reach = reachable[candIdx];
                 int g = 0;
-                for (RoadNode w : dijkstraCache.get(candidate).keySet()) {
-                    if (unsatisfied.contains(w)) g++;
+                for (int w = reach.nextSetBit(0); w >= 0; w = reach.nextSetBit(w + 1)) {
+                    if (unsatisfied.get(w)) g++;
                 }
-                heap.add(new GainEntry(g, iteration, candidate));
+                heap.add(new GainEntry(g, iteration, candIdx));
                 continue;
             }
 
             if (top.gain() == 0) break;
+
+            RoadNode candidate = indexToNode[candIdx];
             stations.add(candidate);
-            stationSet.add(candidate);
-            for (RoadNode w : dijkstraCache.get(candidate).keySet()) {
-                int c = coverageCount.merge(w, 1, Integer::sum);
-                if (c >= k) unsatisfied.remove(w);
+            stationSet.set(candIdx);
+
+            BitSet reach = reachable[candIdx];
+            for (int w = reach.nextSetBit(0); w >= 0; w = reach.nextSetBit(w + 1)) {
+                int c = ++coverageCount[w];
+                if (c == k) {
+                    unsatisfied.clear(w);
+                    unsatisfiedRemaining--;
+                }
             }
             iteration++;
         }
 
-        Map<String, Double> nodeDistances = computeMinWeightedDistances(graph, allNodes, stations, maxRadiusMeters);
-        log.info("Greedy k-coverage finished: selected {} charging stations", stations.size());
+        Map<String, Double> nodeDistances =
+                computeMinWeightedDistances(graph, allNodesSet, stations, maxRadiusMeters);
+        log.info("Greedy k-coverage finished: selected {} charging stations in {} ms total",
+                stations.size(), System.currentTimeMillis() - t0);
         return new PlacementResult(stations, stations.size(), nodeDistances);
     }
 
-    private Map<RoadNode, Double> dijkstraDistances(Graph<RoadNode, RoadEdge> graph, RoadNode source, double maxRadius) {
+    private BitSet dijkstraReachable(Graph<RoadNode, RoadEdge> graph, RoadNode source,
+                                     double maxRadius, Map<RoadNode, Integer> nodeIndex) {
         Map<RoadNode, Double> dist = new HashMap<>();
         dist.put(source, 0.0);
-        PriorityQueue<RoadNode> pq = new PriorityQueue<>(Comparator.comparingDouble(dist::get));
-        pq.add(source);
+
+        PriorityQueue<DistEntry> pq = new PriorityQueue<>(Comparator.comparingDouble(DistEntry::dist));
+        pq.add(new DistEntry(0.0, source));
+
         Set<RoadNode> visited = new HashSet<>();
+        BitSet result = new BitSet(nodeIndex.size());
 
         while (!pq.isEmpty()) {
-            RoadNode u = pq.poll();
+            DistEntry e = pq.poll();
+            RoadNode u = e.node();
             if (!visited.add(u)) continue;
-            double du = dist.get(u);
+            result.set(nodeIndex.get(u));
+            double du = e.dist();
+
             for (RoadEdge edge : graph.edgesOf(u)) {
                 RoadNode v = getOpposite(graph, u, edge);
+                if (visited.contains(v)) continue;
                 double dv = du + graph.getEdgeWeight(edge);
                 if (dv <= maxRadius && dv < dist.getOrDefault(v, Double.MAX_VALUE)) {
                     dist.put(v, dv);
-                    pq.add(v);
+                    pq.add(new DistEntry(dv, v));
                 }
             }
         }
-
-        return dist;
+        return result;
     }
 
     private Map<String, Double> computeMinWeightedDistances(
@@ -111,22 +139,27 @@ public class GreedyStrategy implements PlacementStrategy {
             double maxRadius) {
 
         Map<RoadNode, Double> dist = new HashMap<>();
-        for (RoadNode station : stations) dist.put(station, 0.0);
+        PriorityQueue<DistEntry> pq = new PriorityQueue<>(Comparator.comparingDouble(DistEntry::dist));
+        for (RoadNode station : stations) {
+            dist.put(station, 0.0);
+            pq.add(new DistEntry(0.0, station));
+        }
 
-        PriorityQueue<RoadNode> pq = new PriorityQueue<>(Comparator.comparingDouble(dist::get));
-        pq.addAll(stations);
         Set<RoadNode> visited = new HashSet<>();
 
         while (!pq.isEmpty()) {
-            RoadNode u = pq.poll();
+            DistEntry e = pq.poll();
+            RoadNode u = e.node();
             if (!visited.add(u)) continue;
-            double du = dist.get(u);
+            double du = e.dist();
+
             for (RoadEdge edge : graph.edgesOf(u)) {
                 RoadNode v = getOpposite(graph, u, edge);
+                if (visited.contains(v)) continue;
                 double dv = du + graph.getEdgeWeight(edge);
                 if (dv <= maxRadius && dv < dist.getOrDefault(v, Double.MAX_VALUE)) {
                     dist.put(v, dv);
-                    pq.add(v);
+                    pq.add(new DistEntry(dv, v));
                 }
             }
         }

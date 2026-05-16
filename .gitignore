@@ -2,8 +2,6 @@
 *.iml
 /infrastructure/database/.env.prod
 /infrastructure/data/**
-/CLAUDE.md
-/.claude/settings.local.json
 
 /infrastructure/.env.prod
 /infrastructure/.env

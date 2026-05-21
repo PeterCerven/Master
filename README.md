@@ -1,6 +1,6 @@
 # Master
 
-Full-stack geopriestorová aplikácia na generovanie grafov cestnej siete z GPS trajektórií (GPX súbory) a výpočet rozmiestnenia nabíjacích staníc. Spracovateľský pipeline zahŕňa predspracovanie GPS bodov, map matching pomocou GraphHopper voči OpenStreetMap, vloženie trajektórií do grafu a H3 priestorové zlučovanie. Zameranie na región Slovenska.
+Full-stack aplikácia na generovanie grafov cestnej siete z GPS trajektórií (GPX súbory) a výpočet rozmiestnenia nabíjacích staníc. Spracovateľský pipeline zahŕňa predspracovanie GPS bodov, map matching pomocou GraphHopper voči OpenStreetMap, vloženie trajektórií do grafu a H3 priestorové zlučovanie. Zameranie na región Slovenska.
 
 ## Tech Stack
 
